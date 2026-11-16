@@ -25,7 +25,7 @@ RULES.stamp=(RULES.stamp||[]).map(([a,b])=>[a==null?'Infinity':a,b]);
 for(const k of ['checked','next','stampUntil','kaikaeUntil','akiyaUntil','toukiTransition']) if(!/^\d{4}-\d\d-\d\d$/.test(RULES[k]||'')) fail(`rules.yml の ${k} の日付が正しくありません（例：2027-03-31）`);
 
 // ---- 記事（content/articles/*.md）
-const TOOLMAP={lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
+const TOOLMAP={rent2buy:'#rent2buy',prepay:'#prepay',souzokuzei:'#souzokuzei',lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
 const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f.startsWith('_')).map(f=>{
   const src=read('content/articles/'+f);const m=src.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if(!m) fail(`記事 ${f} の先頭の「---」で囲んだ部分が見つかりません`);

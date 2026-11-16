@@ -328,6 +328,9 @@ table.cf td.ev{font-family:var(--f-body);font-size:11px;color:var(--brand-ink);t
 .tool[href*="souzoku"] .ic{background:#ecf3e4;color:#4f6b2a}
 .tool[href*="akiya"] .ic{background:var(--sand);color:#7a5a22}
 .tool[href*="vs"] .ic{background:#ecebf8;color:#4d55a3}
+.tool[href*="rent2buy"] .ic{background:var(--sky);color:#2f5d73}
+.tool[href*="prepay"] .ic{background:var(--coin-soft);color:#b25f16}
+.tool[href*="souzokuzei"] .ic{background:#ecf3e4;color:#4f6b2a}
 .tool{border-radius:18px;transition:border-color .15s, box-shadow .15s, transform .15s}
 a.tool:hover{box-shadow:0 8px 22px rgba(36,48,46,.08);transform:translateY(-1px)}
 .tool.feat{background:var(--surface);border-width:1.5px}
