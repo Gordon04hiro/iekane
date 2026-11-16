@@ -16,6 +16,16 @@ function vHub(v,slug){
     ${st.arts.map(art).filter(Boolean).length?`<ul class="hs-arts">${st.arts.map(art).filter(Boolean).map(a=>`<li><a href="#a-${a.slug}">${esc(a.title)}</a></li>`).join('')}</ul>`:''}</li>`).join('')}</ol>
    ${legalHTML(LEGAL_MAP[h.cat]||['fin'])}</div>`;
 }
+/* ---------- 用語集 ---------- */
+function vGlossary(v){
+  const cats=[...new Set(GLOSSARY.map(g=>g.c))];
+  const rel=r=>!r?'':(TITLES[r]?`<a href="#${r}">${esc(TITLES[r])}で計算する →</a>`:(a=>a?`<a href="#a-${a.slug}">記事：${esc(a.title)} →</a>`:'')(ARTICLES.find(x=>x.slug===r&&!x.draft)));
+  v.innerHTML=`<div class="wrap doc gloss"><div class="crumb"><a href="#home">イエカネ</a> › 用語集</div><h1>住まいとお金の用語集</h1>
+   <p class="lead">家を買う・売る・相続するときに出てくる言葉を、短くやさしく説明します。</p>
+   <nav class="toc" aria-label="分野"><p class="toc-t">分野から探す</p><ol>${cats.map((c,i)=>`<li><button type="button" data-act="toc" data-to="gc${i}">${esc(c)}（${GLOSSARY.filter(g=>g.c===c).length}語）</button></li>`).join('')}</ol></nav>
+   ${cats.map((c,ci)=>`<section><h2 id="gc${ci}">${esc(c)}</h2><dl class="terms">${GLOSSARY.map((g,i)=>g.c!==c?'':`<div id="t${i+1}"><dt>${esc(g.w)}${g.r?`<small>${esc(g.r)}</small>`:''}</dt><dd><p>${esc(g.d)}</p>${rel(g.rel)?`<p class="trel">${rel(g.rel)}</p>`:''}</dd></div>`).join('')}</dl></section>`).join('')}
+   ${legalHTML(['tax','law'])}</div>`;
+}
 function v404(v){
   document.title='ページが見つかりません｜イエカネ';
   v.innerHTML=`<div class="wrap doc"><h1>ページが見つかりません</h1><p>お探しのページは、移動したか削除された可能性があります。下のテーマやツールからお探しください。</p>
@@ -27,6 +37,7 @@ function vArticles(v){
   const list=pubArticles().filter(a=>!c||a.cat===c);
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 記事</div>
   <div class="thead"><h1>記事</h1><p>家を買う・売る・相続する前に知っておきたい、住まいとお金の基本をまとめています。</p></div>
+  <p class="unit" style="margin:-6px 0 12px">テーマごとのまとめは <a href="#g-buy">家を買う</a>・<a href="#g-sell">家を売る</a>・<a href="#g-souzoku">相続</a>・<a href="#g-money">これからのお金</a>、言葉の意味は <a href="#glossary">用語集</a> へ。</p>
   <div class="seg" style="margin-bottom:14px"><button data-act="acat" data-c="" aria-pressed="${!c}">すべて</button>${cats.map(x=>`<button data-act="acat" data-c="${esc(x)}" aria-pressed="${c===x}">${esc(x)}</button>`).join('')}</div>
   <div class="tools">${list.slice(0,6).map(artCard).join('')||'<p class="unit">まだ記事がありません。</p>'}</div>${list.length>6?adUnit('一覧の中')+`<div class="tools" style="margin-top:14px">${list.slice(6).map(artCard).join('')}</div>`:''}</div>`;
 }

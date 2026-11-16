@@ -145,6 +145,13 @@ details.grp .body{padding:0 16px 16px}
 .toolcta b{font-size:15px}.toolcta span{font-size:14px;line-height:1.7}.toolcta .btn{justify-self:start;margin-top:4px}
 .refs{margin-top:26px}.refs h2{font-size:16px;margin:0 0 6px}.refs ul{margin:0;padding-left:1.2em;display:grid;gap:4px}.refs li{font-size:13.5px}
 .ftguides{margin-bottom:6px}
+table.cf.fit{width:100%}table.cf.fit th,table.cf.fit td{white-space:normal}
+.terms dt{color:var(--ink)}
+.terms{margin:0;display:grid;gap:10px}
+.terms>div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;scroll-margin-top:72px}
+.terms dt{font-weight:800;font-size:16px}.terms dt small{font-weight:400;color:var(--muted);font-size:12px;margin-left:8px}
+.terms dd{margin:4px 0 0}.terms dd p{margin:0;font-size:14.5px;line-height:1.8}.terms .trel{margin-top:4px}.terms .trel a{font-size:13px;color:var(--brand);font-weight:700}
+.gloss section>h2{font-size:19px;margin:28px 0 10px;scroll-margin-top:72px}
 .formgrid:not(.easy) .easyonly{display:none!important}
 .inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--bg);overflow:hidden}
 .inp:focus-within{border-color:var(--brand)}
@@ -349,6 +356,8 @@ table.cf td.ev{font-family:var(--f-body);font-size:11px;color:var(--brand-ink);t
 .tool[href*="akiya"] .ic{background:var(--sand);color:#7a5a22}
 .tool[href*="vs"] .ic{background:#ecebf8;color:#4d55a3}
 .tool[href*="rent2buy"] .ic{background:var(--sky);color:#2f5d73}
+.tool[href*="koujo"] .ic{background:var(--sand);color:#8a5a1c}
+.tool[href*="souzokubun"] .ic{background:var(--brand-soft);color:var(--brand)}
 .tool[href*="prepay"] .ic{background:var(--coin-soft);color:#b25f16}
 .tool[href*="souzokuzei"] .ic{background:#ecf3e4;color:#4f6b2a}
 .tool{border-radius:18px;transition:border-color .15s, box-shadow .15s, transform .15s}

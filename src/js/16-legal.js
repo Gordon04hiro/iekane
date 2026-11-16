@@ -10,6 +10,7 @@ const LEGAL={
  ins:'保険の募集・勧誘は行っていません。'
 };
 const LEGAL_MAP={
+ koujo:['tax','fin'], souzokubun:['law','doc','tax'],
  lifeplan:['fin','pen','tax'], loan:['fin'], vs:['fin','re'], rent2buy:['fin'], prepay:['fin','tax'],
  sell:['tax','re'], akiya:['tax','re'], souzoku:['law','doc','tax'], souzoku2:['law','doc','tax'], souzokuzei:['tax','law'],
  '家を買う':['fin','re'], '家を売る':['tax','re'], '相続':['tax','law','doc'], 'ライフプラン':['fin','pen']
