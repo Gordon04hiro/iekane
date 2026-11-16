@@ -97,7 +97,7 @@ function progItems(S){
   const det=LP.mode==='detail',out=[];
   GROUPS.forEach((g,gi)=>{if(g.adv&&!det)return;(g.f||[]).forEach(f=>{if(f.type==='sel'||(!det&&!f.easy)||(f.show&&!f.show(S)))return;out.push({gi,id:'f_'+f.id,l:f.l,ok:S[f.id]!==''&&S[f.id]!=null})});
     if(g.kids)(S.kids||[]).forEach((c,i)=>out.push({gi,id:`k${i}_by`,l:`第${i+1}子の生まれ年`,ok:c.by!==''&&c.by!=null&&!isNaN(c.by)}));
-    if(g.assets){const b=S.assets&&S.assets.cash.bal;out.push({gi,id:'a_cash_bal',l:'預貯金の残高',ok:b!==''&&b!=null})}});
+    if(g.assets){const b=S.assets&&S.assets.cash.bal;out.push({gi,id:det?'a_cash_bal':'ez_cash',l:'預貯金の残高',ok:b!==''&&b!=null})}});
   return out;
 }
 function updateProgress(){

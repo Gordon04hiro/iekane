@@ -226,7 +226,7 @@ const GROUPS=[
   {id:'carEvery',l:'買い替えの間隔',u:'年'},
   {id:'carNext',l:'次の買い替えまで',u:'年後'},
   {id:'carLast',l:'最後に買う年齢',u:'歳'}]},
- {t:'今の資産と積立',s:'口座ごとの残高と、これからの積立',f:[
+ {t:'今の資産と積立',s:'今の貯蓄・投資と、毎月の積立',f:[
   {id:'infl',l:'物価上昇率',u:'%/年',st:.1,h:'生活費・教育費に反映',pre:'infl',rec:2}],assets:true},
  {t:'不動産投資',adv:1,s:'貸している物件がある場合',props:true},
  {t:'その他の予定',adv:1,s:'旅行・リフォーム・相続など',events:true}
@@ -281,7 +281,32 @@ const ACC=[
  {k:'kyosai',t:'小規模企業共済',d:'個人事業主・小さな会社の役員向けの退職金の積立です。廃業・退職のときにまとめて受け取る前提で計算します。',f:[['bal','今の掛金の累計','万円'],['mon','掛金','万円/月',.1,'月0.1〜7万円'],['until','掛金を払う最後の年齢','歳'],['recv','受け取る年齢（廃業・退職の予定）','歳'],['rate','増え方の目安','%/年',.1,'受取額は加入年数や受け取り方で変わります。目安として1%程度']]},
  {k:'save',t:'貯蓄型の保険・その他',d:'学資保険・個人年金・終身保険の解約返戻金など、将来まとめて受け取る予定のお金。保険料は「毎月の支出」の保険料に入れてください。',f:[['amt','受け取る見込み額','万円'],['recv','受け取る年齢','歳']]}
 ];
-const EASYF={cash:['bal'],nisa:['bal','mon']};
+const EASYF={}; // かんたん入力では口座ごとではなく、下の3項目（預貯金・投資・毎月の積立）だけを出す
+/* かんたん入力の資産：投資と積立は、くわしく入力の口座（NISA・課税口座・iDeCo・共済・その他）の合計として扱う */
+const INVK=['nisa','tax','ideco','kyosai'];
+function easySums(S){const A=S.assets;const inv=INVK.reduce((s,k)=>s+Math.max(0,n(A[k].bal)),0)+A.others.reduce((s,o)=>s+Math.max(0,n(o.bal)),0);
+  const mon=n(A.nisa.mon)+n(A.ideco.mon)+n(A.kyosai.mon)+A.others.reduce((s,o)=>s+Math.max(0,n(o.mon)),0);return{inv,mon}}
+function setEasy(S,key,v){
+  const A=S.assets;v=v===''?'':Math.max(0,parseFloat(v)||0);
+  if(key==='cash'){A.cash.bal=v;return}
+  const cur=easySums(S)[key],val=n(v);
+  if(key==='inv'){
+    if(cur>0){const r=val/cur;INVK.forEach(k=>{A[k].bal=Math.round(n(A[k].bal)*r*10)/10});A.tax.basis=Math.round(n(A.tax.basis)*r*10)/10;A.others.forEach(o=>{o.bal=Math.round(n(o.bal)*r*10)/10;if(o.basis!==''&&o.basis!=null)o.basis=Math.round(n(o.basis)*r*10)/10})}
+    else A.nisa.bal=val;
+  }else{
+    if(cur>0){const r=val/cur;['nisa','ideco','kyosai'].forEach(k=>{A[k].mon=Math.round(n(A[k].mon)*r*10)/10});A.others.forEach(o=>o.mon=Math.round(n(o.mon)*r*10)/10)}
+    else A.nisa.mon=val;
+  }
+}
+function easyAssetsHTML(S){
+  const e=easySums(S);
+  const F=(k,l,u,v,h)=>`<label class="fld"><span class="lab">${l}</span><span class="inp"><input id="ez_${k}" data-ez="${k}" type="number" inputmode="decimal" step="${k==='mon'?.1:1}" value="${esc(v)}"><span class="u">${u}</span></span>${h?`<span class="hint">${esc(h)}</span>`:''}</label>`;
+  return `<div class="sub easyonly"><div class="fields">
+   ${F('cash','預貯金','万円',S.assets.cash.bal,'普通預金・定期預金など')}
+   ${F('inv','投資の残高（合計）','万円',Math.round(e.inv*10)/10,'NISA・iDeCo・株・投資信託など。なければ0')}
+   ${F('mon','毎月の積立（合計）','万円/月',Math.round(e.mon*10)/10,'NISA・iDeCoなどに毎月積み立てている額')}
+  </div><p class="unit" style="margin:8px 0 0">口座ごとの残高や利回りは「くわしく入力」で分けて入れられます。</p></div>`;
+}
 const ACCOL={cash:'var(--planB)',nisa:'var(--accent)',tax:'var(--planC)',ideco:'var(--planD)',kyosai:'var(--warn)',oth:'var(--coin)'};
 function assetSummary(S){
   normPlan(S);const A=S.assets;
@@ -301,7 +326,7 @@ function assetBar(S){
 }
 function assetsHTML(S){
   normPlan(S);
-  return `<div id="asum">${assetBar(S)}</div><div class="sublist" style="margin-top:12px">${ACC.map(ac=>{const o=S.assets[ac.k];return `<div class="sub" data-acc="${ac.k}"${EASYF[ac.k]?'':' data-adv'}><div class="subhead"><span><span class="dot" style="background:${ACCOL[ac.k]||'var(--muted)'};margin-right:6px"></span>${ac.t}</span></div><span class="unit" style="margin-top:-4px">${esc(ac.d)}</span>
+  return `${easyAssetsHTML(S)}<div id="asum" data-adv>${assetBar(S)}</div><div class="sublist" style="margin-top:12px">${ACC.map(ac=>{const o=S.assets[ac.k];return `<div class="sub" data-acc="${ac.k}"${EASYF[ac.k]?'':' data-adv'}><div class="subhead"><span><span class="dot" style="background:${ACCOL[ac.k]||'var(--muted)'};margin-right:6px"></span>${ac.t}</span></div><span class="unit" style="margin-top:-4px">${esc(ac.d)}</span>
    <div class="fields">${ac.f.map(f=>{const [k,l,u,st,h,show,pk]=f;const hid=(show&&!show(o)?' hidden':'')+(EASYF[ac.k]&&!EASYF[ac.k].includes(k)?' data-adv':'');const hint=h?`<span class="hint">${esc(h)}</span>`:'';
      if(u==='sel') return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><select id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}">${st.map(x=>`<option value="${x[0]}"${o[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></label>`;
      return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><span class="inp"><input id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}" type="number" inputmode="decimal" step="${st||1}" value="${esc(o[k])}"><span class="u">${u}</span></span>${pk?preHTML(pk,`a_${ac.k}_${k}`,o[k]):''}${hint}</label>`}).join('')}</div></div>`}).join('')}${othersHTML(S)}</div>`;
@@ -339,6 +364,7 @@ function propsHTML(S){
 /* 入力の反映（data-a / data-pr） */
 function applyAssetInput(S,t){
   if(t.dataset.a){const o=S.assets[t.dataset.a];o[t.dataset.ak]=t.tagName==='SELECT'?t.value:(t.value===''?'':parseFloat(t.value));syncAssetVis(S);return true}
+  if(t.dataset.ez){setEasy(S,t.dataset.ez,t.value);const b=document.getElementById('asum');if(b)b.innerHTML=assetBar(S);return true}
   if(t.dataset.o!=null){const o=S.assets.others[+t.dataset.o],k=t.dataset.ok;if(!o)return false;
     if(k==='type'){o.type=t.value;const d=OTYPE[t.value]||OTYPE.other;['rate','vol','tax'].forEach(x=>{o[x]=d[x];const el=document.getElementById(`o${t.dataset.o}_${x}`);if(el)el.value=d[x]});const h=document.getElementById(`o${t.dataset.o}_note`);if(h)h.textContent=d.note}
     else o[k]=k==='name'?t.value:(t.value===''?'':parseFloat(t.value));

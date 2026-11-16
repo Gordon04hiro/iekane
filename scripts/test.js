@@ -59,6 +59,10 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('空欄にすると「あと1項目」と出る',/あと1項目/.test(T(d,'#prog')[0]||'')&&/生活費/.test(T(d,'#prog')[0]||''),T(d,'#prog')[0]);
    click(w,'[data-act="nextempty"]');check('「次の未入力へ」で空欄に移動',d.activeElement&&d.activeElement.id==='f_live');
    set(w,'f_live','20');await wait(400);
+   check('かんたん入力の資産は「預貯金・投資・毎月の積立」の3項目',!!d.getElementById('ez_inv')&&!!d.getElementById('ez_mon'));
+   {const b0=T(d,'.panel .kv b')[0];set(w,'ez_inv','400');await wait(400);
+    check('投資の残高を変えると結果が変わる',T(d,'.panel .kv b')[0]!==b0);
+    set(w,'ez_inv','200');await wait(400);}
    const before=T(d,'.panel .kv b')[0];
    click(w,'[data-act="pre"][data-for="f_infl"][data-v="3"]');await wait(500);
    check('言葉のボタンで物価上昇率が3%になる',d.getElementById('f_infl').value==='3'&&d.querySelector('[data-act="pre"][data-for="f_infl"][data-v="3"]').getAttribute('aria-pressed')==='true');
