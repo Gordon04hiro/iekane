@@ -7,8 +7,9 @@
     "test": "node scripts/build.js && node scripts/test.js"
   },
   "devDependencies": {
-    "jsdom": "24.1.3",
+    "esbuild": "^0.24.0",
     "js-yaml": "4.1.0",
+    "jsdom": "24.1.3",
     "marked": "12.0.2"
   }
 }
