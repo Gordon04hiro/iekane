@@ -28,6 +28,8 @@ document.addEventListener('click',e=>{
   else if(a==='pcfill'){penFill(b.dataset.w)}
   else if(a==='svset'){const v=Math.floor(retireTax(U.sv.gross,U.sv.yrs).net);const k=U.sv.who==='sp'?'ssev':'sev';const el=document.getElementById('f_'+k);if(el){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))}toast((U.sv.who==='sp'?'配偶者':'ご本人')+'の退職金に'+v.toLocaleString('ja-JP')+'万円を入れました')}
   else if(a==='nextempty'){nextEmpty()}
+  else if(a==='addins'){if(!insOn(S)){S.insl=n(S.ins)>0?[{name:'',who:'self',mon:n(S.ins),end:n(S.insEnd)||60}]:[]}S.insl.push({name:'',who:S.spouse==='yes'&&S.insl.length?'sp':'self',mon:1,end:60});changed();vLife(document.getElementById('view'));toast(S.insl.length===2&&n(S.ins)>0?'今の保険料を1件目に入れました。2件目を入力してください':'保険を追加しました')}
+  else if(a==='delins'){S.insl.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
   else if(a==='delev'){S.events.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
 });
 document.addEventListener('input',e=>{
@@ -40,6 +42,7 @@ document.addEventListener('input',e=>{
   if(S&&applyAssetInput(S,t)){changed();return}
   if(t.dataset.k){const f=ALLF.find(x=>x.id===t.dataset.k);S[t.dataset.k]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));syncVis(S);changed()}
   else if(t.dataset.kid!=null){const k=S.kids[+t.dataset.kid],kk=t.dataset.kk;k[kk]=kk==='away'?t.checked:(kk==='by'?parseFloat(t.value):t.value);changed()}
+  else if(t.dataset.il!=null){const x=S.insl[+t.dataset.il],k=t.dataset.ik;x[k]=(k==='name'||k==='who')?t.value:(t.value===''?'':parseFloat(t.value));changed()}
   else if(t.dataset.ev!=null){const ev=S.events[+t.dataset.ev],ek=t.dataset.ek;ev[ek]=(ek==='age'||ek==='amt')?parseFloat(t.value):t.value;changed()}
   else if(t.dataset.pname){LP.names[U.plan]=t.value;saveLP();document.querySelectorAll('.seg [data-act="plan"]').forEach(btn=>{if(btn.dataset.p===U.plan)btn.lastChild.textContent=U.plan+'：'+t.value});clearTimeout(rT);rT=setTimeout(renderResult,300)}
 });

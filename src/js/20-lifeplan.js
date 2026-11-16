@@ -5,6 +5,7 @@ function diffs(S,A){
   ALLF.forEach(f=>{if((!f.show||f.show(S)||f.show(A))&&String(S[f.id])!==String(A[f.id]))out.push(f.l)});
   if(JSON.stringify(S.kids)!==JSON.stringify(A.kids)) out.push('お子さま');
   if(JSON.stringify(S.events)!==JSON.stringify(A.events)) out.push('その他の予定');
+  if(JSON.stringify(S.insl||[])!==JSON.stringify(A.insl||[])) out.push('保険');
   if(JSON.stringify(S.assets)!==JSON.stringify(A.assets)) out.push('資産と積立');
   if(JSON.stringify(S.props)!==JSON.stringify(A.props)) out.push('不動産投資');
   return out;
@@ -12,7 +13,7 @@ function diffs(S,A){
 function diffHTML(){if(U.plan==='A')return'';const d=diffs(LP.plans[U.plan],LP.plans.A);return 'Aとの違い：'+(d.length?d.map(x=>`<span class="chip muted" style="margin:2px 4px 2px 0">${esc(x)}</span>`).join(''):'まだありません。変えたい項目を書き換えてください')}
 const OPEN=['ご家族','お仕事の収入','住まい','毎月の支出','今の資産と積立'];
 function easyDefaults(S){normPlan(S);const A=S.assets;const sp=S.spouse==='yes';
-  return [`年金（ご本人 月${n(S.pen)}万円${sp?'・配偶者 月'+n(S.spen)+'万円':''}、${n(S.penAge)}歳から）`,`定年${n(S.ret)}歳・退職金${fmt(n(S.sev))}万円・${n(S.workEnd)}歳まで働く`,`車（${fmt(n(S.car))}万円を${n(S.carEvery)}年ごと）`,`物価上昇 年${n(S.infl)}%`,`利回り（預貯金${n(A.cash.rate)}%・NISA${n(A.nisa.rate)}%）`,`保険料 月${n(S.ins)}万円`,`お子さまの幼稚園〜高校（幼稚園は私立、小中高は公立）`].join('、')}
+  return [`年金（ご本人 月${n(S.pen)}万円${sp?'・配偶者 月'+n(S.spen)+'万円':''}、${n(S.penAge)}歳から）`,`定年${n(S.ret)}歳・退職金${fmt(n(S.sev))}万円・${n(S.workEnd)}歳まで働く`,`車（${fmt(n(S.car))}万円を${n(S.carEvery)}年ごと）`,`物価上昇 年${n(S.infl)}%`,`利回り（預貯金${n(A.cash.rate)}%・NISA${n(A.nisa.rate)}%）`,`保険料 月${Math.round(insNow(S)*10)/10}万円`,`お子さまの幼稚園〜高校（幼稚園は私立、小中高は公立）`].join('、')}
 function vLife(v){
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
@@ -27,7 +28,7 @@ function vLife(v){
    </div>
    ${LP.mode!=='detail'?`<details class="defaults"><summary>かんたん入力で自動で使う値を見る</summary><p class="unit">${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p></details>`:''}</div>
   <div class="prog" id="prog" aria-live="polite"></div>
-  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.sevcalc?sevHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
+  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.sevcalc?sevHTML(S):''}${g.insl?inslHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
   ${ks.length>1||U.plan!=='A'?'':planBox(ks)}
   <section class="result" id="result"></section></div>`;
   syncVis(S); renderResult(); updateDock();

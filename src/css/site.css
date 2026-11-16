@@ -558,3 +558,4 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .prof p:last-child{margin:0;font-size:13.5px;line-height:1.8}
 .byline{margin:6px 0 0;font-size:13px;color:var(--muted)}
 .byline a{color:var(--brand)}
+.sublist>.fields+.fields{border-top:1px dashed var(--line);padding-top:12px;margin-top:12px}

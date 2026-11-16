@@ -15,7 +15,7 @@ function premiseRows(k){
   return [['パターン',k+'：'+(LP.names[k]||'')],['開始年',n(S.startY)||Y0],['ご本人の年齢',n(S.age)],['配偶者',S.spouse==='yes'?n(S.sage)+'歳':'なし'],
    ['お子さま',(S.kids||[]).map((c,i)=>'第'+(i+1)+'子 '+c.by+'年生まれ').join('、')||'なし'],
    ['ご本人の手取り年収（万円）',n(S.inc)],['配偶者の手取り年収（万円）',S.spouse==='yes'?n(S.sinc):0],['定年／仕事を辞める年齢',n(S.ret)+'歳／'+n(S.workEnd)+'歳'],['退職金（万円）',n(S.sev)],
-   ['年金（月・万円）','本人 '+n(S.pen)+(S.spouse==='yes'?' ／ 配偶者 '+n(S.spen):'')],['住まい',H],['生活費（月・万円）',n(S.live)],['保険料（月・万円）',n(S.ins)],
+   ['年金（月・万円）','本人 '+n(S.pen)+(S.spouse==='yes'?' ／ 配偶者 '+n(S.spen):'')],['住まい',H],['生活費（月・万円）',n(S.live)],['保険料（月・万円）',Math.round(insNow(S)*10)/10],
    ['預貯金（万円）／利回り',n(A.cash.bal)+' ／ '+n(A.cash.rate)+'%'],['NISA（万円）／積立（月）／利回り',n(A.nisa.bal)+' ／ '+n(A.nisa.mon)+' ／ '+n(A.nisa.rate)+'%'],
    ['課税口座（万円）／利回り',n(A.tax.bal)+' ／ '+n(A.tax.rate)+'%'],['iDeCo（万円）／掛金（月）／受取開始',n(A.ideco.bal)+' ／ '+n(A.ideco.mon)+' ／ '+n(A.ideco.recv)+'歳'],
    ['小規模企業共済（万円）／掛金（月）',n(A.kyosai.bal)+' ／ '+n(A.kyosai.mon)],['その他の資産（万円）',A.others.map(o=>(o.name||(OTYPE[o.type]||OTYPE.other).l)+' '+n(o.bal)).join('、')||'なし'],['投資用不動産',S.props.length+'件'],['物価上昇率',n(S.infl)+'%']];

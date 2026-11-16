@@ -98,6 +98,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     check('配偶者の退職金が定年の年に入る',q.ssev);
     check('古いデータ（配偶者の定年なし）は今までどおり',q.old59&&q.old60===0);
     check('小規模企業共済は退職所得の税金を引いて受け取る',q.kyo);}
+   {const q=w.eval(`(()=>{const S=basePlan();S.insl=[{name:'夫',who:'self',mon:1.5,end:60},{name:'妻',who:'sp',mon:1,end:65}];const r=sim(clone(S));
+     const at=x=>r.find(z=>z.a===x)||{};return{a40:at(40).eIns,a60:at(60).eIns,a66:at(66).eIns,a68:at(68).eIns}})()`);
+    check('保険を1件ずつ：夫婦で払い終わる年齢が違う',q.a40===30&&q.a60===12&&q.a66===12&&q.a68===0,JSON.stringify(q));}
    set(w,'sv_gross','2500');set(w,'sv_yrs','38');await wait(100);
    check('退職金の手取りを計算できる',/約2,465/.test(T(d,'#svout b')[0]||''),T(d,'#svout b')[0]);
    click(w,'[data-act="svset"]');await wait(300);

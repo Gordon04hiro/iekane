@@ -123,7 +123,7 @@ function sim(S,opt){
     eHouse=eRent+eHcost+eHpay; eOne=eDown+eBuyCost;
     const hlEnd=hlAt(a), hInt=Math.max(0,eHpay-(hl-hlEnd)); hl=hlEnd;
     const hvEnd=hv*(1+hdep), hDep=hv-hvEnd; hv=hvEnd;
-    let eIns=a<n(S.insEnd)?n(S.ins)*12:0;
+    let eIns=insYear(S,a,sp?sa:null);
     let eCar=0;
     const ce=Math.round(n(S.carEvery)), cn=Math.round(n(S.carNext));
     if(n(S.car)>0&&ce>0&&t>=cn&&(t-cn)%ce===0&&a<=n(S.carLast)){eCar=n(S.car);ev.push('車')}
@@ -235,8 +235,8 @@ const GROUPS=[
  {t:'毎月の支出',f:[
   {id:'live',easy:1,l:'生活費（住居費・保険料以外）',u:'万円/月',h:'食費・光熱費・通信費・お小遣いなど'},
   {id:'retRatio',l:'退職後の生活費',u:'%',h:'今の生活費に対する割合',pre:'retRatio',rec:80},
-  {id:'ins',l:'保険料',u:'万円/月'},
-  {id:'insEnd',l:'保険料を払い終える年齢',u:'歳'}]},
+  {id:'ins',l:'保険料',u:'万円/月',h:'生命保険・医療保険・がん保険など。積立型の保険も含めた、払っている額',show:S=>!insOn(S)},
+  {id:'insEnd',l:'保険料を払い終える年齢',u:'歳',show:S=>!insOn(S)}],insl:1},
  {t:'車',adv:1,f:[
   {id:'car',l:'1台あたりの購入費用',u:'万円',h:'持たない場合は0'},
   {id:'carEvery',l:'買い替えの間隔',u:'年'},
@@ -279,6 +279,24 @@ function kidsHTML(S){
     <label class="fld"><span class="lab">大学</span>${sel(i,'uni',[['none','進学しない'],['pub','国公立'],['pri_b','私立文系'],['pri_r','私立理系']],c.uni)}</label>
     <label class="chk" data-adv><input type="checkbox" id="k${i}_away" data-kid="${i}" data-kk="away"${c.away?' checked':''}> 大学は一人暮らし</label>
    </div></div>`).join(''):'<span class="unit">お子さまがいない場合はそのままで大丈夫です。</span>'}</div></div>`;
+}
+/* 保険を1件ずつ（夫婦で払い終わる時期が違うときなど）。1件でもあれば「保険料」「払い終える年齢」のかわりに使う */
+const insOn=S=>Array.isArray(S.insl)&&S.insl.length>0;
+function insYear(S,a,sa){
+  if(!insOn(S)) return a<n(S.insEnd)?n(S.ins)*12:0;
+  return S.insl.reduce((t,x)=>{const age=x.who==='sp'?sa:a;return t+(age!=null&&age<n(x.end)?n(x.mon)*12:0)},0);
+}
+const insNow=S=>insOn(S)?S.insl.reduce((t,x)=>t+n(x.mon),0):n(S.ins);
+function inslHTML(S){
+  const L=insOn(S)?S.insl:[], sp=S.spouse==='yes';
+  return `<div class="sub" data-adv style="margin-top:14px"><div class="subhead"><span>保険を1件ずつ入れる</span>${L.length<10?`<button class="btn small" data-act="addins">＋ 保険を追加</button>`:''}</div>
+  <p class="unit" style="margin:4px 0 8px">夫婦で払い終わる時期が違う、更新で保険料が変わるなど、保険がいくつかあるときに使います。1件でも入れると、上の「保険料」のかわりにこちらで計算します。保険料は保険証券や「ご契約内容のお知らせ」で確認できます。</p>
+  <div class="sublist">${L.length?L.map((x,i)=>`<div class="fields" style="align-items:end">
+    <label class="fld"><span class="lab">保険の名前</span><input class="txt" id="i${i}_name" data-il="${i}" data-ik="name" value="${esc(x.name)}" placeholder="例：夫の医療保険"></label>
+    ${sp?`<label class="fld"><span class="lab">だれの保険</span><select id="i${i}_who" data-il="${i}" data-ik="who"><option value="self"${x.who!=='sp'?' selected':''}>ご本人</option><option value="sp"${x.who==='sp'?' selected':''}>配偶者</option></select></label>`:''}
+    <label class="fld"><span class="lab">保険料</span><span class="inp"><input id="i${i}_mon" data-il="${i}" data-ik="mon" type="number" inputmode="decimal" step="0.1" value="${esc(x.mon)}"><span class="u">万円/月</span></span><span class="hint">年払いなら12で割った額</span></label>
+    <label class="fld"><span class="lab">払い終える年齢</span><span class="inp"><input id="i${i}_end" data-il="${i}" data-ik="end" type="number" inputmode="numeric" value="${esc(x.end)}"><span class="u">歳</span></span><span class="hint">${sp?'その人の年齢で。':''}終身払いなら90など</span></label>
+    <button class="btn small ghost danger" data-act="delins" data-i="${i}" style="justify-self:start">削除</button></div>`).join('')+`<p class="unit" style="margin:4px 0 0">いまの保険料の合計：月${(Math.round(insNow(S)*10)/10).toLocaleString('ja-JP')}万円</p>`:'<span class="unit">まだありません。</span>'}</div></div>`;
 }
 function eventsHTML(S){
   return `<div class="sub"><div class="subhead"><span>予定している大きな出費・収入</span>${S.events.length<8?`<button class="btn small" data-act="addev">＋ 追加</button>`:''}</div>
