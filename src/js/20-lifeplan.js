@@ -23,9 +23,13 @@ function vLife(v){
   <div class="pbar"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" role="group" aria-label="パターン">${ks.map(k=>`<button data-act="plan" data-p="${k}" aria-pressed="${U.plan===k}"><span class="dot ${k.toLowerCase()}"></span>${k}：${esc(LP.names[k]||'')}</button>`).join('')}</div>
    ${ks.length<3?`<button class="btn small" data-act="addplan">＋ 比べるパターンを追加</button>`:''}</div>
    ${ks.length>1||U.plan!=='A'?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label class="fld" style="flex:1;min-width:180px"><span class="lab">パターン${U.plan}の名前</span><input class="txt" id="pname" data-pname="1" value="${esc(LP.names[U.plan]||'')}"></label>${U.plan!=='A'?'<button class="btn small ghost danger" data-act="delplan">このパターンを削除</button>':''}</div><div class="unit" id="diffbox">${diffHTML()}</div>`:`<span class="unit">例：「家を買う」と「賃貸のまま」、「65歳で退職」と「70歳まで働く」などを並べて比べられます。</span>`}</div>
-  <div class="modebar"><div class="seg" role="group" aria-label="入力の細かさ"><button data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}">かんたん入力</button><button data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}">くわしく入力</button></div>
-   <span class="unit">${LP.mode==='detail'?'年金・車・iDeCo・不動産投資なども入れられます。':'まずは主な項目だけで大丈夫です。'}</span></div>
-  ${LP.mode!=='detail'?`<p class="unit defaults">かんたん入力では、次の値を自動で使います：${esc(easyDefaults(S))}。変えたいときは「くわしく入力」へ。</p>`:''}
+  <div class="modepick" role="group" aria-label="入力の細かさを選ぶ">
+   <p class="mp-q">入力のしかたを選べます</p>
+   <div class="mp-opts">
+    <button class="mp" data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}"><span class="mp-r"></span><span><b>かんたん入力</b><small>主な項目だけ・約3分。年金や利回りは標準の値で計算します</small></span></button>
+    <button class="mp" data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}"><span class="mp-r"></span><span><b>くわしく入力</b><small>年金・iDeCo・車・金や暗号資産・不動産投資まで入れて、より正確に</small></span></button>
+   </div></div>
+  ${LP.mode!=='detail'?`<p class="unit defaults">かんたん入力では、次の値を自動で使います：${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p>`:''}
   <div class="prog" id="prog" aria-live="polite"></div>
   <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
   <section class="result" id="result"></section></div>`;
@@ -100,7 +104,7 @@ function updateProgress(){
   const it=progItems(S),done=it.filter(x=>x.ok).length,left=it.length-done,nx=it.find(x=>!x.ok);
   box.className='prog'+(left?'':' done');
   box.innerHTML=left?`<div class="ph"><b>入力の進み具合 ${done}／${it.length}項目</b><span>あと<em>${left}</em>項目${nx?`（次は「${esc(nx.l)}」）`:''}</span><button class="btn small" data-act="nextempty">次の未入力へ</button></div><div class="pbar"><i style="width:${(done/Math.max(1,it.length)*100).toFixed(1)}%"></i></div>`
-    :`<div class="ph"><b>✓ ${LP.mode==='detail'?'くわしく入力の':''}項目はすべて入力済みです</b><span>${LP.mode==='detail'?'下の結果を確認してみましょう。':'余裕があれば「くわしく入力」で年金や利回りも見直せます。'}</span></div>`;
+    :`<div class="ph"><b>✓ ${LP.mode==='detail'?'くわしく入力の':''}項目はすべて入力済みです</b><span>${LP.mode==='detail'?'下の結果を確認してみましょう。':'年金や利回りも自分の数字にすると、より正確になります。'}</span>${LP.mode==='detail'?'':'<button class="btn small primary" data-act="mode2" data-m="detail">くわしく入力に進む</button>'}</div>`;
   GROUPS.forEach((g,gi)=>{const el=document.getElementById('gl'+gi);if(!el)return;const m=it.filter(x=>x.gi===gi);const l=m.filter(x=>!x.ok).length;el.textContent=!m.length?'':(l?'あと'+l:'✓');el.className='gleft'+(m.length&&!l?' ok':'')});
   return left;
 }
