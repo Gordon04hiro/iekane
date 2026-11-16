@@ -26,8 +26,9 @@ function retireTax(gross,yrs){
   return{ded,base,it,res,tax,net:g-tax};
 }
 /* 共済の加入年数を、掛金の累計と月の掛金から見積もる */
-function kyoYrs(S){const A=S.assets.kyosai,m=n(A.mon);return Math.max(1,Math.round((m>0?n(A.bal)/(m*12):0)+Math.max(0,Math.min(n(A.recv),n(A.until))-n(S.age))))}
-function zeroAssets(){return{cash:{bal:0,rate:0.1},nisa:{bal:0,mon:0,until:60,rate:4},tax:{bal:0,basis:0,rate:3},ideco:{bal:0,mon:0,until:60,recv:65,mode:'lump',yrs:10,rate:3},kyosai:{bal:0,mon:0,until:65,recv:65,rate:1},save:{amt:0,recv:65}}}
+function kyoYrs(S,k){k=k||'kyosai';const A=S.assets[k],m=n(A.mon),now=k==='skyosai'?n(S.sage):n(S.age);return Math.max(1,Math.round((m>0?n(A.bal)/(m*12):0)+Math.max(0,Math.min(n(A.recv),n(A.until))-now)))}
+function zeroAssets(){return{cash:{bal:0,rate:0.1},nisa:{bal:0,mon:0,until:60,rate:4},tax:{bal:0,basis:0,rate:3},ideco:{bal:0,mon:0,until:60,recv:65,mode:'lump',yrs:10,rate:3},kyosai:{bal:0,mon:0,until:65,recv:65,rate:1},save:{amt:0,recv:65},
+  snisa:{bal:0,mon:0,until:60,rate:4},sideco:{bal:0,mon:0,until:60,recv:65,mode:'lump',yrs:10,rate:3},skyosai:{bal:0,mon:0,until:65,recv:65,rate:1}}}
 /* 古いデータ（貯蓄の合計＋利回りだけ）を口座ごとの形に直す */
 function normPlan(S){
   if(!S.assets){S.assets=zeroAssets();S.assets.cash.bal=n(S.sav);S.assets.cash.rate=S.yld!=null?n(S.yld):0.1}
@@ -67,6 +68,8 @@ function sim(S,opt){
   const infl=n(S.infl)/100, hdep=n(S.hdep)/100;
   let cash=n(A.cash.bal), nisa=n(A.nisa.bal), taxa=n(A.tax.bal), basis=Math.min(n(A.tax.basis)||n(A.tax.bal),n(A.tax.bal)), ideco=n(A.ideco.bal), kyo=n(A.kyosai.bal);
   let idecoLeft=0, idecoPay=0;
+  // 配偶者の口座（年齢は配偶者の年齢で数える）。配偶者がいなければ使わない
+  let nisa2=sp?n(A.snisa.bal):0, ideco2=sp?n(A.sideco.bal):0, kyo2=sp?n(A.skyosai.bal):0, ideco2Left=0;
   const OS=A.others.map(o=>{const b=Math.max(0,n(o.bal));return{o,bal:b,basis:Math.min(o.basis===''||o.basis==null?b:n(o.basis),b)}});
   const othT=()=>OS.reduce((s,x)=>s+x.bal,0);
   const kids=(S.kids||[]).slice().sort((a,b)=>n(a.by)-n(b.by));
@@ -85,8 +88,8 @@ function sim(S,opt){
   };
   const PS=S.props.map(p=>({val:n(p.val),bal:age<n(p.loanEnd)?pvL(n(p.loan),p.rate,n(p.loanEnd)-age):0,sold:false}));
   const snap=()=>{const pvS=PS.reduce((s,x)=>s+x.val,0),plS=PS.reduce((s,x)=>s+x.bal,0);
-    const oth=othT(),fin=Math.max(0,cash)+nisa+taxa+ideco+kyo+oth, at=fin+hv+pvS, dt=hl+plS+Math.max(0,-cash);
-    return{cashP:Math.max(0,cash),short:Math.max(0,-cash),nisa,taxa,ideco,kyo,oth,fin,hv,pv:pvS,hl,pl:plS,at,dt,nw:at-dt}};
+    const oth=othT(),fin=Math.max(0,cash)+nisa+nisa2+taxa+ideco+ideco2+kyo+kyo2+oth, at=fin+hv+pvS, dt=hl+plS+Math.max(0,-cash);
+    return{cashP:Math.max(0,cash),short:Math.max(0,-cash),nisa:nisa+nisa2,taxa,ideco:ideco+ideco2,kyo:kyo+kyo2,oth,fin,hv,pv:pvS,hl,pl:plS,at,dt,nw:at-dt}};
   const bs0=snap();
   for(let a=age;a<=end;a++){
     const t=a-age, y=SY+t, f=Math.pow(1+infl,t), sa=sp?sage+t:null, ev=[];
@@ -147,35 +150,46 @@ function sim(S,opt){
     const cI=(a<n(A.ideco.until)&&a<n(A.ideco.recv))?n(A.ideco.mon)*12:0;
     const cK=(a<n(A.kyosai.until)&&a<n(A.kyosai.recv))?n(A.kyosai.mon)*12:0;
     const cO=OS.map(x=>a<n(x.o.until)?Math.max(0,n(x.o.mon))*12:0);
-    const eSave=cN+cI+cK+cO.reduce((s,v)=>s+v,0);
+    const cN2=sp&&sa<n(A.snisa.until)?n(A.snisa.mon)*12:0;
+    const cI2=(sp&&sa<n(A.sideco.until)&&sa<n(A.sideco.recv))?n(A.sideco.mon)*12:0;
+    const cK2=(sp&&sa<n(A.skyosai.until)&&sa<n(A.skyosai.recv))?n(A.skyosai.mon)*12:0;
+    const eSave=cN+cI+cK+cN2+cI2+cK2+cO.reduce((s,v)=>s+v,0);
     // iDeCo・共済・保険などの受け取り
-    let iAsset=0, iSaveIns=0;
+    let iAsset=0, iSaveIns=0, rtx=0;
     if(a===Math.round(n(A.ideco.recv))&&ideco>0){
       if(A.ideco.mode==='annuity'){idecoLeft=Math.max(1,Math.round(n(A.ideco.yrs)));ev.push('iDeCo 年金受取開始')}
       else{iAsset+=ideco;ideco=0;ev.push('iDeCo 受取')}
     }
     if(idecoLeft>0&&ideco>0){idecoPay=ideco/idecoLeft;iAsset+=idecoPay;ideco-=idecoPay;idecoLeft--}
-    if(a===Math.round(n(A.kyosai.recv))&&kyo>0){const ky=n(A.kyosai.yrs)>0?n(A.kyosai.yrs):kyoYrs(S);iAsset+=kyo-retireTax(kyo,ky).tax;kyo=0;ev.push('共済金 受取')}
+    if(a===Math.round(n(A.kyosai.recv))&&kyo>0){const ky=n(A.kyosai.yrs)>0?n(A.kyosai.yrs):kyoYrs(S);const tx=retireTax(kyo,ky).tax;rtx+=tx;iAsset+=kyo-tx;kyo=0;ev.push('共済金 受取')}
+    if(sp&&sa===Math.round(n(A.sideco.recv))&&ideco2>0){
+      if(A.sideco.mode==='annuity'){ideco2Left=Math.max(1,Math.round(n(A.sideco.yrs)));ev.push('配偶者のiDeCo 年金受取開始')}
+      else{iAsset+=ideco2;ideco2=0;ev.push('配偶者のiDeCo 受取')}
+    }
+    if(ideco2Left>0&&ideco2>0){const p2=ideco2/ideco2Left;iAsset+=p2;ideco2-=p2;ideco2Left--}
+    if(sp&&sa===Math.round(n(A.skyosai.recv))&&kyo2>0){const ky=n(A.skyosai.yrs)>0?n(A.skyosai.yrs):kyoYrs(S,'skyosai');const tx=retireTax(kyo2,ky).tax;rtx+=tx;iAsset+=kyo2-tx;kyo2=0;ev.push('配偶者の共済金 受取')}
     if(a===Math.round(n(A.save.recv))&&n(A.save.amt)>0){iSaveIns=n(A.save.amt);iAsset+=iSaveIns;ev.push('保険など 受取')}
     const iTot=iSelf+iSp+iPen+iAl+iOne+iProp+iAsset+iSale, eTot=eLive+eHouse+eEdu+eIns+eCar+eOne+eProp+eSave, net=iTot-eTot;
     // 運用
     const rC=cash>0?cash*n(A.cash.rate)/100:0, rN=nisa*(n(A.nisa.rate)/100+sh('nisa',t)), rT=taxa*(n(A.tax.rate)/100+sh('tax',t)), rI=ideco*(n(A.ideco.rate)/100+sh('ideco',t)), rK=kyo*n(A.kyosai.rate)/100;
+    const rN2=nisa2*(n(A.snisa.rate)/100+sh('snisa',t)), rI2=ideco2*(n(A.sideco.rate)/100+sh('sideco',t)), rK2=kyo2*n(A.skyosai.rate)/100;
     let rO=0;OS.forEach((x,ix)=>{const g=Math.max(-x.bal*0.95,x.bal*(n(x.o.rate)/100+(opt&&opt.z?Math.max(0,n(x.o.vol))/100*opt.z[t]:0)));rO+=g;x.bal+=g+cO[ix];x.basis+=cO[ix]});
-    cash=cash+rC+net; nisa+=rN+cN; taxa+=rT; ideco+=rI+cI; kyo+=rK+cK;
+    cash=cash+rC+net; nisa+=rN+cN; taxa+=rT; ideco+=rI+cI; kyo+=rK+cK; nisa2+=rN2+cN2; ideco2+=rI2+cI2; kyo2+=rK2+cK2;
     // 足りない分は、課税口座 → その他の資産 → NISA の順に取り崩す
     let wd=0,wTax=0;
     if(cash<0&&taxa>0){const gr=Math.max(0,(taxa-basis)/taxa),k=1-gr*0.20315,take=Math.min(taxa,-cash/k);basis-=basis*take/taxa;taxa-=take;cash+=take*k;wd+=take;wTax+=take*(1-k)}
     OS.forEach(x=>{if(cash<0&&x.bal>0&&x.o.liquid!==false){const gr=Math.max(0,(x.bal-x.basis)/x.bal),k=1-gr*Math.min(60,Math.max(0,n(x.o.tax)))/100,take=Math.min(x.bal,-cash/k);x.basis-=x.basis*take/x.bal;x.bal-=take;cash+=take*k;wd+=take;wTax+=take*(1-k)}});
     if(cash<0&&nisa>0){const take=Math.min(nisa,-cash);nisa-=take;cash+=take;wd+=take}
+    if(cash<0&&nisa2>0){const take=Math.min(nisa2,-cash);nisa2-=take;cash+=take;wd+=take}
     if(wd>0.5) ev.push('投資を取り崩し');
     const bs=snap();
-    const pl={salary:iSelf+iSp,pension:iPen,allow:iAl,prop:iProp,one:iOne,ins:iSaveIns,ret:rC+rN+rT+rI+rK+rO,gain:pGain,
-      live:eLive,rent:eRent,hcost:eHcost,hint:hInt,hdep:hDep,buycost:eBuyCost,edu:eEdu,insp:eIns,car:eCar,ev:eEv,pint:pInt,pdep:pDep,wtax:wTax};
+    const pl={salary:iSelf+iSp,pension:iPen,allow:iAl,prop:iProp,one:iOne,ins:iSaveIns,ret:rC+rN+rT+rI+rK+rN2+rI2+rK2+rO,gain:pGain,
+      live:eLive,rent:eRent,hcost:eHcost,hint:hInt,hdep:hDep,buycost:eBuyCost,edu:eEdu,insp:eIns,car:eCar,ev:eEv,pint:pInt,pdep:pDep,wtax:wTax+rtx};
     pl.rev=pl.salary+pl.pension+pl.allow+pl.prop+pl.one+pl.ins+pl.ret+Math.max(0,pl.gain);
     pl.exp=pl.live+pl.rent+pl.hcost+pl.hint+pl.hdep+pl.buycost+pl.edu+pl.insp+pl.car+pl.ev+pl.pint+pl.pdep+pl.wtax+Math.max(0,-pl.gain);
     pl.net=pl.rev-pl.exp; pl.chk=(bs.nw-nw0)-pl.net;
-    const oth=othT(), othL=OS.map(x=>x.bal), bal=cash+nisa+taxa+ideco+kyo+oth;
-    rows.push({y,a,sa,kids:kids.map(c=>y-Math.round(n(c.by))),ev,iSelf,iSp,iPen,iAl,iOne,iProp,iAsset,iSale,iTot,eLive,eHouse,eEdu,eIns,eCar,eOne,eProp,eSave,eTot,net,wd,cash,nisa,taxa,ideco,kyo,oth,othL,bal,bs,pl});
+    const oth=othT(), othL=OS.map(x=>x.bal), bal=cash+nisa+nisa2+taxa+ideco+ideco2+kyo+kyo2+oth;
+    rows.push({y,a,sa,kids:kids.map(c=>y-Math.round(n(c.by))),ev,iSelf,iSp,iPen,iAl,iOne,iProp,iAsset,iSale,iTot,eLive,eHouse,eEdu,eIns,eCar,eOne,eProp,eSave,eTot,net,wd,cash,nisa:nisa+nisa2,taxa,ideco:ideco+ideco2,kyo:kyo+kyo2,nisaS:nisa2,idecoS:ideco2,kyoS:kyo2,oth,othL,bal,bs,pl});
   }
   rows.bs0=bs0;
   return rows;
@@ -326,20 +340,25 @@ const ACC=[
  {k:'kyosai',t:'小規模企業共済',d:'個人事業主・小さな会社の役員向けの退職金の積立です。廃業・退職のときにまとめて受け取る前提で、退職金と同じ税金（退職所得）を差し引いて計算します。',f:[['bal','今の掛金の累計','万円'],['mon','掛金','万円/月',.1,'月0.1〜7万円'],['until','掛金を払う最後の年齢','歳'],['recv','受け取る年齢（廃業・退職の予定）','歳'],['yrs','受け取るまでの加入年数','年',1,'税金（退職所得）の計算に使います。空欄なら掛金から見積もります'],['rate','増え方の目安','%/年',.1,'受取額は加入年数や受け取り方で変わります。目安として1%程度']]},
  {k:'save',t:'貯蓄型の保険・その他',d:'学資保険・個人年金・終身保険の解約返戻金など、将来まとめて受け取る予定のお金。保険料は「毎月の支出」の保険料に入れてください。',f:[['amt','受け取る見込み額','万円'],['recv','受け取る年齢','歳']]}
 ];
+/* 配偶者名義の NISA・iDeCo・小規模企業共済（ご本人の口座と同じ項目。年齢は配偶者の年齢） */
+const SPACC={snisa:'nisa',sideco:'ideco',skyosai:'kyosai'}, SELFACC=['nisa','ideco','kyosai'];
+Object.entries(SPACC).forEach(([sk,k])=>{const b=ACC.find(x=>x.k===k);ACC.splice(ACC.findIndex(x=>x.k==='save'),0,{k:sk,sp:1,t:b.t,d:'配偶者の名義の分。年齢は配偶者の年齢で入れてください。',f:b.f.map(f=>{const g=f.slice();if(g[2]==='歳')g[1]=g[1].replace(/（.*）$/,'')+'（配偶者の年齢）';return g})})});
 const EASYF={}; // かんたん入力では口座ごとではなく、下の3項目（預貯金・投資・毎月の積立）だけを出す
 /* かんたん入力の資産：投資と積立は、くわしく入力の口座（NISA・課税口座・iDeCo・共済・その他）の合計として扱う */
-const INVK=['nisa','tax','ideco','kyosai'];
-function easySums(S){const A=S.assets;const inv=INVK.reduce((s,k)=>s+Math.max(0,n(A[k].bal)),0)+A.others.reduce((s,o)=>s+Math.max(0,n(o.bal)),0);
-  const mon=n(A.nisa.mon)+n(A.ideco.mon)+n(A.kyosai.mon)+A.others.reduce((s,o)=>s+Math.max(0,n(o.mon)),0);return{inv,mon}}
+const INVK0=['nisa','tax','ideco','kyosai'];
+const invK=S=>S.spouse==='yes'?INVK0.concat(Object.keys(SPACC)):INVK0;
+const monK=S=>S.spouse==='yes'?['nisa','ideco','kyosai','snisa','sideco','skyosai']:['nisa','ideco','kyosai'];
+function easySums(S){const A=S.assets;const inv=invK(S).reduce((s,k)=>s+Math.max(0,n(A[k].bal)),0)+A.others.reduce((s,o)=>s+Math.max(0,n(o.bal)),0);
+  const mon=monK(S).reduce((s,k)=>s+n(A[k].mon),0)+A.others.reduce((s,o)=>s+Math.max(0,n(o.mon)),0);return{inv,mon}}
 function setEasy(S,key,v){
   const A=S.assets;v=v===''?'':Math.max(0,parseFloat(v)||0);
   if(key==='cash'){A.cash.bal=v;return}
   const cur=easySums(S)[key],val=n(v);
   if(key==='inv'){
-    if(cur>0){const r=val/cur;INVK.forEach(k=>{A[k].bal=Math.round(n(A[k].bal)*r*10)/10});A.tax.basis=Math.round(n(A.tax.basis)*r*10)/10;A.others.forEach(o=>{o.bal=Math.round(n(o.bal)*r*10)/10;if(o.basis!==''&&o.basis!=null)o.basis=Math.round(n(o.basis)*r*10)/10})}
+    if(cur>0){const r=val/cur;invK(S).forEach(k=>{A[k].bal=Math.round(n(A[k].bal)*r*10)/10});A.tax.basis=Math.round(n(A.tax.basis)*r*10)/10;A.others.forEach(o=>{o.bal=Math.round(n(o.bal)*r*10)/10;if(o.basis!==''&&o.basis!=null)o.basis=Math.round(n(o.basis)*r*10)/10})}
     else A.nisa.bal=val;
   }else{
-    if(cur>0){const r=val/cur;['nisa','ideco','kyosai'].forEach(k=>{A[k].mon=Math.round(n(A[k].mon)*r*10)/10});A.others.forEach(o=>o.mon=Math.round(n(o.mon)*r*10)/10)}
+    if(cur>0){const r=val/cur;monK(S).forEach(k=>{A[k].mon=Math.round(n(A[k].mon)*r*10)/10});A.others.forEach(o=>o.mon=Math.round(n(o.mon)*r*10)/10)}
     else A.nisa.mon=val;
   }
 }
@@ -352,14 +371,15 @@ function easyAssetsHTML(S){
    ${F('mon','毎月の積立（合計）','万円/月',Math.round(e.mon*10)/10,'NISA・iDeCoなどに毎月積み立てている額')}
   </div><p class="unit" style="margin:8px 0 0">口座ごとの残高や利回りは「くわしく入力」で分けて入れられます。</p></div>`;
 }
-const ACCOL={cash:'var(--planB)',nisa:'var(--accent)',tax:'var(--planC)',ideco:'var(--planD)',kyosai:'var(--warn)',oth:'var(--coin)'};
+const ACCOL={cash:'var(--planB)',nisa:'var(--accent)',tax:'var(--planC)',ideco:'var(--planD)',kyosai:'var(--warn)',oth:'var(--coin)',snisa:'var(--accent)',sideco:'var(--planD)',skyosai:'var(--warn)'};
 function assetSummary(S){
   normPlan(S);const A=S.assets;
-  const parts=[['cash','預貯金',n(A.cash.bal),n(A.cash.rate)],['nisa','NISA',n(A.nisa.bal),n(A.nisa.rate)],['tax','課税口座',n(A.tax.bal),n(A.tax.rate)],['ideco','iDeCo',n(A.ideco.bal),n(A.ideco.rate)],['kyosai','共済',n(A.kyosai.bal),n(A.kyosai.rate)]];
+  const sp=S.spouse==='yes',B=k=>n(A[k].bal)+(sp&&A['s'+k]?n(A['s'+k].bal):0);
+  const parts=[['cash','預貯金',n(A.cash.bal),n(A.cash.rate)],['nisa','NISA',B('nisa'),n(A.nisa.rate)],['tax','課税口座',n(A.tax.bal),n(A.tax.rate)],['ideco','iDeCo',B('ideco'),n(A.ideco.rate)],['kyosai','共済',B('kyosai'),n(A.kyosai.rate)]];
   const ob=A.others.reduce((s,o)=>s+Math.max(0,n(o.bal)),0);if(ob>0)parts.push(['oth','その他',ob,Math.round(A.others.reduce((s,o)=>s+Math.max(0,n(o.bal))*n(o.rate),0)/ob*10)/10]);
   const tot=parts.reduce((s,p)=>s+Math.max(0,p[2]),0);
   const avg=tot>0?parts.reduce((s,p)=>s+Math.max(0,p[2])*p[3],0)/tot:0;
-  const mon=n(A.nisa.mon)+n(A.ideco.mon)+n(A.kyosai.mon)+A.others.reduce((s,o)=>s+Math.max(0,n(o.mon)),0);
+  const mon=monK(S).reduce((s,k)=>s+n(A[k].mon),0)+A.others.reduce((s,o)=>s+Math.max(0,n(o.mon)),0);
   return{parts,tot,avg,mon};
 }
 function assetBar(S){
@@ -371,7 +391,7 @@ function assetBar(S){
 }
 function assetsHTML(S){
   normPlan(S);
-  return `${easyAssetsHTML(S)}<div id="asum" data-adv>${assetBar(S)}</div><div class="sublist" style="margin-top:12px">${ACC.map(ac=>{const o=S.assets[ac.k];return `<div class="sub" data-acc="${ac.k}"${EASYF[ac.k]?'':' data-adv'}><div class="subhead"><span><span class="dot" style="background:${ACCOL[ac.k]||'var(--muted)'};margin-right:6px"></span>${ac.t}</span></div><span class="unit" style="margin-top:-4px">${esc(ac.d)}</span>
+  return `${easyAssetsHTML(S)}<div id="asum" data-adv>${assetBar(S)}</div><div class="sublist" style="margin-top:12px">${ACC.map(ac=>{const o=S.assets[ac.k];return `<div class="sub" data-acc="${ac.k}"${EASYF[ac.k]?'':' data-adv'}${ac.sp?` data-spacc${S.spouse==='yes'?'':' hidden'}`:''}><div class="subhead"><span><span class="dot" style="background:${ACCOL[ac.k]||'var(--muted)'};margin-right:6px"></span>${ac.t}${SELFACC.includes(ac.k)?`<span class="whoS chip muted" style="margin-left:6px"${S.spouse==='yes'?'':' hidden'}>ご本人</span>`:''}${ac.sp?'<span class="chip warn" style="margin-left:6px">配偶者</span>':''}</span></div><span class="unit" style="margin-top:-4px">${esc(ac.d)}</span>
    <div class="fields">${ac.f.map(f=>{const [k,l,u,st,h,show,pk]=f;const hid=(show&&!show(o)?' hidden':'')+(EASYF[ac.k]&&!EASYF[ac.k].includes(k)?' data-adv':'');const hint=h?`<span class="hint">${esc(h)}</span>`:'';
      if(u==='sel') return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><select id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}">${st.map(x=>`<option value="${x[0]}"${o[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></label>`;
      return `<label class="fld"${hid} data-af="${ac.k}_${k}"><span class="lab">${l}</span><span class="inp"><input id="a_${ac.k}_${k}" data-a="${ac.k}" data-ak="${k}" type="number" inputmode="decimal" step="${st||1}" value="${esc(o[k])}"><span class="u">${u}</span></span>${pk?preHTML(pk,`a_${ac.k}_${k}`,o[k]):''}${hint}</label>`}).join('')}</div></div>`}).join('')}${othersHTML(S)}</div>`;
@@ -441,7 +461,7 @@ function stackSVG(rows,id){
   g+=`<text x="${L-8}" y="${T-2}" text-anchor="end" style="font-size:10px">万円</text>`;
   return `<div class="legend" style="margin-bottom:6px">${keys.map(([k,l])=>`<span><span class="dot" style="background:${col[k]}"></span>${l}</span>`).join('')}${lo<0?'<span><span class="dot" style="background:var(--bad)"></span>不足</span>':''}</div><svg class="chart" id="${id}" viewBox="0 0 ${W} ${H}" role="img" aria-label="資産の内訳の推移">${g}</svg>`;
 }
-function syncVis(S){ALLF.forEach(f=>{if(f.show){const el=document.querySelector(`[data-f="${f.id}"]`);if(el)el.hidden=!f.show(S)}})}
+function syncVis(S){ALLF.forEach(f=>{if(f.show){const el=document.querySelector(`[data-f="${f.id}"]`);if(el)el.hidden=!f.show(S)}});const sp=S.spouse==='yes';document.querySelectorAll('[data-spacc],.whoS').forEach(el=>el.hidden=!sp)}
 
 /* ---------- chart ---------- */
 function niceTicks(lo,hi,cnt){const span=hi-lo||1;let st=Math.pow(10,Math.floor(Math.log10(span/cnt)));const e=span/cnt/st;st*=e>=7.5?10:e>=3.5?5:e>=1.5?2:1;const a=Math.floor(lo/st)*st,b=Math.ceil(hi/st)*st;const t=[];for(let v=a;v<=b+1e-9;v+=st)t.push(Math.round(v));return t}

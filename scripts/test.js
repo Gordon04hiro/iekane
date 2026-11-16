@@ -103,6 +103,16 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    {const q=w.eval(`(()=>{const S=basePlan();S.insl=[{name:'夫',who:'self',mon:1.5,end:60},{name:'妻',who:'sp',mon:1,end:65}];const r=sim(clone(S));
      const at=x=>r.find(z=>z.a===x)||{};return{a40:at(40).eIns,a60:at(60).eIns,a66:at(66).eIns,a68:at(68).eIns}})()`);
     check('保険を1件ずつ：夫婦で払い終わる年齢が違う',q.a40===30&&q.a60===12&&q.a66===12&&q.a68===0,JSON.stringify(q));}
+   {const q=w.eval(`(()=>{const S=basePlan();normPlan(S);const A=S.assets;A.snisa={bal:100,mon:1,until:50,rate:0};A.sideco={bal:200,mon:1,until:60,recv:63,mode:'lump',yrs:10,rate:0};A.skyosai={bal:300,mon:0,until:60,recv:60,rate:0,yrs:30};
+     const r=sim(clone(S));const at=x=>r.find(z=>z.sa===x)||{};const B=sim(clone(Object.assign(clone(S),{spouse:'no'})));
+     const z=r.map((_,i)=>i%2?-1:1);const m=sim(clone(S),{z});
+     return{n0:r[0].nisaS,n50:at(50).nisaS,n51:at(51).nisaS,save40:at(40).eSave-at(51).eSave,ide:(at(63).ev||[]).includes('配偶者のiDeCo 受取'),ide64:at(64).idecoS,kyo:(at(60).ev||[]).includes('配偶者の共済金 受取'),
+       chk:Math.max(...r.map(x=>Math.abs(x.pl.chk))),mchk:Math.max(...m.map(x=>Math.abs(x.pl.chk))),noSp:B[0].nisaS,ez:easySums(S).inv}})()`);
+    check('配偶者のNISA：配偶者の年齢で積立が止まる',q.n50>q.n0&&Math.abs(q.n51-q.n50)<0.01&&q.save40>=12,JSON.stringify(q));
+    check('配偶者のiDeCo・共済：配偶者の年齢で受け取る',q.ide&&q.ide64===0&&q.kyo);
+    check('配偶者の口座があってもPLの収支＝純資産の増減',q.chk<0.001&&q.mchk<0.001,q.chk+' / '+q.mchk);
+    check('配偶者が「いない」なら配偶者の口座は使わない',q.noSp===0);
+    check('かんたん入力の投資の合計に配偶者の分も入る',q.ez>=600,q.ez);}
    set(w,'sv_gross','2500');set(w,'sv_yrs','38');await wait(100);
    check('退職金の手取りを計算できる',/約2,465/.test(T(d,'#svout b')[0]||''),T(d,'#svout b')[0]);
    click(w,'[data-act="svset"]');await wait(300);
