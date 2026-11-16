@@ -21,6 +21,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
 
   console.log('\n■ すべてのページが表示できる');
   for(const f of pages){
+    if(f==='404.html'){const h=fs.readFileSync(path.join(DIST,f),'utf8');check(f+'（見つからないページ）',/ページが見つかりません/.test(h)&&/noindex/.test(h)&&/href="\/guide\//.test(h));continue}
     const w=await open(f);const d=w.document;
     check(f,!w.__errs.length&&d.querySelector('#view h1, #view .hero h1'),w.__errs[0]||'見出しがありません');
     const html=fs.readFileSync(path.join(DIST,f),'utf8');
@@ -122,6 +123,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   console.log('\n■ 共有したときの画像');
   {const bad=pages.map(f=>{const m=fs.readFileSync(path.join(DIST,f),'utf8').match(/og:image" content="https?:\/\/[^/]+\/([^"]+)"/);return m&&!fs.existsSync(path.join(DIST,m[1]))?f:null}).filter(Boolean);
    check('共有画像のファイルがすべてある',!bad.length,bad[0]);}
+
+  console.log('\n■ 検索対策');
+  {const sm=fs.readFileSync(path.join(DIST,'sitemap.xml'),'utf8');
+   check('ガイド4ページがサイトマップにある',(sm.match(/\/guide\//g)||[]).length===4);
+   check('404ページはサイトマップに載らない',!/404/.test(sm));
+   const h=fs.readFileSync(path.join(DIST,'articles/sell-cost.html'),'utf8');
+   check('記事の途中にツールへの案内がある',/class="toolcta"/.test(h));
+   check('記事からテーマのまとめへのリンクがある',/class="hublink"/.test(h));}
 
   console.log('\n■ 広告');
   {const bad=pages.filter(f=>/広告枠（/.test(fs.readFileSync(path.join(DIST,f),'utf8')));

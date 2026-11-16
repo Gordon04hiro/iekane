@@ -6,6 +6,10 @@
 下書き: false
 関連ツール: sell
 イラスト: sell
+検索タイトル: 家を売ったら手元にいくら残る？費用と税金の基本
+参考:
+  - ["国税庁 タックスアンサー No.3302 マイホームを売ったときの特例", "https://www.nta.go.jp/taxes/shiraberu/taxanswer/joto/3302.htm"]
+  - ["国税庁 タックスアンサー No.7108 不動産の譲渡、建設工事の請負に関する契約書に係る印紙税の軽減措置", "https://www.nta.go.jp/taxes/shiraberu/taxanswer/inshi/7108.htm"]
 リード: 売却価格がそのまま手元に残るわけではありません。売るときにかかる費用と、税金の考え方を整理しました。
 ---
 

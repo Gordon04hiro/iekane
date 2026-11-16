@@ -131,6 +131,20 @@ details.grp .body{padding:0 16px 16px}
 .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fld .lab{font-size:13px;font-weight:500}
 .fld .hint{font-size:11.5px;color:var(--muted);line-height:1.5}
+/* ガイド（テーマのまとめ）・記事の中のツール案内・参考資料・404 */
+.hsteps{list-style:none;padding:0;margin:20px 0;display:grid;gap:14px}
+.hsteps>li{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.hs-h{display:flex;gap:10px;align-items:center}.hs-h h2{margin:0;font-size:18px}
+.hs-h .hn{flex:0 0 30px;height:30px;border-radius:9px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700}
+.hsteps p{margin:8px 0 10px;font-size:14.5px;line-height:1.8}
+.hs-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.hs-arts{margin:0;padding-left:1.2em;display:grid;gap:4px}.hs-arts a{font-size:14.5px}
+.hubcard .unit{color:var(--brand);font-weight:700}
+.hublink{margin:4px 0 0;font-size:13px}.hublink a{color:var(--brand);font-weight:700}
+.toolcta{display:grid;gap:4px;background:var(--brand-soft);border-radius:14px;padding:14px 16px;margin:22px 0}
+.toolcta b{font-size:15px}.toolcta span{font-size:14px;line-height:1.7}.toolcta .btn{justify-self:start;margin-top:4px}
+.refs{margin-top:26px}.refs h2{font-size:16px;margin:0 0 6px}.refs ul{margin:0;padding-left:1.2em;display:grid;gap:4px}.refs li{font-size:13.5px}
+.ftguides{margin-bottom:6px}
 .formgrid:not(.easy) .easyonly{display:none!important}
 .inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--bg);overflow:hidden}
 .inp:focus-within{border-color:var(--brand)}

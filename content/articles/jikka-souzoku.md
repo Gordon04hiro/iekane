@@ -6,6 +6,10 @@
 下書き: false
 関連ツール: akiya
 イラスト: akiya
+検索タイトル: 相続した実家は売る？貸す？持ち続ける？判断のポイント
+参考:
+  - ["国税庁 確定申告の手引き：譲渡所得の特例（被相続人の居住用財産を売ったときの特例など）", "https://www.nta.go.jp/taxes/shiraberu/shinkoku/tebiki/2025/kakikata/05/tokurei.htm"]
+  - ["総務省 固定資産税の概要", "https://www.soumu.go.jp/main_sosiki/jichi_zeisei/czaisei/czaisei_seido/149767_08.html"]
 リード: 親から相続した実家に住む予定がないとき、売るか、貸すか、そのまま持つかで迷う人は多いはずです。それぞれにかかるお金と、決めるときのポイントをまとめました。
 ---
 
