@@ -13,9 +13,9 @@ img{max-width:100%}
   --coin:#e0873a; --coin-soft:#fcefe0; --sand:#f3e6cf; --sky:#e3eff4;
   --accent:var(--brand); --planB:#e0873a; --planC:#5a63b8; --planD:#8a9a2a;
   --good:#1d7a4c; --warn:#a85a07; --bad:#b42318; --good-bg:#e6f4ec; --warn-bg:#fcefdd; --bad-bg:#fbe9e7;
-  --f-disp:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Zen Kaku Gothic New",sans-serif;
-  --f-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
-  --f-num:"Barlow Semi Condensed","Zen Kaku Gothic New",sans-serif;
+  --f-disp:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN",sans-serif;
+  --f-body:"Hiragino Kaku Gothic ProN","Hiragino Sans","BIZ UDPGothic","Yu Gothic UI","Yu Gothic",Meiryo,"Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  --f-num:"Barlow Semi Condensed",var(--f-body);
   color-scheme:light;
 }
 *{box-sizing:border-box}

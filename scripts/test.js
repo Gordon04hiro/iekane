@@ -115,6 +115,10 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   }
   {const h=fs.readFileSync(path.join(DIST,'sell.html'),'utf8');check('広告コードが空のあいだは、結果の下の案内も出ない',!/cta-aff/.test(h));}
 
+  console.log('\n■ 共有したときの画像');
+  {const bad=pages.map(f=>{const m=fs.readFileSync(path.join(DIST,f),'utf8').match(/og:image" content="https?:\/\/[^/]+\/([^"]+)"/);return m&&!fs.existsSync(path.join(DIST,m[1]))?f:null}).filter(Boolean);
+   check('共有画像のファイルがすべてある',!bad.length,bad[0]);}
+
   console.log('\n■ 広告');
   {const bad=pages.filter(f=>/広告枠（/.test(fs.readFileSync(path.join(DIST,f),'utf8')));
    check('「広告枠」の目印が残っていない',!bad.length,bad[0]);

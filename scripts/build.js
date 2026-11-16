@@ -58,7 +58,7 @@ const AFF_ADS=${JSON.stringify(Object.fromEntries(Object.entries(AFF).filter(([k
 const CFG=${JSON.stringify(RULES).replace(/"Infinity"/g,'Infinity')};
 const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x['項目'],val:x['値'],src:x['出典'],url:x['リンク']||'',until:x['期限']||'',tool:x['使うツール']||''})))};
 const NEWS=${JSON.stringify(NEWS.map(x=>({d:x['日付'],t:x['内容']})))};
-const ARTICLES=${JSON.stringify(ARTS)};
+const ARTICLES=${JSON.stringify(ARTS.map(({body,...a})=>a))}; // 本文は各記事のページにだけ入れる（全ページのプログラムを軽くするため）
 `;
 const files=fs.readdirSync(R('src/js')).filter(f=>f.endsWith('.js')).sort();
 const pre=files.filter(f=>f<'10'), main=files.filter(f=>f>='10');
@@ -68,9 +68,12 @@ try{new Function(bundle)}catch(e){fail('プログラムに書き間違いがあ�
 // ---- 書き出し
 const out=R('dist');
 fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});fs.mkdirSync(path.join(out,'articles'),{recursive:true});
-fs.writeFileSync(path.join(out,'assets','app.js'),bundle);
-fs.writeFileSync(path.join(out,'assets','site.css'),read('src/css/site.css'));
-for(const f of fs.readdirSync(R('static'))) fs.copyFileSync(R('static/'+f),path.join(out,'assets',f));
+// 公開用は圧縮して軽くする（中身は同じ）
+const esb=require('esbuild');
+fs.writeFileSync(path.join(out,'assets','app.js'),esb.transformSync(bundle,{minify:true,target:'es2019',charset:'utf8',legalComments:'none'}).code);
+fs.writeFileSync(path.join(out,'assets','site.css'),esb.transformSync(read('src/css/site.css'),{loader:'css',minify:true,charset:'utf8'}).code);
+fs.cpSync(R('static'),path.join(out,'assets'),{recursive:true});
+const ogImg=pg=>pg.art&&fs.existsSync(R('static/ogp/'+pg.art.slug+'.png'))?SITE_URL+'/assets/ogp/'+pg.art.slug+'.png':SITE_URL+'/assets/ogp.png'; // 記事ごとの共有画像（なければ共通の画像）
 fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico')); // Googleの検索結果・サーチコンソールのアイコン用
 const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -79,7 +82,7 @@ const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.des
 const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}',{page_location:location.origin+location.pathname});</script>`:'';
 const ads=SITE.adsense?`<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
 async function prerender(pg,base){
-  const boot=`<script>window.PAGE=${JSON.stringify(pg.p)};window.BASE=${JSON.stringify(base)};${pg.slug?'window.SLUG='+JSON.stringify(pg.slug)+';':''}</script>`;
+  const boot=`<script>window.PAGE=${JSON.stringify(pg.p)};window.BASE=${JSON.stringify(base)};${pg.slug?'window.SLUG='+JSON.stringify(pg.slug)+';window.ARTB={'+JSON.stringify(pg.slug)+':'+JSON.stringify(pg.art.body).replace(/<\//g,'<\\/')+'};':''}</script>`;
   const errs=[];
   const vc=new (require('jsdom').VirtualConsole)();vc.on('jsdomError',e=>errs.push(e.message));
   const dom=new JSDOM(`<!doctype html><html lang="ja"><head></head><body>${shell}${boot}<script>${bundle}</script></body></html>`,{runScripts:'dangerously',url:SITE_URL+'/'+pg.f,pretendToBeVisual:true,virtualConsole:vc,
@@ -95,7 +98,7 @@ async function prerender(pg,base){
   for(const pg of list){
     const depth=pg.f.split('/').length-1, base=depth?'../'.repeat(depth):'';
     const {body,boot}=await prerender(pg,base);
-    const ld=pg.art?{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:SITE_URL+'/assets/ogp.png',publisher:{'@type':'Organization',name:'イエカネ'}}
+    const ld=pg.art?{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),publisher:{'@type':'Organization',name:'イエカネ'}}
       :pg.p==='home'?{'@context':'https://schema.org','@type':'WebSite',name:SITE.name,url:SITE_URL+'/'}:null;
     const html=`<!doctype html>
 <html lang="ja">
@@ -110,7 +113,9 @@ async function prerender(pg,base){
 <meta property="og:title" content="${esc(pg.t)}">
 <meta property="og:description" content="${esc(pg.d)}">
 <meta property="og:url" content="${canon(pg.f)}">
-<meta property="og:image" content="${SITE_URL}/assets/ogp.png">
+<meta property="og:image" content="${ogImg(pg)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="${base}favicon.ico" sizes="48x48">
 <link rel="icon" href="${base}assets/icon-96.png" type="image/png" sizes="96x96">
