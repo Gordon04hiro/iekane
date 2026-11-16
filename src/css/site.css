@@ -145,6 +145,17 @@ details.grp .body{padding:0 16px 16px}
 .toolcta b{font-size:15px}.toolcta span{font-size:14px;line-height:1.7}.toolcta .btn{justify-self:start;margin-top:4px}
 .refs{margin-top:26px}.refs h2{font-size:16px;margin:0 0 6px}.refs ul{margin:0;padding-left:1.2em;display:grid;gap:4px}.refs li{font-size:13.5px}
 .ftguides{margin-bottom:6px}
+/* 診断結果の見方（タブをタイル型に） */
+.rtabs-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:22px 0 8px}.rtabs-h b{font-size:16px}
+.rtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 16px}
+@media (max-width:640px){.rtabs{grid-template-columns:repeat(2,1fr)}}
+.rtabs button{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;color:var(--ink);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.rtabs button:hover{border-color:var(--brand)}
+.rtabs button svg{flex:0 0 32px;width:32px;height:32px;padding:6px;border-radius:10px;background:var(--brand-soft);fill:none;stroke:var(--brand);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rtabs button b{display:block;font-size:14px}.rtabs button small{display:block;font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+.rtabs button[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 14%,transparent)}
+.rtabs button[aria-pressed="true"] svg{background:var(--brand);stroke:#fff}
+@media print{.rtabs,.rtabs-h{display:none!important}}
 .links{list-style:none;padding:0;margin:0 0 8px;display:grid;gap:8px}.links li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:2px}.links a{font-weight:700;color:var(--brand)}.links span{font-size:13px;color:var(--muted)}
 .tool[href*="chuko"] .ic{background:var(--sky);color:#2f5d73}
 table.cf.fit{width:100%}table.cf.fit th,table.cf.fit td{white-space:normal}
@@ -271,9 +282,6 @@ table.cf td.ev{font-family:var(--f-body);font-size:11px;color:var(--brand-ink);t
 .tacc{display:grid;gap:8px}
 .tacc .cf,.cf.pl{width:100%;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .tacc .cf th:first-child,.cf.pl th:first-child{position:static;min-width:0;white-space:normal}
-.rtabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin:4px 0 14px}
-.rtabs button{border:0;background:none;padding:10px 12px 8px;font-size:13.5px;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap}
-.rtabs button[aria-pressed="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--brand)}
 .levers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .lever{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);display:grid;gap:4px;align-content:start;font-size:12.5px;color:var(--muted)}
 .lever b{font-family:var(--f-num);font-size:24px;font-weight:600;color:var(--ink)}
