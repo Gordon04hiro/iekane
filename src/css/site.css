@@ -495,3 +495,15 @@ details.defaults p{margin:6px 0 0;line-height:1.7}
 details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .tinfo .tools .thumb{display:none}
 .tinfo .tools .tool.art p{-webkit-line-clamp:2}
+
+/* 運営者プロフィール・執筆者 */
+.prof{display:grid;grid-template-columns:56px 1fr;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin:10px 0 18px}
+.prof-ic{width:56px;height:56px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.prof-ic svg{width:28px;height:28px}
+.prof-n{margin:0 0 6px;font-weight:800;font-size:16px}
+.prof ul{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:4px}
+.prof li{font-size:14px;display:grid;grid-template-columns:3.5em 1fr;gap:8px}
+.prof li b{color:var(--muted);font-weight:500}
+.prof p:last-child{margin:0;font-size:13.5px;line-height:1.8}
+.byline{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.byline a{color:var(--brand)}
