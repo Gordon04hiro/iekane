@@ -13,7 +13,7 @@ const LEVERS={
   say:x=>`${Math.round(x)}歳まで働く（定年後の収入で）`},
  live:{t:'生活費を見直す',u:'万円/月',apply:(S,x)=>{S.live=Math.max(0,n(S.live)-x)},lo:0,hi:null,step:0.1,
   say:x=>`生活費を毎月${x.toFixed(1)}万円下げる`},
- yld:{t:'運用の利回りを上げる',u:'%',apply:(S,x)=>{['nisa','tax','ideco'].forEach(k=>S.assets[k].rate=n(S.assets[k].rate)+x)},lo:0,hi:6,step:0.1,
+ yld:{t:'運用の利回りを上げる',u:'%',apply:(S,x)=>{normPlan(S);['nisa','tax','ideco','snisa','sideco'].forEach(k=>S.assets[k].rate=n(S.assets[k].rate)+x)},lo:0,hi:6,step:0.1,
   say:x=>`投資の利回りの見込みを${x.toFixed(1)}%上げる`}
 };
 function goalCalc(S,g){
@@ -42,7 +42,7 @@ function goalTab(cur){
 }
 /* シナリオ */
 const SCEN=[['opt','楽観',{rate:1,infl:-0.5,raise:0.3},'var(--good)'],['base','標準',{rate:0,infl:0,raise:0},'var(--accent)'],['pess','悲観',{rate:-1.5,infl:0.8,raise:-0.3},'var(--bad)']];
-function scenPlan(S,d){const T=clone(S);normPlan(T);['nisa','tax','ideco'].forEach(k=>T.assets[k].rate=Math.max(0,n(T.assets[k].rate)+d.rate));T.assets.others.forEach(o=>o.rate=n(o.rate)+d.rate);T.assets.cash.rate=Math.max(0,n(T.assets.cash.rate)+Math.min(0,d.rate)/4);T.infl=n(T.infl)+d.infl;T.raise=n(T.raise)+d.raise;T.sraise=n(T.sraise)+d.raise;return T}
+function scenPlan(S,d){const T=clone(S);normPlan(T);['nisa','tax','ideco','snisa','sideco'].forEach(k=>T.assets[k].rate=Math.max(0,n(T.assets[k].rate)+d.rate));T.assets.others.forEach(o=>o.rate=n(o.rate)+d.rate);T.assets.cash.rate=Math.max(0,n(T.assets.cash.rate)+Math.min(0,d.rate)/4);T.infl=n(T.infl)+d.infl;T.raise=n(T.raise)+d.raise;T.sraise=n(T.sraise)+d.raise;return T}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function monte(S,N){
   const R=rng(20261115),len=Math.max(Math.round(n(S.age)),95)-Math.round(n(S.age))+1;
@@ -79,6 +79,11 @@ function scenTab(cur){
    <p class="unit" style="margin:8px 0 0">値動きの大きさは、利回りの見込みが高い口座ほど大きくなる前提です（利回り4%なら年14%程度）。株価の動きは口座どうしで連動するとしています。値動きがあると、平均の利回りが同じでも増え方は鈍るため、「真ん中の結果」は標準シナリオより低めに出ます。過去の実績や将来を保証するものではありません。</p></section>`;
 }
 /* 予算と実績 */
+/* 実績の残高を、ご本人と配偶者の口座に、見込みの割合で分ける */
+const SPL={nisa:['snisa','nisaS','nisa'],ideco:['sideco','idecoS','ideco'],kyosai:['skyosai','kyoS','kyo']};
+function splitSp(S,k,tot,row){const m=SPL[k];if(!m||S.spouse!=='yes'){S.assets[k].bal=Math.round(tot);return}
+  const all=row?row[m[2]]:n(S.assets[k].bal)+n(S.assets[m[0]].bal),spv=row?row[m[1]]:n(S.assets[m[0]].bal),r=all>0?spv/all:0;
+  S.assets[m[0]].bal=Math.round(tot*r);S.assets[k].bal=Math.round(tot)-S.assets[m[0]].bal}
 const YJA=[['cash','預貯金'],['nisa','NISA'],['tax','課税口座'],['ideco','iDeCo'],['kyosai','小規模企業共済']];
 const YJK={cash:'cash',nisa:'nisa',tax:'taxa',ideco:'ideco',kyosai:'kyo'};
 function yjFin(v,br){if(!v)return null;const given=YJA.filter(([k])=>v[k]!==''&&v[k]!=null);
@@ -159,13 +164,13 @@ function reflect(key,y){
   if(given.length){
     // 入っていない口座は、見込みの残高を使う
     const row=before.find(x=>x.y===y);
-    const est={cash:row?Math.max(0,row.cash):n(S.assets.cash.bal),nisa:row?row.nisa:n(S.assets.nisa.bal),tax:row?row.taxa:n(S.assets.tax.bal),ideco:row?row.ideco:n(S.assets.ideco.bal),kyosai:row?row.kyo:n(S.assets.kyosai.bal)};
+    const est={cash:row?Math.max(0,row.cash):n(S.assets.cash.bal),nisa:row?row.nisa:n(S.assets.nisa.bal)+(S.spouse==='yes'?n(S.assets.snisa.bal):0),tax:row?row.taxa:n(S.assets.tax.bal),ideco:row?row.ideco:n(S.assets.ideco.bal),kyosai:row?row.kyo:n(S.assets.kyosai.bal)};
     if(row)S.assets.others.forEach((o,i)=>{const nb=Math.round(row.othL[i]||0),ob=n(o.bal);o.basis=Math.round((o.basis===''||o.basis==null?ob:n(o.basis))*(ob>0?nb/ob:1));o.bal=nb});
-    YJA.forEach(([k])=>{const nv=v[k]!==''&&v[k]!=null?n(v[k]):est[k];if(k==='tax'){const o=n(S.assets.tax.bal);S.assets.tax.basis=o>0?Math.round(n(S.assets.tax.basis)/o*nv):nv}S.assets[k].bal=Math.round(nv)});
+    YJA.forEach(([k])=>{const nv=v[k]!==''&&v[k]!=null?n(v[k]):est[k];if(k==='tax'){const o=n(S.assets.tax.bal);S.assets.tax.basis=o>0?Math.round(n(S.assets.tax.basis)/o*nv):nv}splitSp(S,k,nv,row)});
   }else{
     const row=before.find(x=>x.y===y)||before[0];const sum=Math.max(1,Math.max(0,row.cash)+row.nisa+row.taxa+row.ideco+row.kyo+row.oth);
     S.assets.others.forEach((o,i)=>{const nb=Math.round(tot*(row.othL[i]||0)/sum),ob=n(o.bal);o.basis=Math.round((o.basis===''||o.basis==null?ob:n(o.basis))*(ob>0?nb/ob:1));o.bal=nb});
-    [['cash',Math.max(0,row.cash)],['nisa',row.nisa],['tax',row.taxa],['ideco',row.ideco],['kyosai',row.kyo]].forEach(([k,x])=>{S.assets[k].bal=Math.round(tot*x/sum)});
+    [['cash',Math.max(0,row.cash)],['nisa',row.nisa],['tax',row.taxa],['ideco',row.ideco],['kyosai',row.kyo]].forEach(([k,x])=>{splitSp(S,k,tot*x/sum,row)});
   }
   const ns=y+1, d=ns-(n(S.startY)||Y0);
   S.age=n(S.age)+d; if(S.spouse==='yes') S.sage=n(S.sage)+d; S.startY=ns;

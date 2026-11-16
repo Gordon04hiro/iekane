@@ -18,7 +18,7 @@ function premiseRows(k){
    ['年金（月・万円）','本人 '+n(S.pen)+(S.spouse==='yes'?' ／ 配偶者 '+n(S.spen):'')],['住まい',H],['生活費（月・万円）',n(S.live)],['保険料（月・万円）',Math.round(insNow(S)*10)/10],
    ['預貯金（万円）／利回り',n(A.cash.bal)+' ／ '+n(A.cash.rate)+'%'],['NISA（万円）／積立（月）／利回り',n(A.nisa.bal)+' ／ '+n(A.nisa.mon)+' ／ '+n(A.nisa.rate)+'%'],
    ['課税口座（万円）／利回り',n(A.tax.bal)+' ／ '+n(A.tax.rate)+'%'],['iDeCo（万円）／掛金（月）／受取開始',n(A.ideco.bal)+' ／ '+n(A.ideco.mon)+' ／ '+n(A.ideco.recv)+'歳'],
-   ['小規模企業共済（万円）／掛金（月）',n(A.kyosai.bal)+' ／ '+n(A.kyosai.mon)],['その他の資産（万円）',A.others.map(o=>(o.name||(OTYPE[o.type]||OTYPE.other).l)+' '+n(o.bal)).join('、')||'なし'],['投資用不動産',S.props.length+'件'],['物価上昇率',n(S.infl)+'%']];
+   ['小規模企業共済（万円）／掛金（月）',n(A.kyosai.bal)+' ／ '+n(A.kyosai.mon)],...(S.spouse==='yes'&&['snisa','sideco','skyosai'].some(k=>n(A[k].bal)||n(A[k].mon))?[['配偶者のNISA／iDeCo／共済（万円）',n(A.snisa.bal)+' ／ '+n(A.sideco.bal)+' ／ '+n(A.skyosai.bal)],['配偶者の積立・掛金（月・万円）',n(A.snisa.mon)+' ／ '+n(A.sideco.mon)+' ／ '+n(A.skyosai.mon)]]:[]),['その他の資産（万円）',A.others.map(o=>(o.name||(OTYPE[o.type]||OTYPE.other).l)+' '+n(o.bal)).join('、')||'なし'],['投資用不動産',S.props.length+'件'],['物価上昇率',n(S.infl)+'%']];
 }
 function cfSheet(r,S){
   const head=['項目',...r.map(x=>x.y+'年')];
