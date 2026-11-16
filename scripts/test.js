@@ -79,6 +79,8 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const ty=d.getElementById('o0_type');check('「その他の資産」を追加できる',!!ty);
    if(ty){ty.value='crypto';ty.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(300);
      check('暗号資産を選ぶと利回り0%・値動き60%になる',d.getElementById('o0_rate').value==='0'&&d.getElementById('o0_vol').value==='60')}
+   {const pr=d.getElementById('f_inc')?.closest('.pairrow');check('手取り年収は「ご本人｜配偶者」で並ぶ',!!pr&&pr.contains(d.getElementById('f_sinc'))&&/ご本人/.test(pr.textContent)&&/配偶者/.test(pr.textContent));
+    check('配偶者の年金も同じ行に並ぶ',d.getElementById('f_pen')?.closest('.pairrow')?.contains(d.getElementById('f_spen')));}
    check('ねんきん定期便の見方が出る',/50歳未満/.test(d.querySelector('.teiki')?.textContent||''));
    click(w,'[data-act="pcfill"][data-w="self"]');await wait(200);
    check('年収から年金の目安を出せる',+d.getElementById('pc_inc').value>0&&/約\d/.test(T(d,'#pcout b')[0]||''),d.getElementById('pc_inc')?.value);
