@@ -117,6 +117,13 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('退職金の手取りを計算できる',/約2,465/.test(T(d,'#svout b')[0]||''),T(d,'#svout b')[0]);
    click(w,'[data-act="svset"]');await wait(300);
    check('退職金の手取りを入力欄に入れられる',d.getElementById('f_sev').value==='2465',d.getElementById('f_sev').value);
+   click(w,'[data-act="mode2"][data-m="guide"]');await wait(300);
+   check('「質問に答えて入力」で質問が1問ずつ出る',!!d.getElementById('wz')&&/質問 1 \//.test(d.querySelector('.wzhead span')?.textContent||''));
+   set(w,'w_age','40');click(w,'#wz [data-act="wznext"]');await wait(100);
+   click(w,'#wz [data-act="wzset"][data-k="spouse"][data-v="no"]');await wait(100);
+   {const t2=d.getElementById('wz').textContent;click(w,'#wz [data-act="wzprev"]');await wait(100);
+    check('質問の答えが診断の入力に入る（戻っても残る）',t2.includes('配偶者')&&d.getElementById('w_age')?.value==='40',d.getElementById('w_age')?.value);}
+   check('質問の途中は結果を出さない',d.getElementById('result').hidden===true);
    w.close();}
 
   console.log('\n■ 入口ツールの計算');

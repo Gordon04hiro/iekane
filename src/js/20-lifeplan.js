@@ -23,14 +23,15 @@ function vLife(v){
   ${ks.length>1||U.plan!=='A'?planBox(ks):''}
   <div class="modepick" role="group" aria-label="入力のしかた">
    <div class="mp-opts">
-    <button class="mp" data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}"><span class="mp-r"></span><span><b>かんたん入力</b><small>主な項目だけ・約3分</small></span></button>
+    <button class="mp" data-act="mode2" data-m="guide" aria-pressed="${LP.mode==='guide'}"><span class="mp-r"></span><span><b>質問に答えて入力</b><small>はじめての方に・約5分</small></span></button>
+    <button class="mp" data-act="mode2" data-m="easy" aria-pressed="${!LP.mode||LP.mode==='easy'}"><span class="mp-r"></span><span><b>かんたん入力</b><small>主な項目だけ・約3分</small></span></button>
     <button class="mp" data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}"><span class="mp-r"></span><span><b>くわしく入力</b><small>年金・退職金・車なども</small></span></button>
    </div>
-   ${LP.mode!=='detail'?`<details class="defaults"><summary>かんたん入力で自動で使う値を見る</summary><p class="unit">${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p></details>`:''}</div>
-  <div class="prog" id="prog" aria-live="polite"></div>
-  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${fieldsHTML(g,S)}</div>`:''}${g.pencalc?penHTML(S):''}${g.sevcalc?sevHTML(S):''}${g.insl?inslHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
+   ${!LP.mode||LP.mode==='easy'?`<details class="defaults"><summary>かんたん入力で自動で使う値を見る</summary><p class="unit">${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p></details>`:''}</div>
+  ${LP.mode==='guide'?'':'<div class="prog" id="prog" aria-live="polite"></div>'}
+  ${LP.mode==='guide'?guideHTML(S):`<div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${fieldsHTML(g,S)}</div>`:''}${g.pencalc?penHTML(S):''}${g.sevcalc?sevHTML(S):''}${g.insl?inslHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>`}
   ${ks.length>1||U.plan!=='A'?'':planBox(ks)}
-  <section class="result" id="result"></section></div>`;
+  <section class="result" id="result"${wzHold()?' hidden':''}></section></div>`;
   syncVis(S); renderResult(); updateDock();
 }
 function planBox(ks){
@@ -104,6 +105,7 @@ function progItems(S){
 }
 function updateProgress(){
   const S=LP.plans[U.plan],box=document.getElementById('prog');if(!S||!box)return;
+  if(LP.mode==='guide'){box.hidden=true;return 0}
   const it=progItems(S),done=it.filter(x=>x.ok).length,left=it.length-done,nx=it.find(x=>!x.ok);
   box.className='prog'+(left?'':' done');
   box.hidden=!left&&LP.example;
@@ -118,7 +120,9 @@ function nextEmpty(){
   el.scrollIntoView({block:'center',behavior:'smooth'});try{el.focus({preventScroll:true})}catch(e){el.focus()}
 }
 function updateDock(){
-  const S=LP.plans[U.plan]; if(!S) return; const s=summarize(sim(S),S);
+  const S=LP.plans[U.plan]; if(!S) return;
+  if(wzHold()){const d=document.getElementById('dockin');if(d)d.innerHTML='<div class="v"><span>質問に答え終わると、ここに結果が出ます</span></div>';return}
+  const s=summarize(sim(S),S);
   const left=updateProgress();
   document.getElementById('dockin').innerHTML=`<div class="v"><span>${keys().length>1?U.plan+'：':''}95歳時点の貯蓄<b class="${s.last.bal<0?'neg':''}">${fmt(s.last.bal)} 万円</b></span>${left?`<span>入力<b style="font-size:13px;margin-top:3px">あと${left}項目</b></span>`:''}<span>判定<b style="font-size:13px;margin-top:3px"><span class="chip ${s.st.c}">${s.st.t}</span></b></span></div><button class="btn primary" data-act="toresult">結果を見る</button>`;
 }

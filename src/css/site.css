@@ -569,3 +569,21 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .pairrow .lab.who{font-size:12px;color:var(--muted);font-weight:700}
 .pairrow .pre button{padding:3px 7px;font-size:11.5px}
 .pairrow>.hint{font-size:11.5px;color:var(--muted);line-height:1.5}
+/* 質問に答えて入力 */
+.mp-opts .mp:first-child{grid-column:1/-1}
+@media (min-width:760px){.mp-opts{grid-template-columns:repeat(3,1fr)}.mp-opts .mp:first-child{grid-column:auto}}
+.wz{background:var(--surface);border:2px solid var(--brand);border-radius:16px;padding:16px 18px 18px;margin:14px 0;scroll-margin-top:72px}
+.wzhead{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted);font-weight:700}
+.wzbar{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden}.wzbar i{display:block;height:100%;background:var(--brand);border-radius:99px}
+.wz h2{font-size:20px;margin:14px 0 6px;line-height:1.5}
+.wzh{font-size:13.5px;color:var(--muted);line-height:1.8;margin:0 0 12px}
+.wzq{font-size:14px;font-weight:700;margin:14px 0 8px}
+.wzc{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.wzb{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.wzb b{font-size:14.5px}.wzb small{font-size:11.5px;color:var(--muted)}
+.wzb[aria-pressed="true"]{border-color:var(--brand);background:var(--good-bg)}
+.wzcols{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:640px){.wzcols{grid-template-columns:1fr 1fr}}
+.pairrow .pcols.one{grid-template-columns:1fr}
+.wznav{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.wznav .btn{min-width:120px}
