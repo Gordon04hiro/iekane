@@ -45,7 +45,8 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
 
 // ---- ブラウザで動くプログラムをまとめる
 const content=`/* このファイルは自動で作られます。直接書き換えないでください */
-const SITE_CFG=${JSON.stringify({contactForm:SITE.contactForm||''})};
+const SITE_CFG=${JSON.stringify({contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{}})};
+const AFF_ADS=${JSON.stringify(Object.fromEntries(Object.entries(AFF).filter(([k,v])=>String((v||{})['コード']||'').trim()).map(([k,v])=>[k,{h:v['見出し']||'',d:v['説明']||'',code:String(v['コード']).trim()}])))};
 const CFG=${JSON.stringify(RULES).replace(/"Infinity"/g,'Infinity')};
 const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x['項目'],val:x['値'],src:x['出典'],url:x['リンク']||'',until:x['期限']||'',tool:x['使うツール']||''})))};
 const NEWS=${JSON.stringify(NEWS.map(x=>({d:x['日付'],t:x['内容']})))};
@@ -77,6 +78,7 @@ async function prerender(pg,base){
   await new Promise(r=>setTimeout(r,250));
   if(errs.length) fail(`${pg.f} の表示中にエラー：${errs[0]}`);
   const d=dom.window.document;d.querySelectorAll('script').forEach(s=>s.remove());
+  d.querySelectorAll('[data-pushed]').forEach(x=>x.removeAttribute('data-pushed'));
   const body=d.body.innerHTML;dom.window.close();return {body,boot};
 }
 (async()=>{

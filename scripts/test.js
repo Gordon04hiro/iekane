@@ -108,6 +108,11 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('相続税の申告は10か月後',tl.some(x=>x.startsWith('相続税の申告')&&x.includes('2027年8月1日まで')));
    w.close();}
 
+  console.log('\n■ 広告');
+  {const bad=pages.filter(f=>/広告枠（/.test(fs.readFileSync(path.join(DIST,f),'utf8')));
+   check('「広告枠」の目印が残っていない',!bad.length,bad[0]);
+   const w=await open('loan.html');check('広告コードが空のあいだは、ツールの下に何も出ない',w.document.getElementById('adtail').hidden);w.close();}
+
   console.log('\n■ サイトマップ');
   {const sm=fs.readFileSync(path.join(DIST,'sitemap.xml'),'utf8');
    const drafts=pages.filter(f=>f.startsWith('articles/')&&f!=='articles/index.html'&&/noindex/.test(fs.readFileSync(path.join(DIST,f),'utf8')));

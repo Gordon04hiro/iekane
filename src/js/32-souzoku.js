@@ -35,7 +35,6 @@ function cRender(){
   const todo=all.filter(i=>!CK[i[0]]);
   document.getElementById('cresult').innerHTML=`<h2>これからやること</h2>
   ${todo.length?`<section class="advice"><ul>${todo.map(i=>`<li><b>${esc(i[1])}</b><br><span class="unit" style="font-size:13px">${esc(i[3])}</span></li>`).join('')}</ul></section>`:'<section class="advice"><p style="margin:0">すべての項目にチェックが付きました。内容が変わったときに見直しましょう。</p></section>'}
-  <div class="adslot">広告枠（Googleアドセンス）／アフィリエイト枠<br>例：遺言書作成サービス・エンディングノートなど</div>
   <div class="taxnote">このチェックシートは、一般的な準備の目安を確認するためのものです。相続税の計算や、遺産分割・遺言の内容など個別のご相談にはお答えしていません。税金は税理士、登記は司法書士、遺言や争いごとは弁護士などの専門家にご相談ください。</div>
   <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['souzoku2','akiya'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
 }
@@ -111,7 +110,6 @@ function c2Render(){
     return gh+`<label class="citem"><input type="checkbox" id="c2_${it[0]}" data-c2="${it[0]}"${C2[it[0]]?' checked':''}><span><b>${esc(it[1])}<span class="unit">　目安：${lim}</span></b>${due}<span class="why">${esc(it[3])}</span></span></label>`}).join('');
   const pre=PRE.filter(i=>!C2[i[0]]).length;
   document.getElementById('c2result').innerHTML=`
-  <div class="adslot">広告枠（Googleアドセンス）／アフィリエイト枠<br>例：相続手続きの代行サービス・不動産の査定など</div>
   <div class="taxnote">期限は一般的な目安です。起算日（亡くなった日、相続を知った日など）は手続きによって異なり、事情によって期限が変わることもあります。相続税の計算や遺産分割など、個別のご相談にはお答えしていません。税金は税理士、登記は司法書士、相続放棄や争いごとは弁護士などの専門家にご相談ください。</div>
   <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['akiya','sell','souzoku'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
 }
