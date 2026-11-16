@@ -99,7 +99,7 @@ async function prerender(pg,base){
     const depth=pg.f.split('/').length-1, base=depth?'../'.repeat(depth):'';
     const {body,boot}=await prerender(pg,base);
     // 検索エンジン向けの情報（記事・ツール・パンくず）
-    const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'イエカネ運営者',jobTitle:P['資格']||undefined,url:SITE_URL+'/about.html#profile'};
+    const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'イエカネ運営者',jobTitle:[].concat(P['資格']||[])[0]||undefined,hasCredential:[].concat(P['資格']||[]).map(q=>({'@type':'EducationalOccupationalCredential',name:q})),url:SITE_URL+'/about.html#profile'};
     const crumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map(([n,u],k)=>({'@type':'ListItem',position:k+1,name:n,item:u}))});
     const TOOLR=['lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
     const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'イエカネ',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},

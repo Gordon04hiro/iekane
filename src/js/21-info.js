@@ -1,12 +1,12 @@
 /* ---------- info ---------- */
 function contactBtn(){return SITE.contactUrl?`<a class="btn primary" href="${esc(SITE.contactUrl)}" target="_blank" rel="noopener">お問い合わせフォーム</a>`:`<span class="chip soon">お問い合わせフォーム 準備中</span>`}
 function profileHTML(){
-  const P=SITE_CFG.prof||{};const yrs=String(P['実務年数']||'').trim(),cy=String(P['会社の年数']||'').trim();
-  const items=[P['資格']&&`<li><b>資格</b>${esc(P['資格'])}</li>`,`<li><b>仕事</b>${cy?`業歴${esc(cy)}の不動産会社で、`:''}不動産の売買の仲介・管理${yrs?`（実務${esc(yrs)}）`:''}</li>`,P['相続の相談']?'<li><b>相談</b>住まいの売買に加えて、相続した家や手続きの相談にも対応</li>':'',P['地域']&&`<li><b>地域</b>${esc(P['地域'])}</li>`].filter(Boolean).join('');
+  const P=SITE_CFG.prof||{};const Q=[].concat(P['資格']||[]).filter(Boolean);const yrs=String(P['実務年数']||'').trim(),cy=String(P['会社の年数']||'').trim();
+  const items=[Q.length&&`<li><b>資格</b>${Q.map(esc).join('、')}</li>`,`<li><b>仕事</b>${cy?`業歴${esc(cy)}の不動産会社で、`:''}不動産の売買の仲介・管理${yrs?`（実務${esc(yrs)}）`:''}</li>`,P['相続の相談']?'<li><b>相談</b>住まいの売買に加えて、相続した家や手続きの相談にも対応</li>':'',P['地域']&&`<li><b>地域</b>${esc(P['地域'])}</li>`].filter(Boolean).join('');
   return `<div class="prof"><div class="prof-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="12" cy="15" r="2.5"/></svg></div><div><p class="prof-n">${esc(P['名前']||'イエカネ運営者')}</p><ul>${items}</ul>
    <p>不動産の売買や相続の相談を日々受けている立場から、現場でよく聞かれる疑問や、決める前に知っておきたい数字をまとめています。記事とツールは、公的な統計や制度の資料を確認したうえで作成し、出典は「<a href="#data">使っているデータ</a>」で公開しています。</p></div></div>`;
 }
-function bylineHTML(){const P=SITE_CFG.prof||{};return `<p class="byline">執筆・監修：<a href="#about">${esc(P['名前']||'イエカネ運営者')}</a>${P['資格']?'（'+esc(P['資格'])+'）':''}</p>`}
+function bylineHTML(){const P=SITE_CFG.prof||{};return `<p class="byline">執筆・監修：<a href="#about">${esc(P['名前']||'イエカネ運営者')}</a>${[].concat(P['資格']||[])[0]?'（'+esc([].concat(P['資格'])[0])+'）':''}</p>`}
 function vAbout(v){
   v.innerHTML=`<div class="wrap doc"><div class="crumb"><a href="#home">イエカネ</a> › サイトについて</div><h1>サイトについて</h1>
   <p>イエカネは、家を買う・売る・相続するといった住まいの決断を、お金の面から落ち着いて考えるための無料ツールと記事のサイトです。</p>
