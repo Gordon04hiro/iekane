@@ -1,7 +1,7 @@
 /* ---------- 記事・お知らせ・データ ---------- */
 const pubArticles=()=>ARTICLES.slice().sort((a,b)=>b.date.localeCompare(a.date));
 const toolName=h=>{const t=TOOLS.find(x=>x.href===h);return t?t.t:''};
-function artCard(a){return `<a class="tool art" href="#a-${a.slug}"><span class="chip muted" style="justify-self:start">${esc(a.cat)}</span><h3>${esc(a.title)}${a.draft?' <span class="chip warn">下書き</span>':''}</h3><p>${esc(a.lead)}</p><span class="unit">${jd(a.date)}</span></a>`}
+function artCard(a){return `<a class="tool art" href="#a-${a.slug}">${illust(a,true)}<span class="chip muted" style="justify-self:start">${esc(a.cat)}</span><h3>${esc(a.title)}${a.draft?' <span class="chip warn">下書き</span>':''}</h3><p>${esc(a.lead)}</p><span class="unit">${jd(a.date)}</span></a>`}
 function vArticles(v){
   const cats=[...new Set(ARTICLES.map(a=>a.cat))];const c=U.acat&&cats.includes(U.acat)?U.acat:'';
   const list=pubArticles().filter(a=>!c||a.cat===c);
@@ -17,11 +17,13 @@ function vArticle(v,slug){
   const rel=pubArticles().filter(x=>x.slug!==a.slug).slice(0,3);
   v.innerHTML=`<div class="wrap doc art-doc"><div class="crumb"><a href="#home">イエカネ</a> › <a href="#articles">記事</a> › ${esc(a.cat)}</div>
   ${a.draft?'<div class="draft">下書きです。内容を確認してから公開してください（articles の draft を false にすると、この表示は消えます）。</div>':''}
+  ${illust(a)}
   <span class="chip muted">${esc(a.cat)}</span><h1 style="margin-top:8px">${esc(a.title)}</h1>
-  <p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}</p>
+  <p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}${a.mins?'　・　約'+a.mins+'分で読めます':''}</p>
   ${a.pr?'<p class="pr-note">当サイトはアフィリエイト広告を利用しています。記事内の「PR」と表示したリンクから申し込みがあると、当サイトが報酬を受け取ることがあります。</p>':''}
   <p class="lead">${esc(a.lead)}</p>
   ${adUnit('記事の上')}
+  ${(a.toc||[]).length>2?`<nav class="toc" aria-label="この記事の内容"><p class="toc-t">この記事の内容</p><ol>${a.toc.map((t,i)=>`<li><button type="button" data-act="toc" data-to="s${i+1}">${esc(t)}</button></li>`).join('')}</ol></nav>`:''}
   <div class="art-body">${withMidAds(a.body)}</div>
   ${a.tool?`<div class="consult" style="margin-top:22px"><div><h2>数字で確かめてみる</h2><p>${esc(toolName(a.tool))}で、ご自分の場合を計算できます。登録不要・入力内容は送信されません。</p></div><div class="ways"><a class="btn primary" href="${a.tool}">${esc(toolName(a.tool))}を使う</a></div></div>`:''}
   ${adUnit('記事の下')}

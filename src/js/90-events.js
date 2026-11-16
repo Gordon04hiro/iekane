@@ -42,6 +42,7 @@ document.addEventListener('input',e=>{
   else if(t.dataset.pname){LP.names[U.plan]=t.value;saveLP();document.querySelectorAll('.seg [data-act="plan"]').forEach(btn=>{if(btn.dataset.p===U.plan)btn.lastChild.textContent=U.plan+'：'+t.value});clearTimeout(rT);rT=setTimeout(renderResult,300)}
 });
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset.kid!=null&&t.dataset.kk==='away'){LP.plans[U.plan].kids[+t.dataset.kid].away=t.checked;changed()}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="toc"]');if(!b)return;const el=document.getElementById(b.dataset.to);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
 /* 言葉で選ぶボタン（押すと入力欄に数字が入る） */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="pre"]');if(!b)return;e.preventDefault();const el=document.getElementById(b.dataset.for);if(!el)return;el.value=b.dataset.v;el.dispatchEvent(new Event('input',{bubbles:true}))});
 document.addEventListener('input',e=>{const t=e.target;if(!t.id)return;document.querySelectorAll(`[data-act="pre"][data-for="${t.id}"]`).forEach(b=>b.setAttribute('aria-pressed',String(t.value!==''&&+t.value===+b.dataset.v)))});
