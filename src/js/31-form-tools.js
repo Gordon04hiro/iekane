@@ -82,7 +82,6 @@ const LOANDEF={id:'loan',title:'住宅ローン・購入予算診断',example:'�
      <li>審査では約${fmt(R.max)}万円まで借りられる可能性がありますが、「借りられる額」と「返せる額」は違います。差は${fmt(R.max-R.ok)}万円です。</li>
      ${R.term<n(V.term)?`<li>完済時80歳までとすると、返済期間は${R.term}年になります。</li>`:''}
      <li>変動金利の場合、金利が1%上がると毎月の返済は約${(Math.round((R.scen[1].m-R.scen[0].m)*10)/10).toLocaleString('ja-JP')}万円増えます（下の表）。</li></ul></section>
-    <div class="adslot">広告枠（Googleアドセンス）／アフィリエイト枠<br>例：住宅ローンの比較・一括審査など</div>
     <div class="cfhead"><h3>金利が上がった場合の毎月の返済（無理のない借入額の場合）</h3></div>
     <div class="cfwrap"><table class="cf"><tbody><tr class="hd"><th>金利</th><td>毎月の返済</td><td>年間の返済</td><td>返済負担率</td></tr>
      ${R.scen.map(s=>`<tr${s.d===0?' class="tot"':''}><th>${(n(V.rate)+s.d).toFixed(2)}%${s.d?'（＋'+s.d+'%）':'（今の金利）'}</th><td>${(Math.round(s.m*10)/10).toLocaleString('ja-JP')}万円</td><td>${fmt(s.m*12)}万円</td><td>${n(V.income)?((s.m*12+n(V.other)*12)/n(V.income)*100).toFixed(1):'–'}%</td></tr>`).join('')}
@@ -137,7 +136,6 @@ const AKIYADEF={id:'akiya',title:'相続した家・空き家の診断',example:
      <li>空き家のまま持つと、${R.N}年間で約${fmt(-R.hold)}万円の持ち出しになる計算です。その間に建物は傷み、売れる価格も下がっていくことが多いです。</li>
      <li>貸す場合、家賃の手取りは年約${fmt(R.rentIn)}万円です。リフォーム費を回収できるまでの年数や、借り手が見つかるかも確かめておきましょう。</li>
      <li>解体すると土地は売りやすくなりますが、更地のまま持ち続けると固定資産税が上がることがあります。売るまでの期間を考えて決めるのが安心です。</li></ul></section>
-    <div class="adslot">広告枠（Googleアドセンス）／アフィリエイト枠<br>例：空き家の買取・解体費の一括見積もりなど</div>
     <details class="grp" style="margin-top:14px" open><summary>知っておきたい制度<small>一般的な説明です</small></summary><div class="body reqs">
      <p><b>相続登記の義務化</b>：2024年4月から、相続で家や土地を取得したことを知った日から3年以内に相続登記をすることが義務になりました。正当な理由なく怠ると、10万円以下の過料の対象になります。それ以前の相続も対象です。</p>
      <p><b>管理が不十分な空き家</b>：2023年の法改正で、放置すると「特定空家」になるおそれがある空き家も「管理不全空家」として指導・勧告の対象になりました。勧告を受けると、土地の固定資産税を下げる住宅用地の特例が外れます。</p>
@@ -205,7 +203,6 @@ const VSDEF={id:'vs',title:'賃貸vs持ち家 比べる診断',example:'35歳・
      <li>${R.a1}歳までの実質の負担は、${diff>=0?`購入のほうが約${fmt(diff)}万円少ない`:`賃貸のほうが約${fmt(-diff)}万円少ない`}計算です。</li>
      ${R.cross?`<li>払った住居費の合計は、${R.cross}歳ごろに購入が賃貸を下回ります。</li>`:'<li>比べた期間の中では、払った住居費の合計は購入のほうが多いままです。</li>'}
      <li>賃貸は住み替えやすく、修繕の負担がありません。購入はローン完済後の住居費が下がり、家が資産として残ります。老後に借りにくくなることも、賃貸を選ぶときに考えておきたい点です。</li></ul></section>
-    <div class="adslot">広告枠（Googleアドセンス）／アフィリエイト枠</div>
     <p class="unit">頭金を運用した場合の利益、住宅ローン控除、家財・火災保険、賃貸の引越し費用は含めていません。家賃は毎年同じ割合で上がる前提です。</p>`;
   },
   dock:(V,R)=>{const d=R.cr-R.net;return[d>=0?'購入のほうが少ない':'賃貸のほうが少ない',fmt(Math.abs(d))+' 万円']},

@@ -8,7 +8,7 @@ function vArticles(v){
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 記事</div>
   <div class="thead"><h1>記事</h1><p>家を買う・売る・相続する前に知っておきたい、住まいとお金の基本をまとめています。</p></div>
   <div class="seg" style="margin-bottom:14px"><button data-act="acat" data-c="" aria-pressed="${!c}">すべて</button>${cats.map(x=>`<button data-act="acat" data-c="${esc(x)}" aria-pressed="${c===x}">${esc(x)}</button>`).join('')}</div>
-  <div class="tools">${list.map(artCard).join('')||'<p class="unit">まだ記事がありません。</p>'}</div></div>`;
+  <div class="tools">${list.slice(0,6).map(artCard).join('')||'<p class="unit">まだ記事がありません。</p>'}</div>${list.length>6?adUnit('一覧の中')+`<div class="tools" style="margin-top:14px">${list.slice(6).map(artCard).join('')}</div>`:''}</div>`;
 }
 function vArticle(v,slug){
   const a=ARTICLES.find(x=>x.slug===slug);
@@ -21,9 +21,10 @@ function vArticle(v,slug){
   <p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}</p>
   ${a.pr?'<p class="pr-note">当サイトはアフィリエイト広告を利用しています。記事内の「PR」と表示したリンクから申し込みがあると、当サイトが報酬を受け取ることがあります。</p>':''}
   <p class="lead">${esc(a.lead)}</p>
-  <div class="art-body">${a.body}</div>
+  ${adUnit('記事の上')}
+  <div class="art-body">${withMidAds(a.body)}</div>
   ${a.tool?`<div class="consult" style="margin-top:22px"><div><h2>数字で確かめてみる</h2><p>${esc(toolName(a.tool))}で、ご自分の場合を計算できます。登録不要・入力内容は送信されません。</p></div><div class="ways"><a class="btn primary" href="${a.tool}">${esc(toolName(a.tool))}を使う</a></div></div>`:''}
-  <div class="adslot" style="margin-top:18px">広告枠（Googleアドセンス）</div>
+  ${adUnit('記事の下')}
   ${rel.length?`<h2>ほかの記事</h2><div class="tools">${rel.map(artCard).join('')}</div>`:''}</div>`;
 }
 function vNews(v){

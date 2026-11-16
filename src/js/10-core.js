@@ -37,6 +37,7 @@ function go(){
   document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
+  adTail(r);setTimeout(fillAds,0);
   if(r!=='article')document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
 }
 if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
@@ -88,7 +89,7 @@ function vHome(v){
     <a class="tool feat" href="#lifeplan"><span class="ic">${IC.plan}</span><span><h3>ライフプラン診断</h3><p>家族・収入・住まいを入れると、毎年の収支と貯蓄の推移がわかります。住宅購入あり・なしなど、3パターンまで比べられます。</p></span><span class="go">はじめる →</span></a>
     ${TOOLS.filter(t=>!t.hide).map(toolCard).join('')}
    </div></section>
-  <section class="wrap sect"><div class="adslot">広告枠（Googleアドセンス）<br>審査通過後にここへ表示</div></section>
+  ${adUnit('一覧の中')?`<section class="wrap sect">${adUnit('一覧の中')}</section>`:''}
   <section class="wrap sect"><h2>イエカネの考え方</h2><p class="lead">住まいの決断は、金額も大きく、やり直しがききません。</p>
    <div class="why"><div><b>家だけでなく、家計全体で見る</b>ローンが払えるかだけでなく、教育費や老後まで続けて見ないと、本当に大丈夫かはわかりません。</div>
    <div><b>個人情報を預からない</b>計算はブラウザの中だけ。名前やメールアドレスの登録もありません。</div>

@@ -4,3 +4,13 @@ name: イエカネ 家とお金の相談室
 contactForm: "https://docs.google.com/forms/d/e/1FAIpQLSfJuvud4JCL3M9MJ5PTbYuTm9Rg05zVdsF_b8DD7D5koEXONQ/viewform"               # GoogleフォームのURLを入れると、お問い合わせボタンが有効になります
 analytics: ""                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
 adsense: ""                   # AdSenseの審査が通ったら、パブリッシャーID（ca-pub-XXXX）を入れます
+
+# AdSenseの「広告ユニット」の番号（data-ad-slot の数字）。空欄の枠には何も出ません。
+# AdSenseの管理画面 → 広告 → 広告ユニットごと → ディスプレイ広告 で作り、数字だけを貼ります。
+# どの枠もスマホ・PCの両方で、画面の幅に合わせた大きさで表示されます。
+adslots:
+  記事の上: ""      # 記事のリード文のすぐ下
+  記事の中: ""      # 記事の途中（見出し2つごと・何か所でも）
+  記事の下: ""      # 記事の終わり
+  ツールの下: ""    # 各ツールのページの下（計算結果の下）
+  一覧の中: ""      # トップページ・記事一覧の途中
