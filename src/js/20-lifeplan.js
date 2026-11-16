@@ -17,23 +17,25 @@ function vLife(v){
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › ライフプラン診断</div>
-  <div class="thead"><h1>ライフプラン診断</h1><p>家族・収入・住まいを入れると、今年から95歳までの毎年の収支と貯蓄の推移がわかります。わかる範囲の入力で大丈夫です。</p>
-   <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
-   ${LP.example?`<p class="unit" style="margin-top:8px">いまは入力例（35歳・夫婦と子ども2人・家を購入予定）が入っています。ご自分の数字に書き換えてください。　<button class="btn small" data-act="clear">空にして始める</button></p>`:''}</div>
-  <div class="pbar"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" role="group" aria-label="パターン">${ks.map(k=>`<button data-act="plan" data-p="${k}" aria-pressed="${U.plan===k}"><span class="dot ${k.toLowerCase()}"></span>${k}：${esc(LP.names[k]||'')}</button>`).join('')}</div>
-   ${ks.length<3?`<button class="btn small" data-act="addplan">＋ 比べるパターンを追加</button>`:''}</div>
-   ${ks.length>1||U.plan!=='A'?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label class="fld" style="flex:1;min-width:180px"><span class="lab">パターン${U.plan}の名前</span><input class="txt" id="pname" data-pname="1" value="${esc(LP.names[U.plan]||'')}"></label>${U.plan!=='A'?'<button class="btn small ghost danger" data-act="delplan">このパターンを削除</button>':''}</div><div class="unit" id="diffbox">${diffHTML()}</div>`:`<span class="unit">例：「家を買う」と「賃貸のまま」、「65歳で退職」と「70歳まで働く」などを並べて比べられます。</span>`}</div>
-  <div class="modepick" role="group" aria-label="入力の細かさを選ぶ">
-   <p class="mp-q">入力のしかたを選べます</p>
+  <div class="thead"><h1>ライフプラン診断</h1><p>家族・収入・住まいを入れると、95歳までの毎年の収支と貯蓄の推移がわかります。わかる範囲の入力で大丈夫です。</p>
+   <p class="lpnote"><span>✓ 入力は端末の中だけに保存（送信なし）</span>${LP.example?`<span>いまは入力例が入っています <button class="btn small" data-act="clear">空にして始める</button></span>`:''}</p></div>
+  ${ks.length>1||U.plan!=='A'?planBox(ks):''}
+  <div class="modepick" role="group" aria-label="入力のしかた">
    <div class="mp-opts">
-    <button class="mp" data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}"><span class="mp-r"></span><span><b>かんたん入力</b><small>主な項目だけ・約3分。年金や利回りは標準の値で計算します</small></span></button>
-    <button class="mp" data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}"><span class="mp-r"></span><span><b>くわしく入力</b><small>年金・退職金・教育費・車・住まいの費用まで入れて、より正確に</small></span></button>
-   </div></div>
-  ${LP.mode!=='detail'?`<p class="unit defaults">かんたん入力では、次の値を自動で使います：${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p>`:''}
+    <button class="mp" data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}"><span class="mp-r"></span><span><b>かんたん入力</b><small>主な項目だけ・約3分</small></span></button>
+    <button class="mp" data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}"><span class="mp-r"></span><span><b>くわしく入力</b><small>年金・退職金・車なども</small></span></button>
+   </div>
+   ${LP.mode!=='detail'?`<details class="defaults"><summary>かんたん入力で自動で使う値を見る</summary><p class="unit">${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p></details>`:''}</div>
   <div class="prog" id="prog" aria-live="polite"></div>
   <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
+  ${ks.length>1||U.plan!=='A'?'':planBox(ks)}
   <section class="result" id="result"></section></div>`;
   syncVis(S); renderResult(); updateDock();
+}
+function planBox(ks){
+  return `<div class="pbar"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" role="group" aria-label="パターン">${ks.map(k=>`<button data-act="plan" data-p="${k}" aria-pressed="${U.plan===k}"><span class="dot ${k.toLowerCase()}"></span>${k}：${esc(LP.names[k]||'')}</button>`).join('')}</div>
+   ${ks.length<3?`<button class="btn small" data-act="addplan">＋ 比べるパターンを追加</button>`:''}</div>
+   ${ks.length>1||U.plan!=='A'?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label class="fld" style="flex:1;min-width:180px"><span class="lab">パターン${U.plan}の名前</span><input class="txt" id="pname" data-pname="1" value="${esc(LP.names[U.plan]||'')}"></label>${U.plan!=='A'?'<button class="btn small ghost danger" data-act="delplan">このパターンを削除</button>':''}</div><div class="unit" id="diffbox">${diffHTML()}</div>`:`<span class="unit">例：「家を買う」と「賃貸のまま」、「65歳で退職」と「70歳まで働く」などを並べて比べられます。</span>`}</div>`;
 }
 function advice(S,s,r){
   const out=[];
@@ -66,7 +68,7 @@ function renderResult(){
   if(tab==='overview') body=`<section class="chartcard"><div class="legend"><b style="color:var(--ink);font-size:14px">金融資産の推移</b>${ks.map(k=>`<span><span class="dot ${k.toLowerCase()}"></span>${k}：${esc(LP.names[k]||'')}</span>`).join('')}</div>
    <div class="readout" id="ro"></div>${chartSVG(series(),U.hi,'ch1')}<div class="unit">グラフをタップ・なぞると、その年の数字が出ます。</div></section>
   <section class="chartcard"><div class="legend" style="margin-bottom:4px"><b style="color:var(--ink);font-size:14px">資産の内訳の推移（パターン${key}）</b></div>${stackSVG(cur.r,'st1')}<div class="unit">手元のお金が足りない年は、課税口座 → NISA の順に取り崩す計算です。iDeCoと共済は、受け取る年齢まで取り崩しに使いません。</div></section>
-  <section class="advice"><h3>パターン${key}の見どころ</h3><ul>${advice(cur.S,cur.s,cur.r).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`;
+  <section class="advice"><h3>パターン${key}の見どころ</h3><ul>${advice(cur.S,cur.s,cur.r).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>${ctaHTML()}`;
   else if(tab==='bs') body=`<section class="chartcard" id="bsbox"></section>`;
   else if(tab==='goal') body=goalTab(cur);
   else if(tab==='scen') body=scenTab(cur);
@@ -102,6 +104,7 @@ function updateProgress(){
   const S=LP.plans[U.plan],box=document.getElementById('prog');if(!S||!box)return;
   const it=progItems(S),done=it.filter(x=>x.ok).length,left=it.length-done,nx=it.find(x=>!x.ok);
   box.className='prog'+(left?'':' done');
+  box.hidden=!left&&LP.example;
   box.innerHTML=left?`<div class="ph"><b>入力の進み具合 ${done}／${it.length}項目</b><span>あと<em>${left}</em>項目${nx?`（次は「${esc(nx.l)}」）`:''}</span><button class="btn small" data-act="nextempty">次の未入力へ</button></div><div class="pbar"><i style="width:${(done/Math.max(1,it.length)*100).toFixed(1)}%"></i></div>`
     :`<div class="ph"><b>✓ ${LP.mode==='detail'?'くわしく入力の':''}項目はすべて入力済みです</b><span>${LP.mode==='detail'?'下の結果を確認してみましょう。':'年金や利回りも自分の数字にすると、より正確になります。'}</span>${LP.mode==='detail'?'':'<button class="btn small primary" data-act="mode2" data-m="detail">くわしく入力に進む</button>'}</div>`;
   GROUPS.forEach((g,gi)=>{const el=document.getElementById('gl'+gi);if(!el)return;const m=it.filter(x=>x.gi===gi);const l=m.filter(x=>!x.ok).length;el.textContent=!m.length?'':(l?'あと'+l:'✓');el.className='gleft'+(m.length&&!l?' ok':'')});

@@ -176,7 +176,7 @@ function sRender(){
   ${TAXNOTE}${expNote('stampUntil','印紙税の軽減措置')}${t.mode==='kaikae'?expNote('kaikaeUntil','買い替え特例'):''}
   <section class="chartcard"><div class="legend"><b style="color:var(--ink);font-size:14px">売却価格ごとの手取り</b><span><span class="dot a"></span>手取り額</span><span><span class="dot" style="background:var(--coin)"></span>ローンを返し切れる価格</span></div>
    ${sChart(SV,s)}<div class="unit">○が今の入力（${fmt(s.p)}万円）です。値下げしたときに、手取りがどれだけ減るかの目安になります。</div></section>
-  <section class="advice"><h3>入力した条件で計算すると</h3><ul>${sAdvice(s,mv,be).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
+  <section class="advice"><h3>入力した条件で計算すると</h3><ul>${sAdvice(s,mv,be).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>${ctaHTML()}
   <div class="cfhead"><h3>計算の内訳</h3></div>
   <div class="cfwrap"><table class="cf"><tbody>
    ${row('売却価格',s.p,'tot')}

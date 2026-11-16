@@ -108,6 +108,13 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('相続税の申告は10か月後',tl.some(x=>x.startsWith('相続税の申告')&&x.includes('2027年8月1日まで')));
    w.close();}
 
+  console.log('\n■ ツールの説明');
+  for(const f of ['lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei']){
+    const h=fs.readFileSync(path.join(DIST,f+'.html'),'utf8');
+    check(f+'.html に計算の考え方とよくある質問',/計算の考え方/.test(h)&&/よくある質問/.test(h));
+  }
+  {const h=fs.readFileSync(path.join(DIST,'sell.html'),'utf8');check('広告コードが空のあいだは、結果の下の案内も出ない',!/cta-aff/.test(h));}
+
   console.log('\n■ 広告');
   {const bad=pages.filter(f=>/広告枠（/.test(fs.readFileSync(path.join(DIST,f),'utf8')));
    check('「広告枠」の目印が残っていない',!bad.length,bad[0]);

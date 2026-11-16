@@ -9,7 +9,7 @@ function adUnit(name){
 }
 function affBox(key){
   const a=AFF_ADS[key]; if(!a) return '';
-  return `<aside class="pr-box"><span class="pr-label">PR</span><b>${esc(a.h)}</b>${a.d?`<p>${esc(a.d)}</p>`:''}<div class="pr-code">${a.code}</div></aside>`;
+  return `<aside class="pr-box" data-aff="${esc(key)}"><span class="pr-label">PR</span><b>${esc(a.h)}</b>${a.d?`<p>${esc(a.d)}</p>`:''}<div class="pr-code">${a.code}</div></aside>`;
 }
 /* ツールごとに出すアフィリエイト（affiliates.yml の名前） */
 const TOOL_AFF={

@@ -37,7 +37,7 @@ function go(){
   document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
-  legalTail(r);adTail(r);setTimeout(fillAds,0);
+  toolInfoTail(r);legalTail(r);adTail(r);setTimeout(fillAds,0);
   if(r!=='article')document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
 }
 if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
