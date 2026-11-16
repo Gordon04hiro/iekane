@@ -10,7 +10,7 @@ document.addEventListener('click',e=>{
   else if(a==='acat'){U.acat=b.dataset.c;vArticles(document.getElementById('view'))}
   else if(a==='pdf'){printReport()}
   else if(a==='xlsx'){exportExcel()}
-  else if(a==='mode2'){LP.mode=b.dataset.m;saveLP();vLife(document.getElementById('view'))}
+  else if(a==='mode2'){if(b.dataset.m==='guide'&&LP.example){const nx=blankLP();nx.mode='guide';nx.wz=0;lpReplace(nx,'入力例を消して、質問をはじめます');return}LP.mode=b.dataset.m;saveLP();vLife(document.getElementById('view'));if(b.dataset.m==='guide'){const w=document.getElementById('wz');if(w)w.scrollIntoView({block:'start'})}}
   else if(a==='rtab'){U.rtab=b.dataset.t;renderResult()}
   else if(a==='lever'){const L=LEVERS[b.dataset.k];const k=PK.find(x=>!LP.plans[x]);if(!k)return;const T=clone(LP.plans[U.plan]);L.apply(T,+b.dataset.x);LP.plans[k]=T;LP.names[k]=L.t;U.plan=k;U.cf=k;U.rtab='overview';changed();vLife(document.getElementById('view'));toast('パターン'+k+'「'+L.t+'」を作りました')}
   else if(a==='reflect'){const key=U.plan in LP.plans?U.plan:'A';reflect(key,U.yjy);vLife(document.getElementById('view'));const r=document.getElementById('result');if(r)r.scrollIntoView()}
