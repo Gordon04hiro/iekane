@@ -29,7 +29,7 @@ const RENT2BUYDEF={id:'rent2buy',title:'家賃と同じ返済で買える家',ex
      <li>家賃${man1(n(V.rent))}万円のうち、${man1(n(V.upkeep))}万円は家を持ったあとの管理費・修繕費・税金にあてる前提です。ローンに回せるのは毎月${man1(R.m)}万円です。</li>
      <li>頭金${fmt(n(V.down))}万円と諸費用${n(V.costRate)}%を考えると、物件価格の目安は約${fmt(R.price)}万円です。</li>
      ${R.term<n(V.term)?`<li>完済時80歳までとすると、返済期間は${R.term}年になります。</li>`:''}
-     <li>変動金利なら、金利が上がると同じ返済額で買える価格は下がります。下の表で確かめておきましょう。</li></ul></section>
+     <li>変動金利なら、金利が上がると同じ返済額で買える価格は下がります。下の表で確かめておきましょう。</li></ul></section>${ctaHTML()}
     <div class="cfhead"><h3>家賃と金利を変えたときの物件価格の目安</h3></div>
     <div class="cfwrap"><table class="cf"><tbody><tr class="hd"><th>家賃</th>${[0,0.5,1].map(di=>`<td>金利${(n(V.rate)+di).toFixed(2)}%</td>`).join('')}</tr>
      ${R.grid.map(g=>`<tr${g.rent===n(V.rent)?' class="tot"':''}><th>${man1(g.rent)}万円/月</th>${g.vals.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
@@ -64,7 +64,7 @@ const PREPAYDEF={id:'prepay',title:'繰上げ返済シミュレーター',exampl
      <li>${fmt(R.A)}万円を繰上げ返済すると、期間短縮型では利息が約${fmt(R.short.saved)}万円、返済額軽減型では約${fmt(R.light.saved)}万円減る計算です。</li>
      <li>期間短縮型のほうが利息は減りますが、毎月の返済は変わりません。教育費がかかる時期など、毎月の余裕を増やしたいときは返済額軽減型も選択肢です。</li>
      <li>手元のお金を減らしすぎると、急な出費に困ることがあります。生活費の半年〜1年分は残しておくのが安心です。</li>
-     <li>住宅ローン控除を受けている間は、年末のローン残高が減ると控除額も減ることがあります。控除の扱いは税務署や税理士にご確認ください。</li></ul></section>
+     <li>住宅ローン控除を受けている間は、年末のローン残高が減ると控除額も減ることがあります。控除の扱いは税務署や税理士にご確認ください。</li></ul></section>${ctaHTML()}
     <p class="unit">元利均等返済、ボーナス返済なし、金利は残りの期間ずっと同じとして計算しています。繰上げ返済の手数料は含めていません。</p>`;
   },
   dock:(V,R)=>['期間短縮で減る利息',fmt(R.short.saved)+' 万円'],

@@ -37,7 +37,7 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
   let pr=false;
   body=body.replace(/\{\{広告:([^}]+)\}\}/g,(_,k)=>{k=k.trim();const ad=AFF[k];if(!ad)fail(`記事 ${f} の {{広告:${k}}} が affiliates.yml にありません`);
     const code=String(ad['コード']||'').trim();if(!code)return '';pr=true;
-    return `\n\n<aside class="pr-box"><span class="pr-label">PR</span><b>${ad['見出し']||''}</b>${ad['説明']?`<p>${ad['説明']}</p>`:''}<div class="pr-code">${code}</div></aside>\n\n`});
+    return `\n\n<aside class="pr-box" data-aff="${k}"><span class="pr-label">PR</span><b>${ad['見出し']||''}</b>${ad['説明']?`<p>${ad['説明']}</p>`:''}<div class="pr-code">${code}</div></aside>\n\n`});
   // 囲み（:::ポイント 〜 :::）と数字のカード（:::数字）
   const BOX={'ポイント':'point','注意':'warn','まとめ':'sum','例':'ex','数字':'num'};
   body=body.replace(/^:::(\S+)[ \t]*(.*)\n([\s\S]*?)\n:::[ \t]*$/gm,(_,t,ttl,inner)=>{
