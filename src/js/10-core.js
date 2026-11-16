@@ -27,18 +27,18 @@ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.
 
 /* ---------- routing ---------- */
 const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','articles','news','data','about','privacy'];
-function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':'home')}
+function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':h.startsWith('g-')?'hub':'home')}
 const TITLES={rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
 function go(){
   const r=route();
   document.querySelectorAll('.gnav a').forEach(a=>{if(a.dataset.r===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   const v=document.getElementById('view');
-  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
+  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
   document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
   toolInfoTail(r);legalTail(r);adTail(r);setTimeout(fillAds,0);
-  if(r!=='article')document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
+  if(!['article','hub','notfound'].includes(r))document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
 }
 if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
 
@@ -104,6 +104,8 @@ function vHome(v){
    <div class="why"><div><b>家だけでなく、家計全体で見る</b>ローンが払えるかだけでなく、教育費や老後まで続けて見ないと、本当に大丈夫かはわかりません。</div>
    <div><b>個人情報を預からない</b>計算はブラウザの中だけ。名前やメールアドレスの登録もありません。</div>
    <div><b>不動産の実務家が作成</b>住まいの売買や相続の相談を受けている宅地建物取引士が、現場の目線で作っています。</div></div></section>
+  <section class="wrap sect"><h2>テーマから探す</h2><p class="lead">やることを順番に、ツールと記事でたどれます。</p>
+   <div class="tools hubs">${HUBS.map(hubCard).join('')}</div></section>
   <section class="wrap sect"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>新着記事</h2><a href="#articles" class="unit">記事の一覧へ →</a></div><p class="lead">家を買う・売る・相続する前に知っておきたい基本をまとめています。</p>
    <div class="tools">${pubArticles().slice(0,3).map(artCard).join('')}</div></section>
   <section class="wrap sect"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>お知らせ</h2><a href="#news" class="unit">すべて見る →</a></div>

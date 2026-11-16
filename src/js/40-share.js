@@ -1,6 +1,6 @@
 /* ---------- 複数ページ対応のリンク ---------- */
 const FILES={rent2buy:'rent2buy.html',prepay:'prepay.html',souzokuzei:'souzokuzei.html',home:'index.html',lifeplan:'lifeplan.html',sell:'sell.html',loan:'loan.html',souzoku:'souzoku.html',souzoku2:'souzoku2.html',akiya:'akiya.html',vs:'vs.html',articles:'articles/index.html',news:'news.html',data:'data.html',about:'about.html',privacy:'privacy.html',tools:'index.html#tools',contact:'about.html#contact'};
-function pageURL(h){const B=window.BASE||'';if(h.startsWith('a-'))return B+'articles/'+h.slice(2)+'.html';return FILES[h]?B+FILES[h]:null}
+function pageURL(h){const B=window.BASE||'';if(h.startsWith('a-'))return B+'articles/'+h.slice(2)+'.html';if(h.startsWith('g-'))return B+'guide/'+h.slice(2)+'.html';return FILES[h]?B+FILES[h]:null}
 function linkFix(root){if(!window.PAGE)return;const D=root||(typeof document!=='undefined'?document:null);if(!D||!D.querySelectorAll)return;D.querySelectorAll('a[href^="#"]').forEach(a=>{const u=pageURL(a.getAttribute('href').slice(1));if(u)a.setAttribute('href',u)})}
 if(window.PAGE&&window.MutationObserver){new MutationObserver(()=>linkFix(document)).observe(document.body,{childList:true,subtree:true})}
 

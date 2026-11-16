@@ -6,6 +6,10 @@
 下書き: false
 関連ツール: lifeplan
 イラスト: nisa
+検索タイトル: NISAとiDeCoの違い｜どちらから始める？
+参考:
+  - ["金融庁 NISA特設ウェブサイト", "https://www.fsa.go.jp/policy/nisa2/"]
+  - ["厚生労働省 iDeCo（個人型確定拠出年金）", "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/nenkin/kyoshutsu/ideco.html"]
 リード: どちらも税金のメリットがある国の制度ですが、「いつ引き出せるか」と「どんな税金が軽くなるか」が大きく違います。それぞれの特徴と、家計に合わせた使い分けの考え方をまとめました。
 ---
 

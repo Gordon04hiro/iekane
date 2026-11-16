@@ -2,6 +2,26 @@
 const pubArticles=()=>ARTICLES.slice().sort((a,b)=>b.date.localeCompare(a.date));
 const toolName=h=>{const t=TOOLS.find(x=>x.href===h);return t?t.t:''};
 function artCard(a){return `<a class="tool art" href="#a-${a.slug}">${illust(a,true)}<span class="chip muted" style="justify-self:start">${esc(a.cat)}</span><h3>${esc(a.title)}${a.draft?' <span class="chip warn">下書き</span>':''}</h3><p>${esc(a.lead)}</p><span class="unit">${jd(a.date)}</span></a>`}
+/* ---------- テーマごとのまとめページ（ガイド） ---------- */
+const hubOf=cat=>HUBS.find(h=>h.cat===cat);
+function hubCard(h){return `<a class="tool art hubcard" href="#g-${h.slug}">${illust({title:h.title,cat:h.cat,il:h.il},true)}<h3>${esc(h.title)}</h3><p>${esc(h.lead)}</p><span class="unit">${h.steps.length}つのステップ →</span></a>`}
+function vHub(v,slug){
+  const h=HUBS.find(x=>x.slug===slug);if(!h){v404(v);return}
+  document.title=h.stitle+'｜イエカネ';
+  const art=s=>ARTICLES.find(a=>a.slug===s&&!a.draft);
+  v.innerHTML=`<div class="wrap doc art-doc hub"><div class="crumb"><a href="#home">イエカネ</a> › ${esc(h.title)}</div>
+   ${illust({title:h.title,cat:h.cat,il:h.il})}<h1>${esc(h.title)}</h1><p class="lead">${esc(h.lead)}</p>
+   <ol class="hsteps">${h.steps.map((st,i)=>`<li><div class="hs-h"><span class="hn">${i+1}</span><h2>${esc(st.h)}</h2></div><p>${esc(st.d)}</p>
+    ${st.tools.length?`<div class="hs-tools">${st.tools.map(t=>`<a class="btn small primary" href="#${t}">${esc(TITLES[t]||t)}で計算する</a>`).join('')}</div>`:''}
+    ${st.arts.map(art).filter(Boolean).length?`<ul class="hs-arts">${st.arts.map(art).filter(Boolean).map(a=>`<li><a href="#a-${a.slug}">${esc(a.title)}</a></li>`).join('')}</ul>`:''}</li>`).join('')}</ol>
+   ${legalHTML(LEGAL_MAP[h.cat]||['fin'])}</div>`;
+}
+function v404(v){
+  document.title='ページが見つかりません｜イエカネ';
+  v.innerHTML=`<div class="wrap doc"><h1>ページが見つかりません</h1><p>お探しのページは、移動したか削除された可能性があります。下のテーマやツールからお探しください。</p>
+   <div class="tools hubs">${HUBS.map(hubCard).join('')}</div>
+   <p style="margin-top:18px"><a class="btn primary" href="#home">トップページへ</a>　<a class="btn" href="#articles">記事の一覧</a></p></div>`;
+}
 function vArticles(v){
   const cats=[...new Set(ARTICLES.map(a=>a.cat))];const c=U.acat&&cats.includes(U.acat)?U.acat:'';
   const list=pubArticles().filter(a=>!c||a.cat===c);
@@ -19,13 +39,14 @@ function vArticle(v,slug){
   ${a.draft?'<div class="draft">下書きです。内容を確認してから公開してください（articles の draft を false にすると、この表示は消えます）。</div>':''}
   ${illust(a)}
   <span class="chip muted">${esc(a.cat)}</span><h1 style="margin-top:8px">${esc(a.title)}</h1>
-  ${bylineHTML()}<p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}${a.mins?'　・　約'+a.mins+'分で読めます':''}</p>
+  ${bylineHTML()}${hubOf(a.cat)?`<p class="hublink">このテーマのまとめ：<a href="#g-${hubOf(a.cat).slug}">${esc(hubOf(a.cat).title)} →</a></p>`:''}<p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}${a.mins?'　・　約'+a.mins+'分で読めます':''}</p>
   ${a.pr?'<p class="pr-note">当サイトはアフィリエイト広告を利用しています。記事内の「PR」と表示したリンクから申し込みがあると、当サイトが報酬を受け取ることがあります。</p>':''}
   <p class="lead">${esc(a.lead)}</p>
   ${adUnit('記事の上')}
   ${(a.toc||[]).length>2?`<nav class="toc" aria-label="この記事の内容"><p class="toc-t">この記事の内容</p><ol>${a.toc.map((t,i)=>`<li><button type="button" data-act="toc" data-to="s${i+1}">${esc(t)}</button></li>`).join('')}</ol></nav>`:''}
   <div class="art-body">${withMidAds(a.body||(window.ARTB&&window.ARTB[a.slug])||'')}</div>
   ${a.tool?`<div class="consult" style="margin-top:22px"><div><h2>数字で確かめてみる</h2><p>${esc(toolName(a.tool))}で、ご自分の場合を計算できます。登録不要・入力内容は送信されません。</p></div><div class="ways"><a class="btn primary" href="${a.tool}">${esc(toolName(a.tool))}を使う</a></div></div>`:''}
+  ${(a.refs||[]).length?`<section class="refs"><h2>参考にした資料</h2><ul>${a.refs.map(r=>`<li><a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.t)}</a></li>`).join('')}</ul></section>`:''}
   ${legalHTML(LEGAL_MAP[a.cat]||['fin'])}
   ${adUnit('記事の下')}
   ${rel.length?`<h2>ほかの記事</h2><div class="tools">${rel.map(artCard).join('')}</div>`:''}</div>`;

@@ -6,6 +6,9 @@
 下書き: false
 関連ツール: souzokuzei
 イラスト: souzoku
+検索タイトル: 相続税がかかる人は？基礎控除の計算方法
+参考:
+  - ["国税庁 タックスアンサー（相続税・贈与税）", "https://www.nta.go.jp/taxes/shiraberu/taxanswer/code/bunya-souzoku-zoyo.htm"]
 リード: 相続税は、亡くなった方の財産の合計が「基礎控除」を超える場合にかかります。基礎控除の計算方法と、財産の合計を考えるときのポイントをまとめました。
 ---
 

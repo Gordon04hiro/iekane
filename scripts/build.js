@@ -17,6 +17,7 @@ const RULES=Y('content/rules.yml');
 const SOURCES=Y('content/sources.yml');
 const NEWS=Y('content/news.yml');
 const PAGES=Y('content/pages.yml');
+const HUBS_RAW=fs.existsSync(R('content/hubs.yml'))?(Y('content/hubs.yml')||{}):{};
 const AFF=fs.existsSync(R('content/affiliates.yml'))?(Y('content/affiliates.yml')||{}):{};
 const SITE_URL=String(SITE.url||'').replace(/\/+$/,'');
 if(!/^https?:\/\//.test(SITE_URL)) fail('site.yml の url が正しくありません');
@@ -26,6 +27,7 @@ RULES.stamp=(RULES.stamp||[]).map(([a,b])=>[a==null?'Infinity':a,b]);
 for(const k of ['checked','next','stampUntil','kaikaeUntil','akiyaUntil','toukiTransition']) if(!/^\d{4}-\d\d-\d\d$/.test(RULES[k]||'')) fail(`rules.yml の ${k} の日付が正しくありません（例：2027-03-31）`);
 
 // ---- 記事（content/articles/*.md）
+const TOOLNAME={rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート',souzoku2:'相続の手続きチェックシート',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断'};
 const TOOLMAP={rent2buy:'#rent2buy',prepay:'#prepay',souzokuzei:'#souzokuzei',lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
 const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f.startsWith('_')).map(f=>{
   const src=read('content/articles/'+f);const m=src.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -48,8 +50,26 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
     return '\n\n'+html.replace(/\n+/g,' ')+'\n\n'});
   const tool=fm['関連ツール']?TOOLMAP[fm['関連ツール']]:'';
   if(fm['関連ツール']&&!tool) fail(`記事 ${f} の関連ツール「${fm['関連ツール']}」が見つかりません`);
-  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,pr,tool,lead:fm['リード'],il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
+  // 本文の途中にツールへの案内（{{ツール}} と書いた場所。なければ3つ目の見出しの前に自動で入れる）
+  if(tool){const tn=TOOLNAME[fm['関連ツール']];
+    const cta=`\n\n<aside class="toolcta"><b>ご自分の場合は？</b><span>${tn}で計算できます（無料・登録不要・入力は送信されません）</span><a class="btn small primary" href="${tool}">計算してみる</a></aside>\n\n`;
+    if(/\{\{ツール\}\}/.test(body)) body=body.replace(/\{\{ツール\}\}/g,cta);
+    else{let k=0;body=body.replace(/^## /gm,m=>{k++;return k===3?cta+m:m})}}
+  // 参考にした資料
+  const refs=(fm['参考']||[]).map(x=>Array.isArray(x)?{t:x[0],u:x[1]}:{t:x['名前'],u:x['URL']}).filter(x=>x.t&&/^https:\/\//.test(x.u||''));
+  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,pr,tool,lead:fm['リード'],stitle:fm['検索タイトル']||'',refs,il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
 }).sort((a,b)=>b.date.localeCompare(a.date));
+// ---- テーマごとのまとめページ（content/hubs.yml）
+const TOOLKEYS=Object.keys(TOOLMAP);
+const HUBS=Object.entries(HUBS_RAW).map(([slug,h])=>{
+  if(!/^[a-z0-9-]+$/.test(slug)) fail(`hubs.yml の ${slug} は半角の英小文字・数字・ハイフンだけにしてください`);
+  const steps=(h['手順']||[]).map(st=>{
+    const tools=[].concat(st['ツール']||[]);tools.forEach(t=>{if(!TOOLKEYS.includes(t))fail(`hubs.yml の ${slug} のツール「${t}」が見つかりません`)});
+    const arts=[].concat(st['記事']||[]);arts.forEach(a=>{if(!ARTS.find(x=>x.slug===a))fail(`hubs.yml の ${slug} の記事「${a}」が見つかりません`)});
+    return{h:st['見出し'],d:st['説明']||'',tools,arts}});
+  const upd=steps.flatMap(s=>s.arts).map(a=>ARTS.find(x=>x.slug===a)).filter(a=>!a.draft).map(a=>a.updated).sort().pop()||RULES.checked;
+  return{slug,title:h['タイトル'],stitle:h['検索タイトル']||h['タイトル'],cat:h['カテゴリ']||'',il:h['イラスト']||'',lead:h['リード']||'',steps,updated:upd}});
+
 
 // ---- ブラウザで動くプログラムをまとめる
 const content=`/* このファイルは自動で作られます。直接書き換えないでください */
@@ -58,7 +78,8 @@ const AFF_ADS=${JSON.stringify(Object.fromEntries(Object.entries(AFF).filter(([k
 const CFG=${JSON.stringify(RULES).replace(/"Infinity"/g,'Infinity')};
 const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x['項目'],val:x['値'],src:x['出典'],url:x['リンク']||'',until:x['期限']||'',tool:x['使うツール']||''})))};
 const NEWS=${JSON.stringify(NEWS.map(x=>({d:x['日付'],t:x['内容']})))};
-const ARTICLES=${JSON.stringify(ARTS.map(({body,...a})=>a))}; // 本文は各記事のページにだけ入れる（全ページのプログラムを軽くするため）
+const ARTICLES=${JSON.stringify(ARTS.map(({body,...a})=>a))};
+const HUBS=${JSON.stringify(HUBS)}; // 本文は各記事のページにだけ入れる（全ページのプログラムを軽くするため）
 `;
 const files=fs.readdirSync(R('src/js')).filter(f=>f.endsWith('.js')).sort();
 const pre=files.filter(f=>f<'10'), main=files.filter(f=>f>='10');
@@ -67,7 +88,7 @@ try{new Function(bundle)}catch(e){fail('プログラムに書き間違いがあ�
 
 // ---- 書き出し
 const out=R('dist');
-fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});fs.mkdirSync(path.join(out,'articles'),{recursive:true});
+fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});fs.mkdirSync(path.join(out,'articles'),{recursive:true});fs.mkdirSync(path.join(out,'guide'),{recursive:true});
 // 公開用は圧縮して軽くする（中身は同じ）
 const esb=require('esbuild');
 fs.writeFileSync(path.join(out,'assets','app.js'),esb.transformSync(bundle,{minify:true,target:'es2019',charset:'utf8',legalComments:'none'}).code);
@@ -78,11 +99,11 @@ fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico')); // Google
 const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
-const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:a.title+'｜イエカネ',d:a.lead,art:a}))];
+const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...HUBS.map(h=>({p:'hub',slug:h.slug,f:'guide/'+h.slug+'.html',t:h.stitle+'｜イエカネ',d:h.lead,hub:h})),{p:'notfound',f:'404.html',t:'ページが見つかりません｜イエカネ',d:'お探しのページは見つかりませんでした。',nf:true},...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:(a.stitle||a.title)+'｜イエカネ',d:a.lead,art:a}))];
 const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}',{page_location:location.origin+location.pathname});</script>`:'';
 const ads=SITE.adsense?`<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
 async function prerender(pg,base){
-  const boot=`<script>window.PAGE=${JSON.stringify(pg.p)};window.BASE=${JSON.stringify(base)};${pg.slug?'window.SLUG='+JSON.stringify(pg.slug)+';window.ARTB={'+JSON.stringify(pg.slug)+':'+JSON.stringify(pg.art.body).replace(/<\//g,'<\\/')+'};':''}</script>`;
+  const boot=`<script>window.PAGE=${JSON.stringify(pg.p)};window.BASE=${JSON.stringify(base)};${pg.slug?'window.SLUG='+JSON.stringify(pg.slug)+';':''}${pg.art?'window.ARTB={'+JSON.stringify(pg.slug)+':'+JSON.stringify(pg.art.body).replace(/<\//g,'<\\/')+'};':''}</script>`;
   const errs=[];
   const vc=new (require('jsdom').VirtualConsole)();vc.on('jsdomError',e=>errs.push(e.message));
   const dom=new JSDOM(`<!doctype html><html lang="ja"><head></head><body>${shell}${boot}<script>${bundle}</script></body></html>`,{runScripts:'dangerously',url:SITE_URL+'/'+pg.f,pretendToBeVisual:true,virtualConsole:vc,
@@ -96,7 +117,7 @@ async function prerender(pg,base){
 (async()=>{
   const urls=[];
   for(const pg of list){
-    const depth=pg.f.split('/').length-1, base=depth?'../'.repeat(depth):'';
+    const depth=pg.f.split('/').length-1, base=pg.nf?'/':(depth?'../'.repeat(depth):''); // 404ページはどの場所でも出るので、絶対パス
     const {body,boot}=await prerender(pg,base);
     // 検索エンジン向けの情報（記事・ツール・パンくず）
     const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'イエカネ運営者',jobTitle:[].concat(P['資格']||[])[0]||undefined,hasCredential:[].concat(P['資格']||[]).map(q=>({'@type':'EducationalOccupationalCredential',name:q})),url:SITE_URL+'/about.html#profile'};
@@ -104,6 +125,7 @@ async function prerender(pg,base){
     const TOOLR=['lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
     const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'イエカネ',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},
         {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
+      :pg.hub?[{'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],[pg.hub.title,canon(pg.f)]])}]
       :pg.p==='home'?[{'@context':'https://schema.org','@type':'WebSite',name:SITE.name,url:SITE_URL+'/'}]
       :TOOLR.includes(pg.p)?[{'@context':'https://schema.org','@type':'WebApplication',name:pg.t.split('｜')[0],description:pg.d,url:canon(pg.f),applicationCategory:'FinanceApplication',operatingSystem:'Any',inLanguage:'ja',isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'JPY'},author},
         {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],[pg.t.split('｜')[0],canon(pg.f)]])}]:[];
@@ -115,7 +137,7 @@ async function prerender(pg,base){
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(pg.t)}</title>
 <meta name="description" content="${esc(pg.d)}">
-<link rel="canonical" href="${canon(pg.f)}">${pg.art&&pg.art.draft?'\n<meta name="robots" content="noindex">':''}
+${pg.nf?'':`<link rel="canonical" href="${canon(pg.f)}">`}${(pg.art&&pg.art.draft)||pg.nf?'\n<meta name="robots" content="noindex">':''}
 <meta property="og:type" content="${pg.art?'article':'website'}">
 <meta property="og:site_name" content="${esc(SITE.name)}">
 <meta property="og:title" content="${esc(pg.t)}">
@@ -141,7 +163,8 @@ ${boot}
 </html>
 `;
     fs.writeFileSync(path.join(out,pg.f),html);
-    if(!(pg.art&&pg.art.draft)) urls.push({loc:canon(pg.f),lastmod:pg.art?pg.art.updated:RULES.checked});
+    const latest=ARTS.filter(x=>!x.draft).map(x=>x.updated).sort().pop()||RULES.checked;
+    if(!(pg.art&&pg.art.draft)&&!pg.nf) urls.push({loc:canon(pg.f),lastmod:pg.art?pg.art.updated:pg.hub?pg.hub.updated:['home','articles','news'].includes(pg.p)?[latest,RULES.checked].sort().pop():RULES.checked});
   }
   fs.writeFileSync(path.join(out,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u=>`  <url><loc>${u.loc}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
   fs.writeFileSync(path.join(out,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
