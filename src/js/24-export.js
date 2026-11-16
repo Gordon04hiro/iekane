@@ -58,7 +58,7 @@ async function exportExcel(){
   keys().forEach(k=>{const r=sim(clone(LP.plans[k]));add('CF表_'+k,cfSheet(r,LP.plans[k]))});
   const r=sim(clone(LP.plans[key]));add('BS_'+key,bsSheet(r));add('PL_'+key,plSheet(r));
   const yj=yjSheet();if(yj)add('予算と実績',yj,14);
-  try{X.writeFile(wb,'サイかね_ライフプラン_'+ymd8()+'.xlsx');toast(PREVIEW?'プレビュー画面ではファイルを保存できません。公開したサイトでは保存されます':'Excelファイルを保存しました')}
+  try{X.writeFile(wb,'サイのまど_ライフプラン_'+ymd8()+'.xlsx');toast(PREVIEW?'プレビュー画面ではファイルを保存できません。公開したサイトでは保存されます':'Excelファイルを保存しました')}
   catch(e){toast('この画面ではファイルを保存できません')}
 }
 function printReport(){
@@ -67,7 +67,7 @@ function printReport(){
   const cur=R[key], d=new Date();
   const ret=cur.r.find(x=>x.a===Math.round(n(cur.S.workEnd)))||cur.r[cur.r.length-1];
   const el=document.getElementById('printArea');
-  el.innerHTML=`<header class="pr-h"><div><b>サイかね</b> 家とお金の相談室</div><div>${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 作成</div></header>
+  el.innerHTML=`<header class="pr-h"><div><b>サイのまど</b> 家とお金の相談室</div><div>${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 作成</div></header>
    <h1>ライフプラン診断レポート</h1>
    <h2>結果のまとめ</h2><table class="cf"><tbody><tr class="hd"><th>パターン</th><td>判定</td><td>95歳時点の金融資産</td><td>仕事を辞める時</td><td>いちばん少ない時</td><td>95歳時点の純資産</td></tr>
     ${ks.map(k=>{const s=R[k].s;return `<tr><th>${k}：${esc(LP.names[k]||'')}</th><td>${s.st.t}</td><td>${fmt(s.last.bal)}万円</td><td>${fmt(s.retire.bal)}万円</td><td>${s.min.a}歳 ${fmt(s.min.bal)}万円</td><td>${fmt(s.last.bs.nw)}万円</td></tr>`}).join('')}</tbody></table>

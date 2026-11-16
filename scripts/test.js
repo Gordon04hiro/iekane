@@ -1,4 +1,4 @@
-// サイかね 自動チェック（npm test）
+// サイのまど 自動チェック（npm test）
 // 公開前に、計算・表示・リンク・共有が壊れていないかを確かめます。1つでも失敗したら公開しません。
 const fs=require('fs'),path=require('path');
 const {JSDOM,VirtualConsole}=require('jsdom');

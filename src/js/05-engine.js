@@ -1,4 +1,4 @@
-/* サイかね ライフプラン計算エンジン（ブラウザ内で計算・送信なし） */
+/* サイのまど ライフプラン計算エンジン（ブラウザ内で計算・送信なし） */
 const Y0=new Date().getFullYear();
 function basePlan(){return{
   age:35,spouse:'yes',sage:33,

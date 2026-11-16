@@ -1,13 +1,13 @@
 # サイト全体の設定
 url: https://iekane.jp        # ← 取得したドメインに書き換える（最後に / は付けない）
-name: サイかね 家とお金の相談室
+name: サイのまど 家とお金の相談室
 contactForm: "https://docs.google.com/forms/d/e/1FAIpQLSfJuvud4JCL3M9MJ5PTbYuTm9Rg05zVdsF_b8DD7D5koEXONQ/viewform"               # GoogleフォームのURLを入れると、お問い合わせボタンが有効になります
 analytics: "G-78NZTT9650"                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
 adsense: ""                   # AdSenseの審査が通ったら、パブリッシャーID（ca-pub-XXXX）を入れます
 
 # 運営者のプロフィール（「サイトについて」と各記事の執筆者欄に出ます。本名・会社名は出しません）
 運営者:
-  名前: サイかね運営者
+  名前: サイのまど運営者
   資格:               # 1つ目が記事の「執筆・監修」欄に出ます
     - 宅地建物取引士
     - 管理業務主任者
