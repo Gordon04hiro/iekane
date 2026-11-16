@@ -559,3 +559,13 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .byline{margin:6px 0 0;font-size:13px;color:var(--muted)}
 .byline a{color:var(--brand)}
 .sublist>.fields+.fields{border-top:1px dashed var(--line);padding-top:12px;margin-top:12px}
+
+/* 夫婦で対になる項目：「ご本人｜配偶者」の2列 */
+.pairrow{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--sunk)}
+.pairrow .plab{font-size:13.5px;font-weight:700}
+.pairrow .pcols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pairrow .pcols:has(> [hidden]){grid-template-columns:1fr}
+.pairrow .pcols:has(> [hidden]) .lab.who{display:none}
+.pairrow .lab.who{font-size:12px;color:var(--muted);font-weight:700}
+.pairrow .pre button{padding:3px 7px;font-size:11.5px}
+.pairrow>.hint{font-size:11.5px;color:var(--muted);line-height:1.5}

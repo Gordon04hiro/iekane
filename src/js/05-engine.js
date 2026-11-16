@@ -196,26 +196,26 @@ const fmt=v=>{const r=Math.round(v);return(r<0?'▲':'')+Math.abs(r).toLocaleStr
 const spOn=S=>S.spouse==='yes';
 const GROUPS=[
  {t:'ご家族',s:'年齢は今年の誕生日を迎えた時点',f:[
-  {id:'age',easy:1,l:'ご本人の年齢',u:'歳'},
   {id:'spouse',easy:1,l:'配偶者',type:'sel',o:[['yes','いる'],['no','いない']]},
+  {id:'age',easy:1,l:'ご本人の年齢',u:'歳',pr:'sage',pl:'年齢'},
   {id:'sage',easy:1,l:'配偶者の年齢',u:'歳',show:spOn}],kids:true},
- {t:'お仕事の収入',s:'手取り額（額面のおよそ75〜85%）',f:[
-  {id:'inc',easy:1,l:'ご本人の手取り年収',u:'万円/年'},
-  {id:'raise',l:'昇給率',u:'%/年',st:.1,pre:'raise',rec:1},
-  {id:'ret',l:'定年の年齢',u:'歳'},
-  {id:'sev',l:'退職金（手取り）',u:'万円',h:'額面しかわからないときは、下の「退職金の手取りを計算」で'},
-  {id:'reinc',l:'定年後の手取り年収',u:'万円/年',h:'再雇用・パートなど'},
-  {id:'workEnd',l:'完全に仕事を辞める年齢',u:'歳'},
+ {t:'お仕事の収入',s:'手取り額（額面のおよそ75〜85%）。配偶者の分も忘れずに',f:[
+  {id:'inc',easy:1,l:'ご本人の手取り年収',u:'万円/年',pr:'sinc',pl:'手取り年収',ph:'源泉徴収票の「支払金額」から、税金・社会保険料を引いた額。わからなければ額面の約8割'},
   {id:'sinc',easy:1,l:'配偶者の手取り年収',u:'万円/年',show:spOn},
+  {id:'raise',l:'昇給率',u:'%/年',st:.1,pre:'raise',rec:1,pr:'sraise',pl:'昇給率'},
   {id:'sraise',l:'配偶者の昇給率',u:'%/年',st:.1,show:spOn,pre:'raise',rec:0.5},
-  {id:'sret',l:'配偶者の定年の年齢',u:'歳',show:spOn,h:'パート・自営などで定年がなければ、辞める年齢と同じに'},
+  {id:'ret',l:'定年の年齢',u:'歳',pr:'sret',pl:'定年の年齢',ph:'パート・自営などで定年がなければ、完全に辞める年齢と同じに'},
+  {id:'sret',l:'配偶者の定年の年齢',u:'歳',show:spOn},
+  {id:'sev',l:'退職金（手取り）',u:'万円',pr:'ssev',pl:'退職金（手取り）',ph:'額面しかわからないときは、下の「退職金の手取りを計算する」で。なければ0'},
   {id:'ssev',l:'配偶者の退職金（手取り）',u:'万円',show:spOn},
-  {id:'sreinc',l:'配偶者の定年後の手取り年収',u:'万円/年',show:spOn,h:'再雇用・パートなど。働かないなら0'},
+  {id:'reinc',l:'定年後の手取り年収',u:'万円/年',pr:'sreinc',pl:'定年後の手取り年収',ph:'再雇用・パートなど。働かないなら0'},
+  {id:'sreinc',l:'配偶者の定年後の手取り年収',u:'万円/年',show:spOn},
+  {id:'workEnd',l:'完全に仕事を辞める年齢',u:'歳',pr:'sworkEnd',pl:'完全に仕事を辞める年齢'},
   {id:'sworkEnd',l:'配偶者が完全に仕事を辞める年齢',u:'歳',show:spOn}],sevcalc:1},
  {t:'年金',adv:1,pencalc:1,s:'「ねんきん定期便」の見込み額が目安。手元にない場合は下の「目安を計算」で',f:[
-  {id:'pen',l:'ご本人の年金（手取り）',u:'万円/月'},
-  {id:'penAge',l:'受け取り開始',u:'歳'},
+  {id:'pen',l:'ご本人の年金（手取り）',u:'万円/月',pr:'spen',pl:'年金（手取り）'},
   {id:'spen',l:'配偶者の年金（手取り）',u:'万円/月',show:spOn},
+  {id:'penAge',l:'受け取り開始',u:'歳',pr:'spenAge',pl:'受け取り開始の年齢',ph:'原則65歳。60〜75歳の間で早めたり遅らせたりできます'},
   {id:'spenAge',l:'配偶者の受け取り開始',u:'歳',show:spOn},
   {id:'penRev',l:'年金の改定率',u:'%/年',st:.1,h:'年金は物価が上がっても、それより少し低めに増える仕組みです',pre:'penRev',rec:0.5}]},
  {t:'住まい',f:[
@@ -263,10 +263,21 @@ function preHTML(key,id,cur,rec){
   return `<span class="pre" role="group" aria-label="目安から選ぶ">${P.map(([v,l])=>`<button type="button" data-act="pre" data-for="${id}" data-v="${v}" aria-pressed="${cur!==''&&cur!=null&&+cur===v}">${l}<small>${v}</small></button>`).join('')}</span>${rec!=null?`<span class="hint">迷ったら「${P.find(p=>p[0]===rec)[1]}」</span>`:''}`;
 }
 
-function fieldHTML(f,S){
-  const hint=f.h?`<span class="hint">${esc(f.h)}</span>`:'';
+/* 夫婦で対になる項目（pr）は「ご本人｜配偶者」の2列で並べる */
+function fieldsHTML(g,S){
+  const F=g.f, skip=new Set(F.filter(f=>f.pr).map(f=>f.pr));
+  return F.map(f=>{
+    if(skip.has(f.id)) return '';
+    if(!f.pr) return fieldHTML(f,S);
+    const p=F.find(x=>x.id===f.pr);
+    return `<div class="pairrow"${f.easy||p.easy?'':' data-adv'}><div class="plab">${esc(f.pl)}</div><div class="pcols">${fieldHTML(f,S,'ご本人')}${fieldHTML(p,S,'配偶者')}</div>${f.ph?`<span class="hint">${esc(f.ph)}</span>`:''}</div>`;
+  }).join('');
+}
+function fieldHTML(f,S,who){
+  const hint=f.h&&!who?`<span class="hint">${esc(f.h)}</span>`:'';
+  const lab=who?`<span class="lab who">${who}</span>`:`<span class="lab">${esc(f.l)}</span>`;
   if(f.type==='sel') return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}><span class="lab">${esc(f.l)}</span><select id="f_${f.id}" data-k="${f.id}">${f.o.map(o=>`<option value="${o[0]}"${S[f.id]===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select>${hint}</label>`;
-  return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}><span class="lab">${esc(f.l)}</span><span class="inp"><input id="f_${f.id}" data-k="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(S[f.id])}"><span class="u">${f.u}</span></span>${f.pre?preHTML(f.pre,'f_'+f.id,S[f.id],f.rec):''}${hint}</label>`;
+  return `<label class="fld" data-f="${f.id}"${f.easy?'':' data-adv'}${who?` aria-label="${esc(f.l)}"`:''}>${lab}<span class="inp"><input id="f_${f.id}" data-k="${f.id}" type="number" inputmode="decimal" step="${f.st||1}" value="${esc(S[f.id])}"><span class="u">${f.u}</span></span>${f.pre?preHTML(f.pre,'f_'+f.id,S[f.id],f.rec):''}${hint}</label>`;
 }
 function kidsHTML(S){
   const sel=(i,k,opts,v)=>`<select id="k${i}_${k}" data-kid="${i}" data-kk="${k}">${opts.map(o=>`<option value="${o[0]}"${v===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select>`;
