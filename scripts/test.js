@@ -56,8 +56,15 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    click(w,'[data-act="pdf"]');check('PDF用のレポートが作られる',w.__printed&&d.querySelectorAll('#printArea table').length>3);
    w.close();}
 
+  console.log('\n■ 入口ツールの計算');
+  {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,637万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,637'),T(w.document,'.panel .kv b')[0]);w.close();}
+  {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));
+   check('繰上げ返済：期間短縮のほうが利息が多く減る',s>l&&l>0,b.join(' / '));w.close();}
+  {const w=await open('souzokuzei.html');const d=w.document;check('相続税チェック：入力例は基礎控除の範囲内',T(d,'.panel .chip')[0]==='基礎控除の範囲内の見込み');
+   set(w,'g_souzokuzei_cash','4000');await wait(400);check('預貯金を増やすと「超える可能性」になる',T(d,'.panel .chip')[0]==='基礎控除を超える可能性');w.close();}
+
   console.log('\n■ 結果の共有');
-  for(const f of ['lifeplan.html','sell.html','loan.html']){
+  for(const f of ['lifeplan.html','sell.html','loan.html','rent2buy.html','prepay.html','souzokuzei.html']){
     const w=await open(f);click(w,'[data-act="share"]');await wait(200);
     const u=w.document.getElementById('shareurl');
     if(!u){check(f+' の共有リンク',false,'リンクが作られません');continue}

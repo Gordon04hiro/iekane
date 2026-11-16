@@ -5,6 +5,9 @@ const PK=['A','B','C'];
 const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
 const PDASH={A:'',B:'6 4',C:'2 3'};
 const IC={
+ key:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg>',
+ down:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10h11M4 15h7"/><path d="M18 12v8m0 0l-3-3m3 3l3-3"/></svg>',
+ scale:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M5 7h14"/><path d="M5 7l-3 6a3 3 0 006 0zM19 7l-3 6a3 3 0 006 0z"/></svg>',
  plan:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/><circle cx="19" cy="6" r="1.2" fill="currentColor"/></svg>',
  sell:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l7-6 7 6"/><path d="M5 10v9h10v-9"/><path d="M17 14h4m0 0l-2-2m2 2l-2 2"/></svg>',
  loan:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h8"/></svg>',
@@ -23,15 +26,15 @@ const keys=()=>PK.filter(k=>LP.plans[k]);
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
 
 /* ---------- routing ---------- */
-const ROUTES=['home','lifeplan','sell','loan','souzoku','souzoku2','akiya','vs','articles','news','data','about','privacy'];
+const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','articles','news','data','about','privacy'];
 function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':'home')}
-const TITLES={lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
+const TITLES={rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
 function go(){
   const r=route();
   document.querySelectorAll('.gnav a').forEach(a=>{if(a.dataset.r===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   const v=document.getElementById('view');
   ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
-  document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs'].includes(r);
+  document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
   if(r!=='article')document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
@@ -47,7 +50,10 @@ const TOOLS=[
  {ic:'inherit',href:'#souzoku',t:'相続の準備チェックシート（遺す方へ）',d:'財産・家・家族との話し合い。遺す立場で準備がどこまでできているか、12問で確認できます。'},
  {ic:'inherit',href:'#souzoku2',t:'相続の手続きチェックシート（受け継ぐ方へ）',d:'親が元気なうちに確かめること と、相続が起きたあとの手続きの期限日を一覧にします。'},
  {ic:'akiya',href:'#akiya',t:'相続した家・空き家の診断',d:'住む・貸す・売る・解体する。費用と手間を並べて比べます。'},
- {ic:'vs',href:'#vs',t:'賃貸vs持ち家 比べる診断',d:'賃貸と購入、戸建てとマンション、新築と中古。生涯の住居費を比べます。'}
+ {ic:'vs',href:'#vs',t:'賃貸vs持ち家 比べる診断',d:'賃貸と購入、戸建てとマンション、新築と中古。生涯の住居費を比べます。'},
+ {ic:'key',href:'#rent2buy',t:'家賃と同じ返済で買える家',d:'今の家賃と同じ月々の負担で、いくらの家が買えるかがすぐわかります。'},
+ {ic:'down',href:'#prepay',t:'繰上げ返済シミュレーター',d:'期間短縮型と返済額軽減型で、減る利息と毎月の返済を比べます。'},
+ {ic:'scale',href:'#souzokuzei',t:'相続税がかかるかチェック',d:'財産の合計が基礎控除を超えそうかを確かめます。税額は計算しません。'}
 ];
 function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);

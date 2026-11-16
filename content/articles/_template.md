@@ -6,7 +6,7 @@
 公開日: "2026-12-01"
 更新日: "2026-12-01"
 下書き: true              # 確認が終わったら false にすると公開されます
-関連ツール: loan          # lifeplan／sell／loan／souzoku／souzoku2／akiya／vs のどれか。なければ空欄
+関連ツール: loan          # lifeplan／sell／loan／rent2buy／prepay／souzoku／souzoku2／souzokuzei／akiya／vs のどれか。なければ空欄
 リード: 記事の最初に表示する2〜3行の説明です。検索結果の説明文にも使われます。
 ---
 

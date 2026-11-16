@@ -1,5 +1,5 @@
 /* ---------- 複数ページ対応のリンク ---------- */
-const FILES={home:'index.html',lifeplan:'lifeplan.html',sell:'sell.html',loan:'loan.html',souzoku:'souzoku.html',souzoku2:'souzoku2.html',akiya:'akiya.html',vs:'vs.html',articles:'articles/index.html',news:'news.html',data:'data.html',about:'about.html',privacy:'privacy.html',tools:'index.html#tools',contact:'about.html#contact'};
+const FILES={rent2buy:'rent2buy.html',prepay:'prepay.html',souzokuzei:'souzokuzei.html',home:'index.html',lifeplan:'lifeplan.html',sell:'sell.html',loan:'loan.html',souzoku:'souzoku.html',souzoku2:'souzoku2.html',akiya:'akiya.html',vs:'vs.html',articles:'articles/index.html',news:'news.html',data:'data.html',about:'about.html',privacy:'privacy.html',tools:'index.html#tools',contact:'about.html#contact'};
 function pageURL(h){const B=window.BASE||'';if(h.startsWith('a-'))return B+'articles/'+h.slice(2)+'.html';return FILES[h]?B+FILES[h]:null}
 function linkFix(root){if(!window.PAGE)return;const D=root||(typeof document!=='undefined'?document:null);if(!D||!D.querySelectorAll)return;D.querySelectorAll('a[href^="#"]').forEach(a=>{const u=pageURL(a.getAttribute('href').slice(1));if(u)a.setAttribute('href',u)})}
 if(window.PAGE&&window.MutationObserver){new MutationObserver(()=>linkFix(document)).observe(document.body,{childList:true,subtree:true})}
@@ -10,7 +10,10 @@ const SHARE={
  sell:{get:()=>SV,set:d=>{SV=Object.assign(sellBase(),d)}},
  loan:{get:()=>gtState(LOANDEF),set:d=>{GT.loan=d}},
  akiya:{get:()=>gtState(AKIYADEF),set:d=>{GT.akiya=d}},
- vs:{get:()=>gtState(VSDEF),set:d=>{GT.vs=d}}
+ vs:{get:()=>gtState(VSDEF),set:d=>{GT.vs=d}},
+ rent2buy:{get:()=>gtState(RENT2BUYDEF),set:d=>{GT.rent2buy=d}},
+ prepay:{get:()=>gtState(PREPAYDEF),set:d=>{GT.prepay=d}},
+ souzokuzei:{get:()=>gtState(ZEIDEF),set:d=>{GT.souzokuzei=d}}
 };
 const b64u={enc:u8=>{let s='';u8.forEach(c=>s+=String.fromCharCode(c));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},
  dec:s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s);return Uint8Array.from(b,c=>c.charCodeAt(0))}};
@@ -49,7 +52,7 @@ document.addEventListener('click',async e=>{
   else if(a==='closemodal'){const m=document.getElementById('modal');if(m)m.hidden=true}
   else if(a==='copyshare'){const t=document.getElementById('shareurl');try{await navigator.clipboard.writeText(t.value);toast('リンクをコピーしました')}catch(err){t.select();toast('選択しました。長押しまたはCtrl+Cでコピーしてください')}}
   else if(a==='nshare'){const t=document.getElementById('shareurl');try{await navigator.share({title:document.title,text:'イエカネで計算した結果です',url:t.value})}catch(err){}}
-  else if(a==='keepshared'){window.__shared=false;try{saveLP();saveSV();['loan','akiya','vs'].forEach(k=>GT[k]&&gtSave(GDEF[k]))}catch(err){}history.replaceState(null,'',location.href.split('#')[0]);toast('自分のデータとして保存しました');go()}
+  else if(a==='keepshared'){window.__shared=false;try{saveLP();saveSV();Object.keys(GDEF).forEach(k=>GT[k]&&gtSave(GDEF[k]))}catch(err){}history.replaceState(null,'',location.href.split('#')[0]);toast('自分のデータとして保存しました');go()}
   else if(a==='leaveshared'){location.href=location.href.split('#')[0]}
 });
 function sharedBanner(){return window.__shared?`<div class="shared wrap"><span><b>共有された結果を表示しています。</b>この画面で変えても保存されません。</span><span class="macts"><button class="btn small primary" data-act="keepshared">自分のデータとして保存</button><button class="btn small" data-act="leaveshared">自分のデータに戻る</button></span></div>`:''}
