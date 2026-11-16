@@ -5,6 +5,7 @@ function diffs(S,A){
   ALLF.forEach(f=>{if((!f.show||f.show(S)||f.show(A))&&String(S[f.id])!==String(A[f.id]))out.push(f.l)});
   if(JSON.stringify(S.kids)!==JSON.stringify(A.kids)) out.push('お子さま');
   if(JSON.stringify(S.events)!==JSON.stringify(A.events)) out.push('その他の予定');
+  if(JSON.stringify(S.insl||[])!==JSON.stringify(A.insl||[])) out.push('保険');
   if(JSON.stringify(S.assets)!==JSON.stringify(A.assets)) out.push('資産と積立');
   if(JSON.stringify(S.props)!==JSON.stringify(A.props)) out.push('不動産投資');
   return out;
@@ -12,7 +13,7 @@ function diffs(S,A){
 function diffHTML(){if(U.plan==='A')return'';const d=diffs(LP.plans[U.plan],LP.plans.A);return 'Aとの違い：'+(d.length?d.map(x=>`<span class="chip muted" style="margin:2px 4px 2px 0">${esc(x)}</span>`).join(''):'まだありません。変えたい項目を書き換えてください')}
 const OPEN=['ご家族','お仕事の収入','住まい','毎月の支出','今の資産と積立'];
 function easyDefaults(S){normPlan(S);const A=S.assets;const sp=S.spouse==='yes';
-  return [`年金（ご本人 月${n(S.pen)}万円${sp?'・配偶者 月'+n(S.spen)+'万円':''}、${n(S.penAge)}歳から）`,`定年${n(S.ret)}歳・退職金${fmt(n(S.sev))}万円・${n(S.workEnd)}歳まで働く`,`車（${fmt(n(S.car))}万円を${n(S.carEvery)}年ごと）`,`物価上昇 年${n(S.infl)}%`,`利回り（預貯金${n(A.cash.rate)}%・NISA${n(A.nisa.rate)}%）`,`保険料 月${n(S.ins)}万円`,`お子さまの幼稚園〜高校（幼稚園は私立、小中高は公立）`].join('、')}
+  return [`年金（ご本人 月${n(S.pen)}万円${sp?'・配偶者 月'+n(S.spen)+'万円':''}、${n(S.penAge)}歳から）`,`定年${n(S.ret)}歳・退職金${fmt(n(S.sev))}万円・${n(S.workEnd)}歳まで働く`,`車（${fmt(n(S.car))}万円を${n(S.carEvery)}年ごと）`,`物価上昇 年${n(S.infl)}%`,`利回り（預貯金${n(A.cash.rate)}%・NISA${n(A.nisa.rate)}%）`,`保険料 月${Math.round(insNow(S)*10)/10}万円`,`お子さまの幼稚園〜高校（幼稚園は私立、小中高は公立）`].join('、')}
 function vLife(v){
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
@@ -27,7 +28,7 @@ function vLife(v){
    </div>
    ${LP.mode!=='detail'?`<details class="defaults"><summary>かんたん入力で自動で使う値を見る</summary><p class="unit">${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p></details>`:''}</div>
   <div class="prog" id="prog" aria-live="polite"></div>
-  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
+  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.sevcalc?sevHTML(S):''}${g.insl?inslHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
   ${ks.length>1||U.plan!=='A'?'':planBox(ks)}
   <section class="result" id="result"></section></div>`;
   syncVis(S); renderResult(); updateDock();
@@ -151,6 +152,23 @@ function penHTML(S){
    <div id="pcout">${penOut()}</div>
    <div class="macts"><button class="btn small primary" data-act="pcset">この金額を入れる</button></div>
    <p class="unit" style="margin:6px 0 0">令和8年度の制度の金額をもとにした、ざっくりした目安です。正確な見込み額は「ねんきん定期便」や「ねんきんネット」で確認できます。</p></details>`;
+}
+
+/* 退職金の手取りの目安（額面と勤続年数から） */
+function sevOut(){const c=U.sv,r=retireTax(c.gross,c.yrs),m=x=>(Math.round(x*10)/10).toLocaleString('ja-JP');
+  return `<div class="pcres"><span>退職金の手取りの目安</span><b>約${fmt(Math.floor(r.net))}<small>万円</small></b><span class="unit">${r.tax<0.05?`勤続${Math.max(1,Math.ceil(n(c.yrs)))}年の退職所得控除（${fmt(r.ded)}万円）の範囲内なので、税金はかからない計算です。`:`退職所得控除 ${fmt(r.ded)}万円を引いた残りの半分（${m(r.base)}万円）に税金がかかる計算です。税金 約${m(r.tax)}万円（所得税・復興特別所得税 ${m(r.it)}万円、住民税 ${m(r.res)}万円）。`}</span></div>`}
+function sevHTML(S){
+  const c=U.sv=U.sv||{who:'self',gross:2000,yrs:38};
+  const num=(k,l,u,h)=>`<label class="fld"><span class="lab">${l}</span><span class="inp"><input id="sv_${k}" data-sv="${k}" type="number" inputmode="decimal" value="${esc(c[k])}"><span class="u">${u}</span></span>${h?`<span class="hint">${h}</span>`:''}</label>`;
+  return `<details class="sub svcalc" data-adv style="margin-top:14px"><summary><b>退職金の手取りを計算する</b> <span class="unit">額面しかわからないとき</span></summary>
+   <div class="fields" style="margin-top:10px">
+    ${S.spouse==='yes'?`<label class="fld"><span class="lab">だれの退職金</span><select id="sv_who" data-sv="who">${[['self','ご本人'],['sp','配偶者']].map(x=>`<option value="${x[0]}"${c.who===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></label>`:''}
+    ${num('gross','退職金の額面','万円','会社の退職金規程や、人事・総務で確認できます')}
+    ${num('yrs','勤続年数','年','1年未満の端数は1年に切り上げて数えます')}
+   </div>
+   <div id="svout">${sevOut()}</div>
+   <div class="macts"><button class="btn small primary" data-act="svset">この金額を入れる</button></div>
+   <p class="unit" style="margin:6px 0 0">一時金でまとめて受け取る場合の、一般的な計算式による目安です。勤続5年以下の場合や役員の場合、同じ年にほかの退職金・共済金・iDeCoの一時金を受け取る場合は、計算が変わります。会社に「退職所得の受給に関する申告書」を出していれば、税金は退職金から差し引かれて精算されます。実際の税額は、勤務先や税務署にご確認ください。</p></details>`;
 }
 
 function teikiHTML(){

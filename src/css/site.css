@@ -403,7 +403,7 @@ footer.ft nav a{color:var(--muted)}
 .pre button:hover{border-color:var(--brand)}
 .pre button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
 .pre button[aria-pressed="true"] small{color:#fff;opacity:.85}
-.pcalc summary{cursor:pointer;list-style:revert}
+.pcalc summary,.svcalc summary{cursor:pointer;list-style:revert}
 .pcres{display:flex;flex-direction:column;gap:2px;background:var(--sand);border-radius:12px;padding:12px 14px;margin:12px 0 8px}
 .pcres b{font-size:22px;color:var(--ink)} .pcres b small{font-size:12px;font-weight:500;margin-left:3px}
 @media print{.pre,.pcalc{display:none!important}}
@@ -558,3 +558,4 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .prof p:last-child{margin:0;font-size:13.5px;line-height:1.8}
 .byline{margin:6px 0 0;font-size:13px;color:var(--muted)}
 .byline a{color:var(--brand)}
+.sublist>.fields+.fields{border-top:1px dashed var(--line);padding-top:12px;margin-top:12px}

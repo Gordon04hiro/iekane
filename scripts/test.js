@@ -87,6 +87,24 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('年金の目安（会社員40年・年収600万円）が月約16.2万円',/約16\.2/.test(pc),pc);
    click(w,'[data-act="pcset"]');await wait(300);
    check('年金の目安を入力欄に入れられる',d.getElementById('f_pen').value==='16.2',d.getElementById('f_pen').value);
+   {const q=w.eval(`(()=>{const t1=retireTax(2000,38),t2=retireTax(2500,38);
+     const S=basePlan();S.sret=60;S.ssev=300;S.sreinc=100;S.sworkEnd=65;const r=sim(clone(S));const at=x=>r.find(z=>z.sa===x)||{};
+     const O=basePlan();delete O.sret;const ro=sim(clone(O));const ao=x=>ro.find(z=>z.sa===x)||{};
+     const K=basePlan();K.assets.kyosai={bal:1000,mon:5,until:60,recv:60,rate:0,yrs:20};const rk=sim(clone(K));const k60=rk.find(z=>z.a===60);
+     return{t1:t1.tax,t2:Math.round(t2.tax*10)/10,sp62:at(62).iSp,sp66:at(66).iSp,ssev:(at(60).ev||[]).includes('配偶者の退職金'),old59:ao(59).iSp>0,old60:ao(60).iSp,
+       kyo:Math.abs(k60.iAsset-retireTax(2500,20).net)<0.01}})()`);
+    check('退職金の税金：2,000万円・勤続38年は0円、2,500万円は約34.5万円',q.t1===0&&q.t2===34.5,q.t1+' / '+q.t2);
+    check('配偶者の定年後の収入（再雇用・パート）が入る',q.sp62===100&&q.sp66===0,q.sp62+' / '+q.sp66);
+    check('配偶者の退職金が定年の年に入る',q.ssev);
+    check('古いデータ（配偶者の定年なし）は今までどおり',q.old59&&q.old60===0);
+    check('小規模企業共済は退職所得の税金を引いて受け取る',q.kyo);}
+   {const q=w.eval(`(()=>{const S=basePlan();S.insl=[{name:'夫',who:'self',mon:1.5,end:60},{name:'妻',who:'sp',mon:1,end:65}];const r=sim(clone(S));
+     const at=x=>r.find(z=>z.a===x)||{};return{a40:at(40).eIns,a60:at(60).eIns,a66:at(66).eIns,a68:at(68).eIns}})()`);
+    check('保険を1件ずつ：夫婦で払い終わる年齢が違う',q.a40===30&&q.a60===12&&q.a66===12&&q.a68===0,JSON.stringify(q));}
+   set(w,'sv_gross','2500');set(w,'sv_yrs','38');await wait(100);
+   check('退職金の手取りを計算できる',/約2,465/.test(T(d,'#svout b')[0]||''),T(d,'#svout b')[0]);
+   click(w,'[data-act="svset"]');await wait(300);
+   check('退職金の手取りを入力欄に入れられる',d.getElementById('f_sev').value==='2465',d.getElementById('f_sev').value);
    w.close();}
 
   console.log('\n■ 入口ツールの計算');
