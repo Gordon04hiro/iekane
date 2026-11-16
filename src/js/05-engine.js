@@ -4,7 +4,7 @@ function basePlan(){return{
   age:35,spouse:'yes',sage:33,
   kids:[{by:Y0-5,kg:'pri',sch:'pub',uni:'pri_b',away:false},{by:Y0-2,kg:'pri',sch:'pub',uni:'pub',away:false}],
   inc:450,raise:1.0,ret:60,sev:1500,reinc:250,workEnd:65,
-  sinc:120,sraise:0.5,sworkEnd:60,
+  sinc:120,sraise:0.5,sret:60,ssev:0,sreinc:0,sworkEnd:60,
   pen:16,penAge:65,spen:8,spenAge:65,penRev:0.5,
   house:'buy',rent:7,loanPay:9,loanEnd:70,orate:1.0,hval:2500,hdep:-1.5,buyAge:37,price:3000,down:300,rate:1.0,term:35,hcost:12,
   live:20,retRatio:80,ins:2,insEnd:60,
@@ -16,6 +16,17 @@ function basePlan(){return{
   events:[{name:'家族旅行（記念）',age:45,amt:60,kind:'out'},{name:'自宅の修繕',age:55,amt:200,kind:'out'}]
 }}
 const clone=o=>JSON.parse(JSON.stringify(o));
+/* 退職金・共済金（一時金）の税金の目安。数値は content/rules.yml の retire。勤続5年以下などの特例は考えない */
+function retireTax(gross,yrs){
+  const R=CFG.retire,y=Math.max(1,Math.ceil(n(yrs))),g=Math.max(0,n(gross));
+  const ded=Math.max(R.min,y<=20?R.d1*y:R.d1*20+R.d2*(y-20));
+  const base=Math.floor(Math.max(0,g-ded)/2*10)/10; // 退職所得（万円）
+  const b=R.brackets.find(x=>base<=x[0])||R.brackets[R.brackets.length-1];
+  const it=Math.max(0,base*b[1]/100-b[2])*(1+R.fukko/100), res=base*R.res/100, tax=it+res;
+  return{ded,base,it,res,tax,net:g-tax};
+}
+/* 共済の加入年数を、掛金の累計と月の掛金から見積もる */
+function kyoYrs(S){const A=S.assets.kyosai,m=n(A.mon);return Math.max(1,Math.round((m>0?n(A.bal)/(m*12):0)+Math.max(0,Math.min(n(A.recv),n(A.until))-n(S.age))))}
 function zeroAssets(){return{cash:{bal:0,rate:0.1},nisa:{bal:0,mon:0,until:60,rate:4},tax:{bal:0,basis:0,rate:3},ideco:{bal:0,mon:0,until:60,recv:65,mode:'lump',yrs:10,rate:3},kyosai:{bal:0,mon:0,until:65,recv:65,rate:1},save:{amt:0,recv:65}}}
 /* 古いデータ（貯蓄の合計＋利回りだけ）を口座ごとの形に直す */
 function normPlan(S){
@@ -82,11 +93,13 @@ function sim(S,opt){
     const nw0=snap().nw;
     // income
     let iSelf=a<n(S.ret)?n(S.inc)*Math.pow(1+n(S.raise)/100,t):(a<n(S.workEnd)?n(S.reinc):0);
-    let iSp=sp&&sa<n(S.sworkEnd)?n(S.sinc)*Math.pow(1+n(S.sraise)/100,t):0;
+    const sret=(S.sret===undefined||S.sret==='')?n(S.sworkEnd):n(S.sret); // 古いデータは「辞める年齢＝定年」
+    let iSp=sp&&sa<n(S.sworkEnd)?(sa<sret?n(S.sinc)*Math.pow(1+n(S.sraise)/100,t):n(S.sreinc)):0;
     const pr=Math.pow(1+n(S.penRev)/100,t);
     let iPen=(a>=n(S.penAge)?n(S.pen)*12*pr:0)+(sp&&sa>=n(S.spenAge)?n(S.spen)*12*pr:0);
     let iOne=0;
     if(a===Math.round(n(S.ret))&&n(S.sev)>0){iOne+=n(S.sev);ev.push('退職金')}
+    if(sp&&sa===Math.round(sret)&&n(S.ssev)>0){iOne+=n(S.ssev);ev.push('配偶者の退職金')}
     if(a===Math.round(n(S.penAge))) ev.push('年金開始');
     let iAl=0,eEdu=0,rank=0;
     kids.forEach((c,ix)=>{
@@ -142,7 +155,7 @@ function sim(S,opt){
       else{iAsset+=ideco;ideco=0;ev.push('iDeCo 受取')}
     }
     if(idecoLeft>0&&ideco>0){idecoPay=ideco/idecoLeft;iAsset+=idecoPay;ideco-=idecoPay;idecoLeft--}
-    if(a===Math.round(n(A.kyosai.recv))&&kyo>0){iAsset+=kyo;kyo=0;ev.push('共済金 受取')}
+    if(a===Math.round(n(A.kyosai.recv))&&kyo>0){const ky=n(A.kyosai.yrs)>0?n(A.kyosai.yrs):kyoYrs(S);iAsset+=kyo-retireTax(kyo,ky).tax;kyo=0;ev.push('共済金 受取')}
     if(a===Math.round(n(A.save.recv))&&n(A.save.amt)>0){iSaveIns=n(A.save.amt);iAsset+=iSaveIns;ev.push('保険など 受取')}
     const iTot=iSelf+iSp+iPen+iAl+iOne+iProp+iAsset+iSale, eTot=eLive+eHouse+eEdu+eIns+eCar+eOne+eProp+eSave, net=iTot-eTot;
     // 運用
@@ -190,12 +203,15 @@ const GROUPS=[
   {id:'inc',easy:1,l:'ご本人の手取り年収',u:'万円/年'},
   {id:'raise',l:'昇給率',u:'%/年',st:.1,pre:'raise',rec:1},
   {id:'ret',l:'定年の年齢',u:'歳'},
-  {id:'sev',l:'退職金（手取り）',u:'万円'},
+  {id:'sev',l:'退職金（手取り）',u:'万円',h:'額面しかわからないときは、下の「退職金の手取りを計算」で'},
   {id:'reinc',l:'定年後の手取り年収',u:'万円/年',h:'再雇用・パートなど'},
   {id:'workEnd',l:'完全に仕事を辞める年齢',u:'歳'},
   {id:'sinc',easy:1,l:'配偶者の手取り年収',u:'万円/年',show:spOn},
   {id:'sraise',l:'配偶者の昇給率',u:'%/年',st:.1,show:spOn,pre:'raise',rec:0.5},
-  {id:'sworkEnd',l:'配偶者が仕事を辞める年齢',u:'歳',show:spOn}]},
+  {id:'sret',l:'配偶者の定年の年齢',u:'歳',show:spOn,h:'パート・自営などで定年がなければ、辞める年齢と同じに'},
+  {id:'ssev',l:'配偶者の退職金（手取り）',u:'万円',show:spOn},
+  {id:'sreinc',l:'配偶者の定年後の手取り年収',u:'万円/年',show:spOn,h:'再雇用・パートなど。働かないなら0'},
+  {id:'sworkEnd',l:'配偶者が完全に仕事を辞める年齢',u:'歳',show:spOn}],sevcalc:1},
  {t:'年金',adv:1,pencalc:1,s:'「ねんきん定期便」の見込み額が目安。手元にない場合は下の「目安を計算」で',f:[
   {id:'pen',l:'ご本人の年金（手取り）',u:'万円/月'},
   {id:'penAge',l:'受け取り開始',u:'歳'},
@@ -278,7 +294,7 @@ const ACC=[
  {k:'nisa',t:'NISA',d:'つみたて投資枠・成長投資枠。運用益は非課税。手元のお金が足りない年は、課税口座の次に取り崩します。',f:[['bal','残高','万円'],['mon','積立額','万円/月',.1],['until','積立をやめる年齢','歳'],['rate','利回りの見込み','%/年',.1,'',null,'inv']]},
  {k:'tax',t:'課税口座の投資',d:'特定口座・一般口座の株や投資信託など。取り崩すときに、利益に約20%の税金がかかる前提です。手元のお金が足りない年は、まずここから取り崩します。',f:[['bal','残高','万円'],['basis','うち元本（買った金額）','万円'],['rate','利回りの見込み','%/年',.1,'',null,'inv']]},
  {k:'ideco',t:'iDeCo（個人型確定拠出年金）',d:'原則60歳まで引き出せません。受け取り開始の年齢になるまで、足りない年の取り崩しには使いません。',f:[['bal','残高','万円'],['mon','掛金','万円/月',.1],['until','掛金を払う最後の年齢','歳'],['recv','受け取り開始','歳',1,'60〜75歳の間で選べます'],['mode','受け取り方','sel',[['lump','一時金でまとめて'],['annuity','年金で分けて']]],['yrs','年金で受け取る年数','年',1,'',x=>x.mode==='annuity'],['rate','利回りの見込み','%/年',.1,'',null,'inv']]},
- {k:'kyosai',t:'小規模企業共済',d:'個人事業主・小さな会社の役員向けの退職金の積立です。廃業・退職のときにまとめて受け取る前提で計算します。',f:[['bal','今の掛金の累計','万円'],['mon','掛金','万円/月',.1,'月0.1〜7万円'],['until','掛金を払う最後の年齢','歳'],['recv','受け取る年齢（廃業・退職の予定）','歳'],['rate','増え方の目安','%/年',.1,'受取額は加入年数や受け取り方で変わります。目安として1%程度']]},
+ {k:'kyosai',t:'小規模企業共済',d:'個人事業主・小さな会社の役員向けの退職金の積立です。廃業・退職のときにまとめて受け取る前提で、退職金と同じ税金（退職所得）を差し引いて計算します。',f:[['bal','今の掛金の累計','万円'],['mon','掛金','万円/月',.1,'月0.1〜7万円'],['until','掛金を払う最後の年齢','歳'],['recv','受け取る年齢（廃業・退職の予定）','歳'],['yrs','受け取るまでの加入年数','年',1,'税金（退職所得）の計算に使います。空欄なら掛金から見積もります'],['rate','増え方の目安','%/年',.1,'受取額は加入年数や受け取り方で変わります。目安として1%程度']]},
  {k:'save',t:'貯蓄型の保険・その他',d:'学資保険・個人年金・終身保険の解約返戻金など、将来まとめて受け取る予定のお金。保険料は「毎月の支出」の保険料に入れてください。',f:[['amt','受け取る見込み額','万円'],['recv','受け取る年齢','歳']]}
 ];
 const EASYF={}; // かんたん入力では口座ごとではなく、下の3項目（預貯金・投資・毎月の積立）だけを出す
