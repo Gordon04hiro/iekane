@@ -5,7 +5,7 @@ document.addEventListener('click',e=>{
   if(a==='plan'){U.plan=b.dataset.p;U.cf=b.dataset.p;vLife(document.getElementById('view'))}
   else if(a==='addplan'){const k=PK.find(x=>!LP.plans[x]);if(!k)return;LP.plans[k]=JSON.parse(JSON.stringify(S));LP.names[k]=k==='B'?'比べたい案':'もう一つの案';U.plan=k;U.cf=k;changed();vLife(document.getElementById('view'));toast('パターン'+k+'を作りました。変えたいところだけ書き換えてください');const p=document.getElementById('pname');if(p){p.focus();p.select()}}
   else if(a==='delplan'){delete LP.plans[U.plan];delete LP.names[U.plan];U.plan='A';U.cf='A';changed();vLife(document.getElementById('view'))}
-  else if(a==='clear'){const p=basePlan();Object.assign(p,{kids:[],events:[],inc:'',sinc:'',live:'',rent:'',car:0,price:'',down:'',sev:'',reinc:'',pen:'',spen:'',assets:zeroAssets(),props:[]});LP={plans:{A:p},names:{A:'今のまま'},example:false};U.plan='A';saveLP();vLife(document.getElementById('view'))}
+  else if(a==='clear'){lpReplace(blankLP(),'入力を空にしました')}
   else if(a==='cf'){U.cf=b.dataset.p;renderResult()}
   else if(a==='acat'){U.acat=b.dataset.c;vArticles(document.getElementById('view'))}
   else if(a==='pdf'){printReport()}
