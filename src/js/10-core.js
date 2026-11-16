@@ -37,7 +37,7 @@ function go(){
   document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
-  adTail(r);setTimeout(fillAds,0);
+  legalTail(r);adTail(r);setTimeout(fillAds,0);
   if(r!=='article')document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
 }
 if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
@@ -90,6 +90,16 @@ function vHome(v){
     ${TOOLS.filter(t=>!t.hide).map(toolCard).join('')}
    </div></section>
   ${adUnit('一覧の中')?`<section class="wrap sect">${adUnit('一覧の中')}</section>`:''}
+  <section class="wrap sect"><h2>安心してお使いいただくために</h2><p class="lead">イエカネは、一般的な情報と計算の目安をお届けするサイトです。専門家の仕事にあたることは行っていません。</p>
+   <div class="stance">
+    <div><b>税金</b><span>表示する税金は一般的な計算式による計算例です。個別の税額計算・申告・税務相談は行いません（税理士法）。</span></div>
+    <div><b>法律・相続の手続き</b><span>個別の法律相談や交渉・代理、登記や遺言書などの書類作成は行いません（弁護士法・司法書士法・行政書士法）。</span></div>
+    <div><b>お金の運用</b><span>特定の金融商品の勧誘や投資の助言は行いません。利回りは入力された前提による仮定です（金融商品取引法）。</span></div>
+    <div><b>不動産の取引</b><span>このサイトで売買・賃貸の仲介や価格の査定は行いません。金額は入力条件による目安です。</span></div>
+    <div><b>保険</b><span>保険の募集・勧誘は行いません。</span></div>
+    <div><b>情報の新しさ</b><span>制度・数値は${jd(CFG.checked)}時点の内容で、毎年見直しています。期限が過ぎた制度は、ツールの画面でお知らせします。</span></div>
+   </div>
+   <p class="unit" style="margin-top:10px">ご自身の状況にもとづく判断は、税理士・弁護士・司法書士などの専門家にご相談ください。くわしくは<a href="#privacy">プライバシーポリシー・免責事項</a>をご覧ください。</p></section>
   <section class="wrap sect"><h2>イエカネの考え方</h2><p class="lead">住まいの決断は、金額も大きく、やり直しがききません。</p>
    <div class="why"><div><b>家だけでなく、家計全体で見る</b>ローンが払えるかだけでなく、教育費や老後まで続けて見ないと、本当に大丈夫かはわかりません。</div>
    <div><b>個人情報を預からない</b>計算はブラウザの中だけ。名前やメールアドレスの登録もありません。</div>

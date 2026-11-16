@@ -26,6 +26,7 @@ function vArticle(v,slug){
   ${(a.toc||[]).length>2?`<nav class="toc" aria-label="この記事の内容"><p class="toc-t">この記事の内容</p><ol>${a.toc.map((t,i)=>`<li><button type="button" data-act="toc" data-to="s${i+1}">${esc(t)}</button></li>`).join('')}</ol></nav>`:''}
   <div class="art-body">${withMidAds(a.body)}</div>
   ${a.tool?`<div class="consult" style="margin-top:22px"><div><h2>数字で確かめてみる</h2><p>${esc(toolName(a.tool))}で、ご自分の場合を計算できます。登録不要・入力内容は送信されません。</p></div><div class="ways"><a class="btn primary" href="${a.tool}">${esc(toolName(a.tool))}を使う</a></div></div>`:''}
+  ${legalHTML(LEGAL_MAP[a.cat]||['fin'])}
   ${adUnit('記事の下')}
   ${rel.length?`<h2>ほかの記事</h2><div class="tools">${rel.map(artCard).join('')}</div>`:''}</div>`;
 }

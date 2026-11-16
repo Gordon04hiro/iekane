@@ -71,6 +71,7 @@ fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(path.join(out,'assets'),
 fs.writeFileSync(path.join(out,'assets','app.js'),bundle);
 fs.writeFileSync(path.join(out,'assets','site.css'),read('src/css/site.css'));
 for(const f of fs.readdirSync(R('static'))) fs.copyFileSync(R('static/'+f),path.join(out,'assets',f));
+fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico')); // Googleの検索結果・サーチコンソールのアイコン用
 const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
@@ -111,7 +112,11 @@ async function prerender(pg,base){
 <meta property="og:url" content="${canon(pg.f)}">
 <meta property="og:image" content="${SITE_URL}/assets/ogp.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="${base}favicon.ico" sizes="48x48">
+<link rel="icon" href="${base}assets/icon-96.png" type="image/png" sizes="96x96">
+<link rel="icon" href="${base}assets/icon-192.png" type="image/png" sizes="192x192">
 <link rel="icon" href="${base}assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="${base}assets/apple-touch-icon.png">
 ${headLinks}<link rel="stylesheet" href="${base}assets/site.css">
 ${ld?`<script type="application/ld+json">${JSON.stringify(ld)}</script>\n`:''}${ga}${ads}
 </head>

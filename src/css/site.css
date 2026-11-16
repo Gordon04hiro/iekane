@@ -41,7 +41,8 @@ h1,h2,h3{text-wrap:balance;margin:0;line-height:1.4}
 .gnav a[aria-current="page"]{color:var(--brand-ink);background:var(--brand-soft);font-weight:700}
 @media (max-width:560px){.gnav a.hide-sm{display:none}.brand small{display:none}}
 
-main{padding-block:0 120px}
+main{padding-block:0 24px}
+body{padding-bottom:96px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 16px;font-size:14px;font-weight:500;text-decoration:none;color:var(--ink)}
 .btn:hover{border-color:var(--brand)}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand);font-weight:700}
@@ -444,3 +445,17 @@ footer.ft nav a{color:var(--muted)}
 .tool.art .chip{width:fit-content}
 .tool.art p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 @media (max-width:420px){.numcard b{font-size:20px}.numcard{padding:12px 8px}}
+
+/* ご利用にあたって（法令上の立ち位置・情報の時点） */
+.legal{margin-top:6px;margin-bottom:10px}
+.legal-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:22px 0}
+.legal-t{margin:0 0 6px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.legal-box ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
+.legal-box li{font-size:12.5px;line-height:1.7;color:var(--muted)}
+.legal-box li b{color:var(--ink)}
+.art-body+.legal-box,.art-doc .legal-box{margin-top:28px}
+.stance{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.stance div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:4px}
+.stance b{font-size:14px}
+.stance span{font-size:13px;color:var(--muted);line-height:1.7}
+@media print{.legal{display:none!important}}
