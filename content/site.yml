@@ -1,0 +1,6 @@
+# サイト全体の設定
+url: https://iekane.jp        # ← 取得したドメインに書き換える（最後に / は付けない）
+name: イエカネ 家とお金の相談室
+contactForm: ""               # GoogleフォームのURLを入れると、お問い合わせボタンが有効になります
+analytics: ""                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
+adsense: ""                   # AdSenseの審査が通ったら、パブリッシャーID（ca-pub-XXXX）を入れます

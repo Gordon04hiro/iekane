@@ -1,0 +1,96 @@
+/* ===== イエカネ サイト本体 ===== */
+const SITE={name:'イエカネ',sub:'家とお金の相談室',contactUrl:SITE_CFG.contactForm||''}; /* contactUrl：GoogleフォームのURLを入れると、お問い合わせボタンが有効になります */
+const LKEY='iekane-lifeplan-v1';
+const PK=['A','B','C'];
+const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
+const PDASH={A:'',B:'6 4',C:'2 3'};
+const IC={
+ plan:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/><circle cx="19" cy="6" r="1.2" fill="currentColor"/></svg>',
+ sell:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l7-6 7 6"/><path d="M5 10v9h10v-9"/><path d="M17 14h4m0 0l-2-2m2 2l-2 2"/></svg>',
+ loan:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h8"/></svg>',
+ inherit:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 11l2 2 4-4M9 17h6"/></svg>',
+ akiya:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/><path d="M15 8l3 3"/></svg>',
+ vs:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M4 8l3-4 3 4"/><path d="M4 8h6v3a3 3 0 01-6 0z"/><path d="M14 13l3-4 3 4"/><path d="M14 13h6v3a3 3 0 01-6 0z"/></svg>'
+};
+const LOGO='<svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M4 16L17 5l13 11" fill="none" stroke="var(--brand)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 14v14h18V14" fill="none" stroke="var(--brand)" stroke-width="3" stroke-linejoin="round"/><circle cx="17" cy="21" r="5.2" fill="var(--coin)"/><path d="M15 18.6l2 2.4 2-2.4M17 21v3.4M15.2 22.2h3.6" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>';
+
+let LP=null;
+try{const s=localStorage.getItem(LKEY);if(s)LP=JSON.parse(s)}catch(e){}
+if(!LP||!LP.plans||!LP.plans.A) LP={plans:{A:basePlan()},names:{A:'今のまま'},example:true};
+let lpT=0;const saveLP=()=>{if(window.__shared)return;clearTimeout(lpT);lpT=setTimeout(()=>{try{localStorage.setItem(LKEY,JSON.stringify(LP))}catch(e){}},300)};
+const U={plan:'A',cf:'A',step:5,hi:0};
+const keys=()=>PK.filter(k=>LP.plans[k]);
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+
+/* ---------- routing ---------- */
+const ROUTES=['home','lifeplan','sell','loan','souzoku','souzoku2','akiya','vs','articles','news','data','about','privacy'];
+function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':'home')}
+const TITLES={lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
+function go(){
+  const r=route();
+  document.querySelectorAll('.gnav a').forEach(a=>{if(a.dataset.r===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  const v=document.getElementById('view');
+  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
+  document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs'].includes(r);
+  if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
+  if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
+  if(r!=='article')document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
+}
+if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
+
+/* ---------- home ---------- */
+function toolCard(t){return t.href?`<a class="tool" href="${t.href}"><span class="ic">${IC[t.ic]}</span><h3>${t.t}</h3><p>${t.d}</p><span class="go">使ってみる →</span></a>`:`<div class="tool off"><span class="ic">${IC[t.ic]}</span><h3>${t.t} <span class="chip soon">準備中</span></h3><p>${t.d}</p></div>`}
+const TOOLS=[
+ {ic:'plan',href:'#lifeplan',t:'ライフプラン診断',d:'家族・収入・住まいから、95歳までの毎年の収支と貯蓄の推移を出します。',hide:true},
+ {ic:'sell',href:'#sell',t:'売却・住み替えシミュレーター',d:'今の家がいくらで売れたら、住み替えられるか。手取り額とローン残高から逆算します。'},
+ {ic:'loan',href:'#loan',t:'住宅ローン・購入予算診断',d:'年収と家族構成から、無理なく返せる借入額と物件価格の目安を出します。'},
+ {ic:'inherit',href:'#souzoku',t:'相続の準備チェックシート（遺す方へ）',d:'財産・家・家族との話し合い。遺す立場で準備がどこまでできているか、12問で確認できます。'},
+ {ic:'inherit',href:'#souzoku2',t:'相続の手続きチェックシート（受け継ぐ方へ）',d:'親が元気なうちに確かめること と、相続が起きたあとの手続きの期限日を一覧にします。'},
+ {ic:'akiya',href:'#akiya',t:'相続した家・空き家の診断',d:'住む・貸す・売る・解体する。費用と手間を並べて比べます。'},
+ {ic:'vs',href:'#vs',t:'賃貸vs持ち家 比べる診断',d:'賃貸と購入、戸建てとマンション、新築と中古。生涯の住居費を比べます。'}
+];
+function vHome(v){
+  const S=LP.plans.A,r=sim(S),s=summarize(r,S);
+  v.innerHTML=`<div class="heroband"><section class="wrap hero">
+   <div><div class="k">家とお金の相談室</div>
+    <h1>家のことを決める前に、<br><em>お金の未来</em>を見てみよう。</h1>
+    <p>家を買う、売る、相続する。大きな決断の前に、95歳までのお金の流れを数字で確かめられる無料ツールをそろえています。</p>
+    <div class="acts"><a class="btn primary big" href="#lifeplan">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
+    <div class="promise"><span>登録不要</span><span>入力内容は送信されません</span><span>スマホで5分</span></div></div>
+   <div class="hero-art"><svg class="town" viewBox="0 0 440 230" role="img" aria-label="家が並ぶ街のイラスト">
+  <circle cx="372" cy="52" r="24" fill="#f6c879"/>
+  <path d="M0 196 Q110 176 220 190 T440 182 V230 H0Z" fill="#cfe5dc"/>
+  <g><rect x="40" y="118" width="96" height="78" rx="4" fill="#ffffff" stroke="#24302e" stroke-width="2.5"/><path d="M30 122 L88 76 L146 122" fill="#e0873a" stroke="#24302e" stroke-width="2.5" stroke-linejoin="round"/><rect x="58" y="138" width="22" height="20" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="96" y="150" width="24" height="46" rx="2" fill="#f3e6cf" stroke="#24302e" stroke-width="2"/></g>
+  <g><rect x="166" y="96" width="112" height="100" rx="4" fill="#ffffff" stroke="#24302e" stroke-width="2.5"/><path d="M156 100 L222 48 L288 100" fill="#16706a" stroke="#24302e" stroke-width="2.5" stroke-linejoin="round"/><rect x="184" y="118" width="24" height="22" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="236" y="118" width="24" height="22" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="208" y="150" width="28" height="46" rx="2" fill="#fcefe0" stroke="#24302e" stroke-width="2"/><circle cx="231" cy="174" r="2" fill="#24302e"/></g>
+  <g><rect x="310" y="132" width="82" height="64" rx="4" fill="#ffffff" stroke="#24302e" stroke-width="2.5"/><path d="M302 136 L351 98 L400 136" fill="#f3e6cf" stroke="#24302e" stroke-width="2.5" stroke-linejoin="round"/><rect x="326" y="150" width="20" height="18" rx="2" fill="#e3eff4" stroke="#24302e" stroke-width="2"/><rect x="358" y="158" width="20" height="38" rx="2" fill="#e5f1ec" stroke="#24302e" stroke-width="2"/></g>
+  <g><rect x="146" y="164" width="5" height="30" fill="#8b6a43"/><circle cx="148" cy="156" r="16" fill="#7fb59d" stroke="#24302e" stroke-width="2"/></g>
+  <g><rect x="292" y="168" width="5" height="26" fill="#8b6a43"/><circle cx="294" cy="160" r="13" fill="#9cc7a9" stroke="#24302e" stroke-width="2"/></g>
+  <circle cx="404" cy="118" r="11" fill="#e0873a" stroke="#24302e" stroke-width="2"/><path d="M400 114 l4 5 4 -5 M404 119 v6 M400.5 121 h7" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+</svg>
+   <div class="peek" aria-label="ライフプラン診断の画面例"><div class="t"><span>入力例：35歳・夫婦と子ども2人・家を購入</span><span class="chip ${s.st.c}">${s.st.t}</span></div>
+    <div class="t" style="margin-top:6px"><span>95歳時点の金融資産</span></div><div class="v">${fmt(s.last.bal)}<span class="unit"> 万円</span></div>
+    ${chartSVG([{rows:r,color:'var(--accent)'}],null,'peekc')}</div></div>
+  </section></div>
+  <section class="wrap trust" aria-label="イエカネの約束">
+   <div><span class="ti">${IC.plan}</span><span><b>登録不要・無料</b>名前もメールも要りません</span></div>
+   <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><span><b>入力は送信されません</b>計算はお使いの端末の中だけ</span></div>
+   <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/></svg></span><span><b>宅地建物取引士が作成</b>売買・相続の現場の目線で</span></div>
+   <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></span><span><b>データの出典を公開</b><a href="#data">使っているデータ</a>で確認できます</span></div>
+  </section>
+  <section class="wrap sect" id="tools"><h2>ツール</h2><p class="lead">どれも無料・登録不要。計算はお使いの端末の中だけで行います。</p>
+   <div class="tools">
+    <a class="tool feat" href="#lifeplan"><span class="ic">${IC.plan}</span><span><h3>ライフプラン診断</h3><p>家族・収入・住まいを入れると、毎年の収支と貯蓄の推移がわかります。住宅購入あり・なしなど、3パターンまで比べられます。</p></span><span class="go">はじめる →</span></a>
+    ${TOOLS.filter(t=>!t.hide).map(toolCard).join('')}
+   </div></section>
+  <section class="wrap sect"><div class="adslot">広告枠（Googleアドセンス）<br>審査通過後にここへ表示</div></section>
+  <section class="wrap sect"><h2>イエカネの考え方</h2><p class="lead">住まいの決断は、金額も大きく、やり直しがききません。</p>
+   <div class="why"><div><b>家だけでなく、家計全体で見る</b>ローンが払えるかだけでなく、教育費や老後まで続けて見ないと、本当に大丈夫かはわかりません。</div>
+   <div><b>個人情報を預からない</b>計算はブラウザの中だけ。名前やメールアドレスの登録もありません。</div>
+   <div><b>不動産の実務家が作成</b>住まいの売買や相続の相談を受けている宅地建物取引士が、現場の目線で作っています。</div></div></section>
+  <section class="wrap sect"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>新着記事</h2><a href="#articles" class="unit">記事の一覧へ →</a></div><p class="lead">家を買う・売る・相続する前に知っておきたい基本をまとめています。</p>
+   <div class="tools">${pubArticles().slice(0,3).map(artCard).join('')}</div></section>
+  <section class="wrap sect"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>お知らせ</h2><a href="#news" class="unit">すべて見る →</a></div>
+   <ul class="news">${NEWS.slice(0,3).map(x=>`<li><span class="num">${x.d.replace(/-/g,'.')}</span><span>${esc(x.t)}</span></li>`).join('')}</ul>
+   <p class="unit">ツールの計算に使っている制度・数値は<a href="#data">使っているデータ</a>で公開しています（${jd(CFG.checked)}確認）。</p></section>`;
+}
+

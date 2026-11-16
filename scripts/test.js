@@ -1,0 +1,84 @@
+// イエカネ 自動チェック（npm test）
+// 公開前に、計算・表示・リンク・共有が壊れていないかを確かめます。1つでも失敗したら公開しません。
+const fs=require('fs'),path=require('path');
+const {JSDOM,VirtualConsole}=require('jsdom');
+const DIST=path.join(__dirname,'..','dist');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let ok=0,ng=0;
+const check=(name,cond,info='')=>{if(cond){ok++;console.log('  ✔ '+name)}else{ng++;console.log('  ✖ '+name+(info?'（'+info+'）':''))}};
+async function open(file,hash=''){
+  const errs=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/fonts\.googleapis|googletagmanager|googlesyndication/.test(e.message))errs.push(e.message)});
+  const dom=await JSDOM.fromFile(path.join(DIST,file),{runScripts:'dangerously',resources:'usable',url:'file://'+path.join(DIST,file)+hash,pretendToBeVisual:true,virtualConsole:vc,
+    beforeParse(w){w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.print=()=>{w.__printed=true}}});
+  await wait(600);const w=dom.window;w.__errs=errs;return w;
+}
+const T=(d,s)=>[...d.querySelectorAll(s)].map(x=>x.textContent.replace(/\s+/g,' ').trim());
+const set=(w,id,v)=>{const i=w.document.getElementById(id);i.value=v;i.dispatchEvent(new w.Event('input',{bubbles:true}));i.dispatchEvent(new w.Event('change',{bubbles:true}))};
+const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+
+(async()=>{
+  const pages=[];(function walk(d,p=''){for(const f of fs.readdirSync(d)){const q=path.join(d,f);if(fs.statSync(q).isDirectory())walk(q,p+f+'/');else if(f.endsWith('.html'))pages.push(p+f)}})(DIST);
+
+  console.log('\n■ すべてのページが表示できる');
+  for(const f of pages){
+    const w=await open(f);const d=w.document;
+    check(f,!w.__errs.length&&d.querySelector('#view h1, #view .hero h1'),w.__errs[0]||'見出しがありません');
+    const html=fs.readFileSync(path.join(DIST,f),'utf8');
+    const bad=(html.match(/href="#(?!tools|contact)[a-z]/g)||[]);
+    if(bad.length) check(f+' のリンク',false,'「#」のままのリンク：'+bad[0]);
+    const links=[...html.matchAll(/href="([^"#:]+\.html)(#[^"]*)?"/g)].map(m=>m[1]);
+    const missing=links.filter(l=>!fs.existsSync(path.join(DIST,path.dirname(f),l)));
+    if(missing.length) check(f+' のリンク先',false,'見つからないページ：'+missing[0]);
+    w.close();
+  }
+
+  console.log('\n■ 売却・住み替えの計算');
+  {const w=await open('sell.html');const d=w.document;
+   check('入力例の手取りが1,235万円',T(d,'.panel .kv b')[0].startsWith('1,235'),T(d,'.panel .kv b')[0]);
+   set(w,'s_buyPrice','2000');set(w,'s_bldPrice','1000');set(w,'s_price','6000');set(w,'s_buyYear',String(new Date().getFullYear()-26));set(w,'s_newPrice','5000');await wait(400);
+   const tbl=T(d,'.cfwrap')[1]||'';
+   check('3,000万円控除の税金が211万円',/軽減税率）211/.test(tbl),tbl.slice(0,80));
+   check('買い替え特例の税金152万円・繰り延べ3,740万円',/特例1523,740/.test(tbl),tbl.slice(0,120));
+   set(w,'s_price','700');set(w,'s_feeMode','low');await wait(400);
+   check('800万円以下の特例で仲介手数料33万円',T(d,'table.cf tr').some(x=>/^仲介手数料.*▲33$/.test(x)));
+   w.close();}
+
+  console.log('\n■ ライフプランの計算');
+  {const w=await open('lifeplan.html');const d=w.document;
+   check('入力例が「不足なし」',T(d,'.panel .chip')[0]==='不足なし',T(d,'.panel .chip')[0]);
+   const r=w.eval('(()=>{const S=basePlan();S.house="own";S.hval=2800;S.loanPay=8;S.loanEnd=65;S.assets.tax={bal:500,basis:300,rate:3};S.props=[{name:"A",val:1500,vdep:-1,rent:7,vac:10,cost:15,loan:4,loanEnd:60,rate:2,sell:70,price:1200}];return sim(S)})()');
+   const mx=Math.max(...r.map(x=>Math.abs(x.pl.chk)));
+   check('PLの収支＝純資産の増減（誤差0）',mx<0.001,'最大の誤差 '+mx);
+   click(w,'[data-t="goal"]');set(w,'g_target','9000');await wait(700);
+   check('目標から逆算が計算できる',/万円\/月/.test(T(d,'.lever')[0]||''),T(d,'.lever')[0]);
+   click(w,'[data-t="scen"]');await wait(100);
+   check('シナリオと確率が出る',/%/.test(T(d,'.kpi')[0]||''));
+   click(w,'[data-act="pdf"]');check('PDF用のレポートが作られる',w.__printed&&d.querySelectorAll('#printArea table').length>3);
+   w.close();}
+
+  console.log('\n■ 結果の共有');
+  for(const f of ['lifeplan.html','sell.html','loan.html']){
+    const w=await open(f);click(w,'[data-act="share"]');await wait(200);
+    const u=w.document.getElementById('shareurl');
+    if(!u){check(f+' の共有リンク',false,'リンクが作られません');continue}
+    const w2=await open(f,u.value.slice(u.value.indexOf('#')));await wait(200);
+    check(f+' の共有リンクを開ける',!!w2.document.querySelector('.shared')&&!w2.__errs.length,w2.__errs[0]);
+    w.close();w2.close();
+  }
+
+  console.log('\n■ 相続の期限');
+  {const w=await open('souzoku2.html');const d=w.document;const i=d.getElementById('c2_date');i.value='2026-10-01';i.dispatchEvent(new w.Event('change',{bubbles:true}));
+   const tl=T(d,'#c2tl .citem');
+   check('相続放棄は3か月後',tl.some(x=>x.startsWith('相続するか')&&x.includes('2027年1月1日まで')));
+   check('相続税の申告は10か月後',tl.some(x=>x.startsWith('相続税の申告')&&x.includes('2027年8月1日まで')));
+   w.close();}
+
+  console.log('\n■ サイトマップ');
+  {const sm=fs.readFileSync(path.join(DIST,'sitemap.xml'),'utf8');
+   const drafts=pages.filter(f=>f.startsWith('articles/')&&f!=='articles/index.html'&&/noindex/.test(fs.readFileSync(path.join(DIST,f),'utf8')));
+   check('下書きの記事はサイトマップに載らない',drafts.every(f=>!sm.includes(f)));
+   check('トップがサイトマップにある',/<loc>https?:\/\/[^<]+\/<\/loc>/.test(sm));}
+
+  console.log(`\n結果：${ok}件OK、${ng}件NG`);
+  process.exit(ng?1:0);
+})();

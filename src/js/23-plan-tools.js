@@ -1,0 +1,176 @@
+/* ---------- 目標から逆算・シナリオ・予算と実績 ---------- */
+const RTABS=[['overview','概要'],['bs','家計の決算書'],['goal','目標から逆算'],['scen','シナリオ'],['yj','予算と実績'],['cf','キャッシュフロー表']];
+function search(lo,hi,ok,step,iters){ // ok(x) が true になる最小の x（単調な前提）
+  if(!ok(hi)) return null; if(ok(lo)) return lo;
+  for(let k=0;k<(iters||30);k++){const m=(lo+hi)/2;if(ok(m))hi=m;else lo=m}
+  return step?Math.ceil(hi/step)*step:hi;
+}
+function goalOK(S,g){const r=sim(clone(S)),s=summarize(r,S);return !s.neg&&(g.type==='noshort'||s.last.bal>=n(g.target))}
+const LEVERS={
+ save:{t:'毎月の積立を増やす',u:'万円/月',apply:(S,x)=>{S.assets.nisa.mon=n(S.assets.nisa.mon)+x;S.assets.nisa.until=Math.max(n(S.assets.nisa.until),60)},lo:0,hi:30,step:0.1,
+  say:x=>`NISAの積立を毎月あと${x.toFixed(1)}万円増やす（60歳まで）`},
+ work:{t:'働く期間を延ばす',u:'歳',apply:(S,x)=>{S.workEnd=Math.round(x);if(!n(S.reinc))S.reinc=Math.round(n(S.inc)*0.5)},lo:null,hi:80,step:1,
+  say:x=>`${Math.round(x)}歳まで働く（定年後の収入で）`},
+ live:{t:'生活費を見直す',u:'万円/月',apply:(S,x)=>{S.live=Math.max(0,n(S.live)-x)},lo:0,hi:null,step:0.1,
+  say:x=>`生活費を毎月${x.toFixed(1)}万円下げる`},
+ yld:{t:'運用の利回りを上げる',u:'%',apply:(S,x)=>{['nisa','tax','ideco'].forEach(k=>S.assets[k].rate=n(S.assets[k].rate)+x)},lo:0,hi:6,step:0.1,
+  say:x=>`投資の利回りの見込みを${x.toFixed(1)}%上げる`}
+};
+function goalCalc(S,g){
+  const out={};
+  const base=goalOK(S,g);
+  Object.entries(LEVERS).forEach(([k,L])=>{
+    if(base){out[k]={x:0,ok:true};return}
+    const lo=k==='work'?n(S.workEnd):L.lo, hi=k==='live'?n(S.live):L.hi;
+    const x=search(lo,hi,v=>{const T=clone(S);L.apply(T,v);return goalOK(T,g)},L.step,k==='work'?12:24);
+    out[k]={x,ok:x!=null};
+  });
+  return{base,out};
+}
+function goalTab(cur){
+  const g=LP.goal||(LP.goal={type:'fin95',target:1000});
+  const G=goalCalc(cur.S,g);
+  const cards=Object.entries(LEVERS).map(([k,L])=>{const o=G.out[k];
+    const v=G.base?'<span class="chip good" style="font-size:13px">達成</span>':k==='work'?(o.ok?Math.round(o.x)+'<small>歳まで</small>':'—'):(o.ok?(k==='yld'?'+':'')+(Math.round(o.x*10)/10).toLocaleString('ja-JP')+'<small>'+L.u+'</small>':'—');
+    return `<div class="lever"><span>${L.t}</span><b>${v}</b><em>${G.base?'今のままで達成できます':o.ok?esc(L.say(o.x)):'この方法だけでは届きません'}</em>${!G.base&&o.ok&&keys().length<3?`<button class="btn small" data-act="lever" data-k="${k}" data-x="${o.x}">このやり方でパターンを作る</button>`:''}</div>`}).join('');
+  return `<section class="chartcard"><h3 style="font-size:16px;margin-bottom:4px">目標から逆算する（パターン${cur.key}）</h3>
+   <p class="unit" style="margin:0 0 10px">目標を決めると、それを達成するために「何を・どれだけ」変えればいいかを、1つずつ計算します。会社でいう目標利益からの逆算です。</p>
+   <div class="fields" style="margin-bottom:12px"><label class="fld"><span class="lab">目標</span><select id="g_type" data-goal="type"><option value="fin95"${g.type==='fin95'?' selected':''}>95歳時点で金融資産を残す</option><option value="noshort"${g.type==='noshort'?' selected':''}>最後までお金が足りなくならない</option></select></label>
+   <label class="fld"${g.type==='noshort'?' hidden':''}><span class="lab">残したい金額</span><span class="inp"><input id="g_target" data-goal="target" type="number" inputmode="decimal" value="${esc(g.target)}"><span class="u">万円</span></span></label></div>
+   <div class="levers">${cards}</div>
+   <p class="unit" style="margin:10px 0 0">それぞれ、ほかの条件は今のままで1つだけ変えた場合の計算です。実際には、いくつかを少しずつ組み合わせるのが現実的です。利回りを上げると、そのぶん値動きのブレも大きくなります。</p></section>`;
+}
+/* シナリオ */
+const SCEN=[['opt','楽観',{rate:1,infl:-0.5,raise:0.3},'var(--good)'],['base','標準',{rate:0,infl:0,raise:0},'var(--accent)'],['pess','悲観',{rate:-1.5,infl:0.8,raise:-0.3},'var(--bad)']];
+function scenPlan(S,d){const T=clone(S);normPlan(T);['nisa','tax','ideco'].forEach(k=>T.assets[k].rate=Math.max(0,n(T.assets[k].rate)+d.rate));T.assets.cash.rate=Math.max(0,n(T.assets.cash.rate)+Math.min(0,d.rate)/4);T.infl=n(T.infl)+d.infl;T.raise=n(T.raise)+d.raise;T.sraise=n(T.sraise)+d.raise;return T}
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function monte(S,N){
+  const R=rng(20261115),len=Math.max(Math.round(n(S.age)),95)-Math.round(n(S.age))+1;
+  const gauss=()=>{let u=0,v=0;while(!u)u=R();while(!v)v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+  let okN=0;const paths=[];
+  for(let k=0;k<N;k++){const z=Array.from({length:len},gauss);const r=sim(clone(S),{z});if(!r.some(x=>x.cash<-0.5))okN++;paths.push(r.map(x=>x.bal))}
+  const q=p=>paths[0].map((_,i)=>{const col=paths.map(x=>x[i]).sort((a,b)=>a-b);return col[Math.floor(p*(col.length-1))]});
+  return{prob:okN/N,p10:q(0.1),p50:q(0.5),p90:q(0.9)};
+}
+function bandSVG(r,mc){
+  const W=680,H=240,L=58,Rr=14,T=14,B=30,nn=r.length;
+  const lo=Math.min(0,...mc.p10),hi=Math.max(...mc.p90);
+  const tk=niceTicks(lo,hi,5),y0=tk[0],y1=tk[tk.length-1];
+  const X=i=>L+i*(W-L-Rr)/Math.max(1,nn-1),Y=v=>T+(y1-v)*(H-T-B)/((y1-y0)||1);
+  let g='';tk.forEach(v=>{g+=`<line x1="${L}" x2="${W-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="${v===0?1.6:1}"${v===0?'':' stroke-dasharray="2 3"'}/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v<0?'▲':''}${Math.abs(v).toLocaleString('ja-JP')}</text>`});
+  r.forEach((x,i)=>{if(x.a%10===0||i===0)g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle">${x.a}歳</text>`});
+  g+=`<polygon points="${mc.p90.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')} ${mc.p10.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).reverse().join(' ')}" fill="var(--accent)" fill-opacity=".16"/>`;
+  g+=`<polyline points="${mc.p50.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.4"/>`;
+  g+=`<text x="${L-8}" y="${T-2}" text-anchor="end" style="font-size:10px">万円</text>`;
+  return `<div class="legend" style="margin-bottom:6px"><span><span class="dot a"></span>真ん中の結果</span><span><span class="dot" style="background:var(--accent);opacity:.35"></span>10回中8回がこの幅に入る</span></div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="運用のブレを考えた金融資産の幅">${g}</svg>`;
+}
+function scenTab(cur){
+  const rs=SCEN.map(([k,l,d,c])=>{const T=scenPlan(cur.S,d),r=sim(T);return{k,l,d,c,r,s:summarize(r,T)}});
+  const mc=monte(cur.S,600);
+  const pr=Math.round(mc.prob*100);const pc=pr>=80?'good':pr>=50?'warn':'bad';
+  return `<section class="chartcard"><h3 style="font-size:16px;margin-bottom:4px">楽観・標準・悲観で比べる（パターン${cur.key}）</h3>
+   <p class="unit" style="margin:0 0 10px">運用利回り・物価・昇給がずれたときに、結果がどれくらい変わるかを見ます。標準は今の入力のままです。</p>
+   <div class="panels">${rs.map(x=>`<section class="panel"><div class="ph"><span class="dot" style="background:${x.c}"></span><span class="nm">${x.l}</span><span class="chip ${x.s.st.c}">${x.s.st.t}</span></div><div class="kv"><span>95歳時点の金融資産</span><b class="${x.s.last.bal<0?'neg':''}">${fmt(x.s.last.bal)}<small>万円</small></b><span>前提</span><b style="font-size:12.5px;font-family:var(--f-body);font-weight:400">利回り${x.d.rate>=0?'+':''}${x.d.rate}%・物価${x.d.infl>=0?'+':''}${x.d.infl}%・昇給${x.d.raise>=0?'+':''}${x.d.raise}%</b></div></section>`).join('')}</div>
+   ${chartSVG(rs.map(x=>({rows:x.r,color:x.c,dash:x.k==='base'?'':x.k==='opt'?'6 4':'2 3'})),null,'sc1')}</section>
+  <section class="chartcard"><h3 style="font-size:16px;margin-bottom:4px">運用のブレを考える</h3>
+   <p class="unit" style="margin:0 0 10px">投資の成績は毎年ばらつきます。良い年・悪い年がランダムに来る場合を600回試して、最後まで足りる確率と、金融資産の幅を出しました。物価や収入は標準のままで、運用成績だけを変えています。</p>
+   <div class="kpis"><div class="kpi ${pc==='good'?'':pc}"><span>95歳まで足りる確率</span><b>${pr}<small>%</small></b><em>600回中${Math.round(mc.prob*600)}回</em></div><div class="kpi"><span>95歳時点（真ん中）</span><b>${fmt(mc.p50[mc.p50.length-1])}<small>万円</small></b></div><div class="kpi"><span>95歳時点（悪いほうから1割）</span><b class="${mc.p10[mc.p10.length-1]<0?'neg':''}">${fmt(mc.p10[mc.p10.length-1])}<small>万円</small></b></div></div>
+   ${bandSVG(cur.r,mc)}
+   <p class="unit" style="margin:8px 0 0">値動きの大きさは、利回りの見込みが高い口座ほど大きくなる前提です（利回り4%なら年14%程度）。株価の動きは口座どうしで連動するとしています。値動きがあると、平均の利回りが同じでも増え方は鈍るため、「真ん中の結果」は標準シナリオより低めに出ます。過去の実績や将来を保証するものではありません。</p></section>`;
+}
+/* 予算と実績 */
+const YJA=[['cash','預貯金'],['nisa','NISA'],['tax','課税口座'],['ideco','iDeCo'],['kyosai','小規模企業共済']];
+const YJK={cash:'cash',nisa:'nisa',tax:'taxa',ideco:'ideco',kyosai:'kyo'};
+function yjFin(v,br){if(!v)return null;const given=YJA.filter(([k])=>v[k]!==''&&v[k]!=null);
+  if(given.length) return YJA.reduce((s,[k])=>s+(v[k]!==''&&v[k]!=null?n(v[k]):(br&&br[YJK[k]]!=null?Math.max(0,br[YJK[k]]):0)),0);
+  return v.fin!==''&&v.fin!=null?n(v.fin):null}
+function yjChart(B,fr,AC){
+  const W=680,H=240,L=58,Rr=14,T=14,Bm=30;
+  const y0=B.rows[0].y,y1=Math.max(B.rows[B.rows.length-1].y,fr[fr.length-1].y);
+  const pts=B.rows.map(x=>[x.y,x.fin]),fp=fr.map(x=>[x.y,x.bal]),ap=Object.keys(AC).map(Number).map(y=>[y,yjFin(AC[y],B.rows.find(r=>r.y===y))]).filter(x=>x[1]!=null);
+  const all=[...pts,...fp,...ap].map(x=>x[1]);const tk=niceTicks(Math.min(0,...all),Math.max(...all),5),v0=tk[0],v1=tk[tk.length-1];
+  const X=y=>L+(y-y0)/Math.max(1,y1-y0)*(W-L-Rr),Y=v=>T+(v1-v)*(H-T-Bm)/((v1-v0)||1);
+  let g='';tk.forEach(v=>{g+=`<line x1="${L}" x2="${W-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="${v===0?1.6:1}"${v===0?'':' stroke-dasharray="2 3"'}/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v<0?'▲':''}${Math.abs(v).toLocaleString('ja-JP')}</text>`});
+  for(let y=Math.ceil(y0/10)*10;y<=y1;y+=10)g+=`<text x="${X(y)}" y="${H-10}" text-anchor="middle">${y}</text>`;
+  const pl=(p,c,d)=>`<polyline points="${p.map(x=>X(x[0]).toFixed(1)+','+Y(x[1]).toFixed(1)).join(' ')}" fill="none" stroke="${c}" stroke-width="2.2"${d?` stroke-dasharray="${d}"`:''}/>`;
+  g+=pl(pts,'var(--muted)','5 4')+pl(fp,'var(--accent)','');
+  ap.forEach(x=>{g+=`<circle cx="${X(x[0])}" cy="${Y(x[1])}" r="5" fill="var(--coin, var(--warn))" stroke="var(--surface)" stroke-width="1.5"/>`});
+  g+=`<text x="${L-8}" y="${T-2}" text-anchor="end" style="font-size:10px">万円</text>`;
+  return `<div class="legend" style="margin-bottom:6px"><span><span class="dot" style="background:var(--muted)"></span>予算（点線）</span><span><span class="dot a"></span>今の見込み</span><span><span class="dot" style="background:var(--coin, var(--warn))"></span>実績</span></div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="金融資産の予算・実績・見込み">${g}</svg>`;
+}
+function yjTab(cur){
+  const B=LP.budget, AC=LP.actuals||(LP.actuals={});
+  const head=`<section class="chartcard"><h3 style="font-size:16px;margin-bottom:4px">予算と実績（家計の予実管理）</h3>
+   <p class="unit" style="margin:0 0 10px">①今の計画を「予算」として保存 → ②毎年の終わりに実績を入れる → ③ズレの原因を確かめる → ④実績から計画を引き直す。会社の予実管理と同じ流れです。データはこの端末の中だけに保存されます。</p>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn${B?'':' primary'} small" data-act="savebudget">パターン${cur.key}を予算として保存${B?'し直す':''}</button>${B?`<span class="unit">保存した予算：${esc(B.name)}（${esc(B.at)}）</span>`:'<span class="unit">まだ予算がありません</span>'}</div></section>`;
+  if(!B) return head;
+  const sel=B.rows.filter(x=>x.y<=Y0+1);
+  const yy=U.yjy&&sel.find(x=>x.y===U.yjy)?U.yjy:(sel.find(x=>x.y===Y0)?Y0:sel[0].y);U.yjy=yy;
+  const a=AC[yy]||{}, br=B.rows.find(x=>x.y===yy);
+  const fld=(k,l,h)=>`<label class="fld"><span class="lab">${l}</span><span class="inp"><input id="yj_${k}" data-yj="${k}" type="number" inputmode="decimal" value="${esc(a[k]??'')}"><span class="u">万円</span></span>${h?`<span class="hint">${h}</span>`:''}</label>`;
+  const finA=yjFin(a,br);
+  const input=`<section class="chartcard"><h3 style="font-size:15px;margin-bottom:8px">② 実績を入れる</h3><div class="fields">
+   <label class="fld"><span class="lab">年</span><select id="yj_y" data-yjy="1">${sel.map(x=>`<option value="${x.y}"${x.y===yy?' selected':''}>${x.y}年（${x.a}歳）</option>`).join('')}</select></label>
+   ${fld('inc','1年間の手取り収入')}${fld('exp','1年間の支出','積立・ローンの元本も含めた、出ていったお金の合計')}</div>
+   ${LP.mode!=='detail'?`<div class="fields" style="margin-top:10px">${fld('fin','年末の金融資産の合計','預貯金・NISA・iDeCoなどを全部足した額')}</div><p class="unit" style="margin:6px 0 0">口座ごとに入れたいときは「くわしく入力」に切り替えてください。</p>`:`<h4 style="font-size:13.5px;margin:12px 0 6px">年末の残高 <span class="unit">（分かる口座だけで大丈夫です。入れていない口座は予算の値で計算します）</span></h4>
+   <div class="fields">${YJA.map(([k,l])=>fld(k,l)).join('')}</div>`}
+   <div class="unit" style="margin-top:8px">年末の金融資産の合計：<b class="num" style="font-size:16px;color:var(--ink)">${finA==null?'—':fmt(finA)+' 万円'}</b>（予算 ${fmt(br.fin)} 万円）</div></section>`;
+  // ③ 差異分析
+  let ana='';
+  if(finA!=null){
+    const dInc=a.inc!==''&&a.inc!=null?n(a.inc)-br.inc:0, dExp=a.exp!==''&&a.exp!=null?-(n(a.exp)-br.exp):0, dAll=finA-br.fin, dOth=dAll-dInc-dExp;
+    const it=[['収入の差',dInc],['支出の差（使いすぎはマイナス）',dExp],['運用・その他の差',dOth]];
+    const mx=Math.max(1,...it.map(x=>Math.abs(x[1])));
+    ana=`<section class="chartcard"><h3 style="font-size:15px;margin-bottom:8px">③ ズレの原因（${yy}年）</h3>
+     <div class="wf"><div class="wfr tot"><span>予算の金融資産</span><b>${fmt(br.fin)}</b></div>
+     ${it.map(([l,v])=>`<div class="wfr"><span>${l}</span><span class="wfb"><i style="${v<0?'right:50%':'left:50%'};width:${(Math.abs(v)/mx*50).toFixed(1)}%;background:${v<0?'var(--bad)':'var(--good)'}"></i></span><b class="${v<-0.5?'neg':''}">${v>=0?'+':''}${fmt(v)}</b></div>`).join('')}
+     <div class="wfr tot"><span>実績の金融資産</span><b>${fmt(finA)}</b></div></div>
+     <p class="unit" style="margin:8px 0 0">${Math.abs(dAll)<1?'予算どおりでした。':`予算より${fmt(Math.abs(dAll))}万円${dAll>0?'多い':'少ない'}結果です。いちばん大きな原因は「${it.slice().sort((x,y)=>Math.abs(y[1])-Math.abs(x[1]))[0][0].replace(/（.*/,'')}」です。`}${a.inc===''||a.inc==null||a.exp===''||a.exp==null?'収入と支出も入れると、原因をもっと細かく分けられます。':''}</p></section>`;
+  }
+  // ④ 引き直し
+  const S=cur.S, st=n(S.startY)||Y0;
+  const re=`<section class="chartcard"><h3 style="font-size:15px;margin-bottom:8px">④ 実績から計画を引き直す</h3>
+   <p class="unit" style="margin:0 0 10px">${yy}年末の実績の残高を出発点にして、${yy+1}年から95歳までの見込みを計算し直します。年齢も${yy+1}年に合わせて進めます（パターン${cur.key}が書き換わります）。予算はそのまま残るので、予算と見込みの差がわかります。</p>
+   <button class="btn primary small" data-act="reflect"${finA==null?' disabled':''}>${yy}年の実績で引き直す</button>${finA==null?'<span class="unit">　年末の残高を入れると押せます</span>':''}
+   ${st>Y0?`<p class="unit" style="margin:8px 0 0">今の計画は${st}年からの見込みです。</p>`:''}</section>`;
+  const fr=sim(clone(S));
+  const chart=`<section class="chartcard"><h3 style="font-size:15px;margin-bottom:8px">予算・実績・見込み</h3>${yjChart(B,fr,AC)}
+   <div class="kpis" style="margin-top:10px"><div class="kpi"><span>95歳時点（予算）</span><b>${fmt(B.rows[B.rows.length-1].fin)}<small>万円</small></b></div><div class="kpi"><span>95歳時点（今の見込み）</span><b class="${fr[fr.length-1].bal<0?'neg':''}">${fmt(fr[fr.length-1].bal)}<small>万円</small></b></div><div class="kpi ${fr[fr.length-1].bal-B.rows[B.rows.length-1].fin<0?'warn':''}"><span>予算との差</span><b>${fr[fr.length-1].bal-B.rows[B.rows.length-1].fin>=0?'+':''}${fmt(fr[fr.length-1].bal-B.rows[B.rows.length-1].fin)}<small>万円</small></b></div></div></section>`;
+  const done=B.rows.filter(x=>yjFin(AC[x.y],x)!=null||(AC[x.y]&&AC[x.y].inc!=null&&AC[x.y].inc!==''));
+  const d=(p,v)=>v==null||v===''?'<td>—</td><td>—</td>':`<td>${fmt(n(v))}</td><td class="${n(v)-p<-0.5?'neg':''}">${n(v)-p>=0?'+':''}${fmt(n(v)-p)}</td>`;
+  const table=done.length?`<section class="chartcard"><h3 style="font-size:15px;margin-bottom:8px">年ごとの予算と実績</h3><div class="cfwrap"><table class="cf"><tbody><tr class="hd"><th>年</th><td>収入 予算</td><td>実績</td><td>差</td><td>支出 予算</td><td>実績</td><td>差</td><td>金融資産 予算</td><td>実績</td><td>差</td></tr>
+   ${done.map(x=>{const v=AC[x.y];return `<tr><th>${x.y}年（${x.a}歳）</th><td>${fmt(x.inc)}</td>${d(x.inc,v.inc)}<td>${fmt(x.exp)}</td>${d(x.exp,v.exp)}<td>${fmt(x.fin)}</td>${d(x.fin,yjFin(v,x))}</tr>`}).join('')}</tbody></table></div></section>`:'';
+  const H=LP.history||[];
+  const hist=H.length?`<section class="chartcard"><h3 style="font-size:15px;margin-bottom:8px">計画の改訂履歴</h3><div class="cfwrap"><table class="cf"><tbody><tr class="hd"><th>引き直した日</th><td>使った実績</td><td>95歳時点 引き直す前</td><td>引き直した後</td><td>変化</td></tr>
+   ${H.slice().reverse().map(h=>`<tr><th>${esc(h.at)}</th><td>${h.y}年末</td><td>${fmt(h.before)}</td><td>${fmt(h.after)}</td><td class="${h.after-h.before<-0.5?'neg':''}">${h.after-h.before>=0?'+':''}${fmt(h.after-h.before)}</td></tr>`).join('')}</tbody></table></div></section>`:'';
+  return head+input+ana+re+chart+table+hist;
+}
+function saveBudget(cur){
+  const r=sim(clone(cur.S));const d=new Date();
+  LP.budget={name:'パターン'+cur.key+'：'+(LP.names[cur.key]||''),at:`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`,rows:r.map(x=>({y:x.y,a:x.a,inc:x.iTot,exp:x.eTot,fin:x.bal,nw:x.bs.nw,cash:x.cash,nisa:x.nisa,taxa:x.taxa,ideco:x.ideco,kyo:x.kyo}))};
+  saveLP();toast('予算として保存しました');
+}
+function reflect(key,y){
+  const S=LP.plans[key], v=(LP.actuals||{})[y]; if(!S||!v) return;
+  normPlan(S);
+  const before=sim(clone(S)); const b95=before[before.length-1].bal;
+  const brow=LP.budget&&LP.budget.rows.find(x=>x.y===y);const tot=yjFin(v,brow); if(tot==null) return;
+  const given=YJA.filter(([k])=>v[k]!==''&&v[k]!=null);
+  if(given.length){
+    // 入っていない口座は、見込みの残高を使う
+    const row=before.find(x=>x.y===y);
+    const est={cash:row?Math.max(0,row.cash):n(S.assets.cash.bal),nisa:row?row.nisa:n(S.assets.nisa.bal),tax:row?row.taxa:n(S.assets.tax.bal),ideco:row?row.ideco:n(S.assets.ideco.bal),kyosai:row?row.kyo:n(S.assets.kyosai.bal)};
+    YJA.forEach(([k])=>{const nv=v[k]!==''&&v[k]!=null?n(v[k]):est[k];if(k==='tax'){const o=n(S.assets.tax.bal);S.assets.tax.basis=o>0?Math.round(n(S.assets.tax.basis)/o*nv):nv}S.assets[k].bal=Math.round(nv)});
+  }else{
+    const row=before.find(x=>x.y===y)||before[0];const sum=Math.max(1,Math.max(0,row.cash)+row.nisa+row.taxa+row.ideco+row.kyo);
+    [['cash',Math.max(0,row.cash)],['nisa',row.nisa],['tax',row.taxa],['ideco',row.ideco],['kyosai',row.kyo]].forEach(([k,x])=>{S.assets[k].bal=Math.round(tot*x/sum)});
+  }
+  const ns=y+1, d=ns-(n(S.startY)||Y0);
+  S.age=n(S.age)+d; if(S.spouse==='yes') S.sage=n(S.sage)+d; S.startY=ns;
+  const after=sim(clone(S)); const a95=after[after.length-1].bal;
+  const dt=new Date();
+  (LP.history=LP.history||[]).push({at:`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`,y,before:b95,after:a95,key});
+  LP.example=false; saveLP();
+  toast(`${y}年の実績で引き直しました（95歳時点 ${fmt(b95)} → ${fmt(a95)}万円）`);
+}
+
