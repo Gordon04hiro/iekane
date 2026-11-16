@@ -227,6 +227,10 @@ table.cf td.ev{font-family:var(--f-body);font-size:11px;color:var(--brand-ink);t
 .doc dt{color:var(--muted)}
 .doc dd{margin:0}
 @media (max-width:520px){.doc dl{grid-template-columns:1fr;gap:2px}.doc dd{margin-bottom:8px}}
+/* 用語集は .doc dl の2列レイアウトを使わず、1語ずつのカードにする */
+.doc dl.terms{grid-template-columns:1fr;gap:10px}
+.doc .terms dt{color:var(--ink)}
+.doc .terms dd{margin:4px 0 0}
 .draft{background:var(--coin-soft);color:var(--warn);font-size:12.5px;border-radius:8px;padding:8px 12px;margin-bottom:16px}
 
 .taxnote{background:var(--sunk);border-left:3px solid var(--coin);border-radius:0 10px 10px 0;padding:10px 14px;font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.7}
