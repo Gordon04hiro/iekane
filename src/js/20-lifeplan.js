@@ -26,7 +26,7 @@ function vLife(v){
   <div class="modebar"><div class="seg" role="group" aria-label="入力の細かさ"><button data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}">かんたん入力</button><button data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}">くわしく入力</button></div>
    <span class="unit">${LP.mode==='detail'?'年金・車・iDeCo・不動産投資なども入れられます。':'まずは主な項目だけで大丈夫です。'}</span></div>
   ${LP.mode!=='detail'?`<p class="unit defaults">かんたん入力では、次の値を自動で使います：${esc(easyDefaults(S))}。変えたいときは「くわしく入力」へ。</p>`:''}
-  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
+  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
   <section class="result" id="result"></section></div>`;
   syncVis(S); renderResult(); updateDock();
 }
@@ -93,3 +93,29 @@ function updateDock(){
 let rT=0;
 function changed(){LP.example=false;saveLP();updateDock();clearTimeout(rT);rT=setTimeout(()=>{renderResult();const d=document.getElementById('diffbox');if(d)d.innerHTML=diffHTML()},250)}
 
+
+/* ---------- 年金の目安（ねんきん定期便がない人向け） ---------- */
+function penEst(){
+  const c=U.pc=U.pc||{who:'self',work:'emp',nen:40,yrs:38,inc:500};const P=CFG.pension;
+  const basic=P.basic*Math.min(40,Math.max(0,n(c.nen)))/40;
+  const hirei=c.work==='emp'?Math.min(n(c.inc),P.incCap)*P.rate/1000*Math.min(50,Math.max(0,n(c.yrs)))/12:0;
+  const gross=basic+hirei;
+  return{basic,hirei,gross,take:Math.round(gross*P.take*10)/10};
+}
+function penOut(){const v=penEst();return `<div class="pcres"><span>65歳からの年金の目安</span><b>月 約${v.take}<small>万円（手取り）</small></b><span class="unit">額面 約${(Math.round(v.gross*10)/10)}万円（基礎年金 ${(Math.round(v.basic*10)/10)}万円${v.hirei>0?'＋厚生年金 '+(Math.round(v.hirei*10)/10)+'万円':''}）。税金・社会保険料として約${Math.round((1-CFG.pension.take)*100)}%を差し引いています。</span></div>`}
+function penHTML(S){
+  const c=U.pc=U.pc||{who:'self',work:'emp',nen:40,yrs:38,inc:500};
+  const sel=(k,o)=>`<select id="pc_${k}" data-pc="${k}">${o.map(x=>`<option value="${x[0]}"${c[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select>`;
+  const num=(k,l,u,h)=>`<label class="fld"${k!=='nen'?' data-pcemp':''}${k!=='nen'&&c.work!=='emp'?' hidden':''}><span class="lab">${l}</span><span class="inp"><input id="pc_${k}" data-pc="${k}" type="number" inputmode="decimal" value="${esc(c[k])}"><span class="u">${u}</span></span>${h?`<span class="hint">${h}</span>`:''}</label>`;
+  return `<details class="sub pcalc" style="margin-top:14px"><summary><b>年金の目安を計算する</b> <span class="unit">ねんきん定期便が手元にないとき</span></summary>
+   <div class="fields" style="margin-top:10px">
+    <label class="fld"><span class="lab">だれの年金</span>${sel('who',[['self','ご本人'],['sp','配偶者']])}</label>
+    <label class="fld"><span class="lab">おもな働き方</span>${sel('work',[['emp','会社員・公務員'],['self','自営業・フリーランス'],['dep','専業主婦（夫）・扶養の範囲で働く']])}</label>
+    ${num('nen','国民年金に入る年数','年','20〜60歳のうち保険料を納める（免除を除く）年数。満額は40年')}
+    ${num('yrs','会社員として働く年数（合計）','年','厚生年金に入っている年数')}
+    ${num('inc','その間の平均の年収（額面・賞与込み）','万円','手取りではなく額面で')}
+   </div>
+   <div id="pcout">${penOut()}</div>
+   <div class="macts"><button class="btn small primary" data-act="pcset">この金額を入れる</button></div>
+   <p class="unit" style="margin:6px 0 0">令和8年度の制度の金額をもとにした、ざっくりした目安です。正確な見込み額は「ねんきん定期便」や「ねんきんネット」で確認できます。</p></details>`;
+}

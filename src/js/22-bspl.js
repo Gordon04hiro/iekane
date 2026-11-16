@@ -9,7 +9,7 @@ function bsQuick(r,S){
   return q;
 }
 function bsDiagram(b){
-  const L=[['預貯金',b.cashP,ACCOL.cash],['NISA',b.nisa,ACCOL.nisa],['課税口座',b.taxa,ACCOL.tax],['iDeCo',b.ideco,ACCOL.ideco],['小規模企業共済',b.kyo,ACCOL.kyosai],['自宅',b.hv,'var(--muted)'],['投資用不動産',b.pv,'var(--planC)']].filter(x=>x[1]>0.5);
+  const L=[['預貯金',b.cashP,ACCOL.cash],['NISA',b.nisa,ACCOL.nisa],['課税口座',b.taxa,ACCOL.tax],['iDeCo',b.ideco,ACCOL.ideco],['小規模企業共済',b.kyo,ACCOL.kyosai],['その他の資産',b.oth||0,ACCOL.oth],['自宅',b.hv,'var(--muted)'],['投資用不動産',b.pv,'var(--planC)']].filter(x=>x[1]>0.5);
   const Rt=[['住宅ローン',b.hl,'var(--bad)'],['不動産ローン',b.pl,'var(--bad)'],['資金の不足',b.short,'var(--bad)']].filter(x=>x[1]>0.5);
   if(b.nw>=0) Rt.push(['純資産',b.nw,'var(--good)']); else L.push(['債務超過',-b.nw,'var(--bad)']);
   const tot=Math.max(1,L.reduce((s,x)=>s+x[1],0),Rt.reduce((s,x)=>s+x[1],0));
@@ -19,7 +19,7 @@ function bsDiagram(b){
 function bsTable(b){
   const row=(l,v,cls='')=>v>0.5||cls?`<tr class="${cls}"><th>${l}</th><td class="${v<-0.5?'neg':''}">${fmt(v)}</td></tr>`:'';
   return `<div class="tacc"><table class="cf"><tbody><tr class="sec"><th>資産の部</th><td></td></tr>
-   ${row('預貯金',b.cashP)}${row('NISA',b.nisa)}${row('課税口座の投資',b.taxa)}${row('iDeCo',b.ideco)}${row('小規模企業共済',b.kyo)}${row('金融資産 計',b.fin,'tot')}${row('自宅',b.hv)}${row('投資用不動産',b.pv)}${row('資産 合計',b.at,'bal')}</tbody></table>
+   ${row('預貯金',b.cashP)}${row('NISA',b.nisa)}${row('課税口座の投資',b.taxa)}${row('iDeCo',b.ideco)}${row('小規模企業共済',b.kyo)}${row('その他の資産',b.oth||0)}${row('金融資産 計',b.fin,'tot')}${row('自宅',b.hv)}${row('投資用不動産',b.pv)}${row('資産 合計',b.at,'bal')}</tbody></table>
   <table class="cf"><tbody><tr class="sec"><th>負債・純資産の部</th><td></td></tr>
    ${row('住宅ローン',b.hl)}${row('不動産ローン',b.pl)}${row('資金の不足（借入が必要な額）',b.short)}${row('負債 合計',b.dt,'tot')}${row('純資産',b.nw,'tot')}${row('負債・純資産 合計',b.dt+b.nw,'bal')}</tbody></table></div>`;
 }

@@ -42,7 +42,7 @@ function goalTab(cur){
 }
 /* シナリオ */
 const SCEN=[['opt','楽観',{rate:1,infl:-0.5,raise:0.3},'var(--good)'],['base','標準',{rate:0,infl:0,raise:0},'var(--accent)'],['pess','悲観',{rate:-1.5,infl:0.8,raise:-0.3},'var(--bad)']];
-function scenPlan(S,d){const T=clone(S);normPlan(T);['nisa','tax','ideco'].forEach(k=>T.assets[k].rate=Math.max(0,n(T.assets[k].rate)+d.rate));T.assets.cash.rate=Math.max(0,n(T.assets.cash.rate)+Math.min(0,d.rate)/4);T.infl=n(T.infl)+d.infl;T.raise=n(T.raise)+d.raise;T.sraise=n(T.sraise)+d.raise;return T}
+function scenPlan(S,d){const T=clone(S);normPlan(T);['nisa','tax','ideco'].forEach(k=>T.assets[k].rate=Math.max(0,n(T.assets[k].rate)+d.rate));T.assets.others.forEach(o=>o.rate=n(o.rate)+d.rate);T.assets.cash.rate=Math.max(0,n(T.assets.cash.rate)+Math.min(0,d.rate)/4);T.infl=n(T.infl)+d.infl;T.raise=n(T.raise)+d.raise;T.sraise=n(T.sraise)+d.raise;return T}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function monte(S,N){
   const R=rng(20261115),len=Math.max(Math.round(n(S.age)),95)-Math.round(n(S.age))+1;
@@ -160,9 +160,11 @@ function reflect(key,y){
     // 入っていない口座は、見込みの残高を使う
     const row=before.find(x=>x.y===y);
     const est={cash:row?Math.max(0,row.cash):n(S.assets.cash.bal),nisa:row?row.nisa:n(S.assets.nisa.bal),tax:row?row.taxa:n(S.assets.tax.bal),ideco:row?row.ideco:n(S.assets.ideco.bal),kyosai:row?row.kyo:n(S.assets.kyosai.bal)};
+    if(row)S.assets.others.forEach((o,i)=>{const nb=Math.round(row.othL[i]||0),ob=n(o.bal);o.basis=Math.round((o.basis===''||o.basis==null?ob:n(o.basis))*(ob>0?nb/ob:1));o.bal=nb});
     YJA.forEach(([k])=>{const nv=v[k]!==''&&v[k]!=null?n(v[k]):est[k];if(k==='tax'){const o=n(S.assets.tax.bal);S.assets.tax.basis=o>0?Math.round(n(S.assets.tax.basis)/o*nv):nv}S.assets[k].bal=Math.round(nv)});
   }else{
-    const row=before.find(x=>x.y===y)||before[0];const sum=Math.max(1,Math.max(0,row.cash)+row.nisa+row.taxa+row.ideco+row.kyo);
+    const row=before.find(x=>x.y===y)||before[0];const sum=Math.max(1,Math.max(0,row.cash)+row.nisa+row.taxa+row.ideco+row.kyo+row.oth);
+    S.assets.others.forEach((o,i)=>{const nb=Math.round(tot*(row.othL[i]||0)/sum),ob=n(o.bal);o.basis=Math.round((o.basis===''||o.basis==null?ob:n(o.basis))*(ob>0?nb/ob:1));o.bal=nb});
     [['cash',Math.max(0,row.cash)],['nisa',row.nisa],['tax',row.taxa],['ideco',row.ideco],['kyosai',row.kyo]].forEach(([k,x])=>{S.assets[k].bal=Math.round(tot*x/sum)});
   }
   const ns=y+1, d=ns-(n(S.startY)||Y0);

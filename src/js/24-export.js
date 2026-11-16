@@ -18,7 +18,7 @@ function premiseRows(k){
    ['年金（月・万円）','本人 '+n(S.pen)+(S.spouse==='yes'?' ／ 配偶者 '+n(S.spen):'')],['住まい',H],['生活費（月・万円）',n(S.live)],['保険料（月・万円）',n(S.ins)],
    ['預貯金（万円）／利回り',n(A.cash.bal)+' ／ '+n(A.cash.rate)+'%'],['NISA（万円）／積立（月）／利回り',n(A.nisa.bal)+' ／ '+n(A.nisa.mon)+' ／ '+n(A.nisa.rate)+'%'],
    ['課税口座（万円）／利回り',n(A.tax.bal)+' ／ '+n(A.tax.rate)+'%'],['iDeCo（万円）／掛金（月）／受取開始',n(A.ideco.bal)+' ／ '+n(A.ideco.mon)+' ／ '+n(A.ideco.recv)+'歳'],
-   ['小規模企業共済（万円）／掛金（月）',n(A.kyosai.bal)+' ／ '+n(A.kyosai.mon)],['投資用不動産',S.props.length+'件'],['物価上昇率',n(S.infl)+'%']];
+   ['小規模企業共済（万円）／掛金（月）',n(A.kyosai.bal)+' ／ '+n(A.kyosai.mon)],['その他の資産（万円）',A.others.map(o=>(o.name||(OTYPE[o.type]||OTYPE.other).l)+' '+n(o.bal)).join('、')||'なし'],['投資用不動産',S.props.length+'件'],['物価上昇率',n(S.infl)+'%']];
 }
 function cfSheet(r,S){
   const head=['項目',...r.map(x=>x.y+'年')];
@@ -26,12 +26,12 @@ function cfSheet(r,S){
   const rows=[head,L('ご本人の年齢',x=>x.a),
    L('イベント',x=>x.ev.join('・')),['【収入】'],L('ご本人の収入',x=>x.iSelf),L('配偶者の収入',x=>x.iSp),L('年金',x=>x.iPen),L('児童手当',x=>x.iAl),L('不動産収入（経費差引後）',x=>x.iProp),L('不動産の売却（手取り）',x=>x.iSale),L('iDeCo・共済・保険の受取',x=>x.iAsset),L('一時的な収入',x=>x.iOne),L('収入 合計',x=>x.iTot),
    ['【支出】'],L('生活費',x=>x.eLive),L('住居費',x=>x.eHouse),L('教育費',x=>x.eEdu),L('保険料',x=>x.eIns),L('車',x=>x.eCar),L('不動産ローン返済',x=>x.eProp),L('積立・掛金',x=>x.eSave),L('一時的な支出',x=>x.eOne),L('支出 合計',x=>x.eTot),
-   L('年間収支',x=>x.net),['【資産残高】'],L('預貯金',x=>x.cash),L('NISA',x=>x.nisa),L('課税口座',x=>x.taxa),L('iDeCo',x=>x.ideco),L('小規模企業共済',x=>x.kyo),L('投資からの取り崩し',x=>x.wd),L('金融資産 合計',x=>x.bal)];
+   L('年間収支',x=>x.net),['【資産残高】'],L('預貯金',x=>x.cash),L('NISA',x=>x.nisa),L('課税口座',x=>x.taxa),L('iDeCo',x=>x.ideco),L('小規模企業共済',x=>x.kyo),L('その他の資産',x=>x.oth),L('投資からの取り崩し',x=>x.wd),L('金融資産 合計',x=>x.bal)];
   return rows;
 }
 function bsSheet(r){
   const head=['項目（年末・万円）',...r.map(x=>x.y+'年')];const L=(l,f)=>[l,...r.map(x=>rnd(f(x.bs)))];
-  return [head,['【資産】'],L('預貯金',b=>b.cashP),L('NISA',b=>b.nisa),L('課税口座',b=>b.taxa),L('iDeCo',b=>b.ideco),L('小規模企業共済',b=>b.kyo),L('金融資産 計',b=>b.fin),L('自宅',b=>b.hv),L('投資用不動産',b=>b.pv),L('資産 合計',b=>b.at),
+  return [head,['【資産】'],L('預貯金',b=>b.cashP),L('NISA',b=>b.nisa),L('課税口座',b=>b.taxa),L('iDeCo',b=>b.ideco),L('小規模企業共済',b=>b.kyo),L('その他の資産',b=>b.oth||0),L('金融資産 計',b=>b.fin),L('自宅',b=>b.hv),L('投資用不動産',b=>b.pv),L('資産 合計',b=>b.at),
    ['【負債】'],L('住宅ローン',b=>b.hl),L('不動産ローン',b=>b.pl),L('資金の不足',b=>b.short),L('負債 合計',b=>b.dt),['【純資産】'],L('純資産',b=>b.nw),L('自己資本比率（%）',b=>b.at>0?b.nw/b.at*100:0)];
 }
 function plSheet(r){

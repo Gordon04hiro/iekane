@@ -347,3 +347,15 @@ footer.ft nav{display:flex;gap:6px 18px;flex-wrap:wrap}
 footer.ft nav a{color:var(--muted)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* 言葉で選ぶボタン・年金の目安 */
+.pre{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.pre button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 10px;font-size:12px;line-height:1.3;cursor:pointer;display:inline-flex;gap:5px;align-items:baseline}
+.pre button small{color:var(--muted);font-size:10.5px}
+.pre button small::after{content:"%"}
+.pre button:hover{border-color:var(--brand)}
+.pre button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.pre button[aria-pressed="true"] small{color:#fff;opacity:.85}
+.pcalc summary{cursor:pointer;list-style:revert}
+.pcres{display:flex;flex-direction:column;gap:2px;background:var(--sand);border-radius:12px;padding:12px 14px;margin:12px 0 8px}
+.pcres b{font-size:22px;color:var(--ink)} .pcres b small{font-size:12px;font-weight:500;margin-left:3px}
+@media print{.pre,.pcalc{display:none!important}}

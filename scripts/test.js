@@ -54,6 +54,26 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    click(w,'[data-t="scen"]');await wait(100);
    check('シナリオと確率が出る',/%/.test(T(d,'.kpi')[0]||''));
    click(w,'[data-act="pdf"]');check('PDF用のレポートが作られる',w.__printed&&d.querySelectorAll('#printArea table').length>3);
+   const before=T(d,'.panel .kv b')[0];
+   click(w,'[data-act="pre"][data-for="f_infl"][data-v="3"]');await wait(500);
+   check('言葉のボタンで物価上昇率が3%になる',d.getElementById('f_infl').value==='3'&&d.querySelector('[data-act="pre"][data-for="f_infl"][data-v="3"]').getAttribute('aria-pressed')==='true');
+   check('ボタンを押すと結果が計算し直される',T(d,'.panel .kv b')[0]!==before,before);
+   const o=w.eval(`(()=>{const S=basePlan();S.assets.others=[{type:'crypto',name:'BTC',bal:300,basis:100,mon:1,until:50,rate:0,vol:60,tax:30},{type:'gold',bal:200,basis:'',mon:0,until:60,rate:2,vol:15,tax:20}];
+     S.live=40;const r=sim(clone(S));const z=r.map((_,i)=>i%2?-1.5:1.2);const m=sim(clone(S),{z});
+     return{chk:Math.max(...r.map(x=>Math.abs(x.pl.chk))),mchk:Math.max(...m.map(x=>Math.abs(x.pl.chk))),oth0:r[0].oth,used:r.some(x=>x.wd>0&&x.oth<r[0].oth),nisaAfter:r.findIndex(x=>x.oth<0.5)<=r.findIndex(x=>x.nisa<0.5)||r.every(x=>x.nisa<0.5),fin:r[0].bs.fin>=r[0].oth}})()`);
+   check('その他の資産（暗号資産・金）もPLの収支＝純資産の増減',o.chk<0.001&&o.mchk<0.001,o.chk+' / '+o.mchk);
+   check('その他の資産が足りない年に取り崩される（NISAより先）',o.used&&o.nisaAfter);
+   check('その他の資産が金融資産に入る',o.oth0>500&&o.fin);
+   click(w,'[data-act="mode2"][data-m="detail"]');await wait(300);
+   click(w,'[data-act="addoth"]');await wait(300);
+   const ty=d.getElementById('o0_type');check('「その他の資産」を追加できる',!!ty);
+   if(ty){ty.value='crypto';ty.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(300);
+     check('暗号資産を選ぶと利回り0%・値動き60%になる',d.getElementById('o0_rate').value==='0'&&d.getElementById('o0_vol').value==='60')}
+   set(w,'pc_work','emp');set(w,'pc_nen','40');set(w,'pc_yrs','40');set(w,'pc_inc','600');await wait(100);
+   const pc=T(d,'#pcout b')[0]||'';
+   check('年金の目安（会社員40年・年収600万円）が月約16.2万円',/約16\.2/.test(pc),pc);
+   click(w,'[data-act="pcset"]');await wait(300);
+   check('年金の目安を入力欄に入れられる',d.getElementById('f_pen').value==='16.2',d.getElementById('f_pen').value);
    w.close();}
 
   console.log('\n■ 入口ツールの計算');
