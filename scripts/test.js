@@ -109,6 +109,12 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('配偶者と兄弟姉妹：3/4と1/8、配偶者の遺留分1/2・兄弟姉妹なし',/^配偶者3\/43,750万円1\/2/.test(rows()[1]||'')&&/1\/8625万円なし$/.test(rows()[2]||''),rows().join(' / '));
    w.close();}
 
+  {const w=await open('chuko.html');const d=w.document;const n0=d.querySelectorAll('#chresult li').length;
+   const c=d.querySelector('[data-chk="road"]');c.checked=true;c.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(100);
+   check('中古住宅チェック：チェックすると「まだ確かめていないこと」が1つ減る',d.querySelectorAll('#chresult li').length===n0-1,n0+'→'+d.querySelectorAll('#chresult li').length);
+   w.close();}
+  {const h=fs.readFileSync(path.join(DIST,'links.html'),'utf8');check('一次情報リンク集にリンクが並ぶ',(h.match(/class="links"/g)||[]).length>=4);}
+
   console.log('\n■ 結果の共有');
   for(const f of ['lifeplan.html','sell.html','loan.html','rent2buy.html','prepay.html','souzokuzei.html','koujo.html','souzokubun.html']){
     const w=await open(f);click(w,'[data-act="share"]');await wait(200);
@@ -127,7 +133,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    w.close();}
 
   console.log('\n■ ツールの説明');
-  for(const f of ['lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei','koujo','souzokubun']){
+  for(const f of ['lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei','koujo','souzokubun','chuko']){
     const h=fs.readFileSync(path.join(DIST,f+'.html'),'utf8');
     check(f+'.html に計算の考え方とよくある質問',/計算の考え方/.test(h)&&/よくある質問/.test(h));
   }
