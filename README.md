@@ -11,6 +11,7 @@
 |---|---|
 | 記事を書く・直す | `content/articles/〇〇.md` |
 | テーマごとのまとめページ（ガイド） | `content/hubs.yml` |
+| 用語集 | `content/glossary.yml` |
 | 制度・数値を見直す（年1回） | `content/rules.yml` |
 | 「使っているデータ」の出典を直す | `content/sources.yml` |
 | お知らせを足す | `content/news.yml` |
@@ -76,6 +77,7 @@
 - 教育費（文部科学省「子供の学習費調査」・日本政策金融公庫の調査が新しくなっていないか）
 - 児童手当の金額
 - 印紙税の軽減措置の期限（stampUntil）
+- 住宅ローン控除の借入限度額・控除期間（koujo）
 - 買い替え特例・相続空き家の特例の期限（kaikaeUntil・akiyaUntil）
 - 税率、仲介手数料の上限
 - 最後に `checked`（確認した日）と `next`（次の予定）を書き換える
