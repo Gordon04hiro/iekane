@@ -17,6 +17,7 @@ const RULES=Y('content/rules.yml');
 const SOURCES=Y('content/sources.yml');
 const NEWS=Y('content/news.yml');
 const PAGES=Y('content/pages.yml');
+const AFF=fs.existsSync(R('content/affiliates.yml'))?(Y('content/affiliates.yml')||{}):{};
 const SITE_URL=String(SITE.url||'').replace(/\/+$/,'');
 if(!/^https?:\/\//.test(SITE_URL)) fail('site.yml の url が正しくありません');
 const jd=d=>{const [y,m,dd]=String(d).split('-').map(Number);return `${y}年${m}月${dd}日`};
@@ -33,9 +34,13 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
   if(!/^[a-z0-9-]+$/.test(slug)) fail(`記事のファイル名 ${f} は半角の英小文字・数字・ハイフンだけにしてください`);
   for(const k of ['タイトル','カテゴリ','公開日','リード']) if(!fm[k]) fail(`記事 ${f} に「${k}」がありません`);
   let body=m[2].replace(/\{\{期限:(\w+)\}\}/g,(_,k)=>{if(!RULES[k])fail(`記事 ${f} の {{期限:${k}}} が rules.yml にありません`);return jd(RULES[k])});
+  let pr=false;
+  body=body.replace(/\{\{広告:([^}]+)\}\}/g,(_,k)=>{k=k.trim();const ad=AFF[k];if(!ad)fail(`記事 ${f} の {{広告:${k}}} が affiliates.yml にありません`);
+    const code=String(ad['コード']||'').trim();if(!code)return '';pr=true;
+    return `\n\n<aside class="pr-box"><span class="pr-label">PR</span><b>${ad['見出し']||''}</b>${ad['説明']?`<p>${ad['説明']}</p>`:''}<div class="pr-code">${code}</div></aside>\n\n`});
   const tool=fm['関連ツール']?TOOLMAP[fm['関連ツール']]:'';
   if(fm['関連ツール']&&!tool) fail(`記事 ${f} の関連ツール「${fm['関連ツール']}」が見つかりません`);
-  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,tool,lead:fm['リード'],body:marked.parse(body)};
+  return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,pr,tool,lead:fm['リード'],body:marked.parse(body)};
 }).sort((a,b)=>b.date.localeCompare(a.date));
 
 // ---- ブラウザで動くプログラムをまとめる
