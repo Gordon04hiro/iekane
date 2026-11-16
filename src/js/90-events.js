@@ -25,6 +25,8 @@ document.addEventListener('click',e=>{
   else if(a==='addoth'){S.assets.others.push(newOther('gold'));changed();vLife(document.getElementById('view'))}
   else if(a==='deloth'){S.assets.others.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
   else if(a==='pcset'){const v=penEst();const k=U.pc.who==='sp'?'spen':'pen';const el=document.getElementById('f_'+k);if(el){el.value=v.take;el.dispatchEvent(new Event('input',{bubbles:true}))}toast((U.pc.who==='sp'?'配偶者':'ご本人')+'の年金に月'+v.take+'万円を入れました')}
+  else if(a==='pcfill'){penFill(b.dataset.w)}
+  else if(a==='nextempty'){nextEmpty()}
   else if(a==='delev'){S.events.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
 });
 document.addEventListener('input',e=>{

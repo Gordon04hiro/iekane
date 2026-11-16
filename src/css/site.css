@@ -359,3 +359,18 @@ footer.ft nav a{color:var(--muted)}
 .pcres{display:flex;flex-direction:column;gap:2px;background:var(--sand);border-radius:12px;padding:12px 14px;margin:12px 0 8px}
 .pcres b{font-size:22px;color:var(--ink)} .pcres b small{font-size:12px;font-weight:500;margin-left:3px}
 @media print{.pre,.pcalc{display:none!important}}
+/* 入力の進み具合 */
+.prog{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:12px 0}
+.prog .ph{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:13px}
+.prog .ph span{color:var(--muted);flex:1;min-width:160px}
+.prog .ph em{font-style:normal;font-weight:700;color:var(--coin);font-size:16px;margin:0 2px}
+.prog .pbar{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden;margin-top:8px}
+.prog .pbar i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s}
+.prog.done{background:var(--good-bg);border-color:transparent}
+.prog.done b{color:var(--good)}
+.gleft{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--sand);color:var(--coin);vertical-align:middle}
+.gleft:empty{display:none}
+.gleft.ok{background:var(--good-bg);color:var(--good)}
+.teiki summary,.pcalc summary{cursor:pointer}
+.teiki .steps{margin:10px 0 0;padding-left:1.3em;display:grid;gap:8px;font-size:13.5px;line-height:1.7}
+@media print{.prog,.gleft,.teiki{display:none!important}}

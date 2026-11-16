@@ -26,7 +26,8 @@ function vLife(v){
   <div class="modebar"><div class="seg" role="group" aria-label="入力の細かさ"><button data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}">かんたん入力</button><button data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}">くわしく入力</button></div>
    <span class="unit">${LP.mode==='detail'?'年金・車・iDeCo・不動産投資なども入れられます。':'まずは主な項目だけで大丈夫です。'}</span></div>
   ${LP.mode!=='detail'?`<p class="unit defaults">かんたん入力では、次の値を自動で使います：${esc(easyDefaults(S))}。変えたいときは「くわしく入力」へ。</p>`:''}
-  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
+  <div class="prog" id="prog" aria-live="polite"></div>
+  <div class="formgrid${LP.mode==='detail'?'':' easy'}">${GROUPS.map(g=>`<details class="grp"${OPEN.includes(g.t)?' open':''}${g.adv?' data-adv':''}><summary>${g.t}<span class="gleft" id="gl${GROUPS.indexOf(g)}"></span>${g.s?`<small>${g.s}</small>`:''}</summary><div class="body">${g.f?`<div class="fields">${g.f.map(f=>fieldHTML(f,S)).join('')}</div>`:''}${g.pencalc?penHTML(S):''}${g.kids?`<div style="margin-top:14px">${kidsHTML(S)}</div>`:''}${g.events?eventsHTML(S):''}${g.assets?`<div style="margin-top:14px">${assetsHTML(S)}</div>`:''}${g.props?propsHTML(S):''}</div></details>`).join('')}</div>
   <section class="result" id="result"></section></div>`;
   syncVis(S); renderResult(); updateDock();
 }
@@ -86,9 +87,32 @@ function renderResult(){
   bindChart('ch1',r0.length,onIdx);
   }
 }
+/* ---------- 入力の進み具合（あと何項目） ---------- */
+function progItems(S){
+  const det=LP.mode==='detail',out=[];
+  GROUPS.forEach((g,gi)=>{if(g.adv&&!det)return;(g.f||[]).forEach(f=>{if(f.type==='sel'||(!det&&!f.easy)||(f.show&&!f.show(S)))return;out.push({gi,id:'f_'+f.id,l:f.l,ok:S[f.id]!==''&&S[f.id]!=null})});
+    if(g.kids)(S.kids||[]).forEach((c,i)=>out.push({gi,id:`k${i}_by`,l:`第${i+1}子の生まれ年`,ok:c.by!==''&&c.by!=null&&!isNaN(c.by)}));
+    if(g.assets){const b=S.assets&&S.assets.cash.bal;out.push({gi,id:'a_cash_bal',l:'預貯金の残高',ok:b!==''&&b!=null})}});
+  return out;
+}
+function updateProgress(){
+  const S=LP.plans[U.plan],box=document.getElementById('prog');if(!S||!box)return;
+  const it=progItems(S),done=it.filter(x=>x.ok).length,left=it.length-done,nx=it.find(x=>!x.ok);
+  box.className='prog'+(left?'':' done');
+  box.innerHTML=left?`<div class="ph"><b>入力の進み具合 ${done}／${it.length}項目</b><span>あと<em>${left}</em>項目${nx?`（次は「${esc(nx.l)}」）`:''}</span><button class="btn small" data-act="nextempty">次の未入力へ</button></div><div class="pbar"><i style="width:${(done/Math.max(1,it.length)*100).toFixed(1)}%"></i></div>`
+    :`<div class="ph"><b>✓ ${LP.mode==='detail'?'くわしく入力の':''}項目はすべて入力済みです</b><span>${LP.mode==='detail'?'下の結果を確認してみましょう。':'余裕があれば「くわしく入力」で年金や利回りも見直せます。'}</span></div>`;
+  GROUPS.forEach((g,gi)=>{const el=document.getElementById('gl'+gi);if(!el)return;const m=it.filter(x=>x.gi===gi);const l=m.filter(x=>!x.ok).length;el.textContent=!m.length?'':(l?'あと'+l:'✓');el.className='gleft'+(m.length&&!l?' ok':'')});
+  return left;
+}
+function nextEmpty(){
+  const S=LP.plans[U.plan];const nx=progItems(S).find(x=>!x.ok);if(!nx)return;
+  const el=document.getElementById(nx.id);if(!el)return;const d=el.closest('details');if(d)d.open=true;
+  el.scrollIntoView({block:'center',behavior:'smooth'});try{el.focus({preventScroll:true})}catch(e){el.focus()}
+}
 function updateDock(){
   const S=LP.plans[U.plan]; if(!S) return; const s=summarize(sim(S),S);
-  document.getElementById('dockin').innerHTML=`<div class="v"><span>${keys().length>1?U.plan+'：':''}95歳時点の貯蓄<b class="${s.last.bal<0?'neg':''}">${fmt(s.last.bal)} 万円</b></span><span>判定<b style="font-size:13px;margin-top:3px"><span class="chip ${s.st.c}">${s.st.t}</span></b></span></div><button class="btn primary" data-act="toresult">結果を見る</button>`;
+  const left=updateProgress();
+  document.getElementById('dockin').innerHTML=`<div class="v"><span>${keys().length>1?U.plan+'：':''}95歳時点の貯蓄<b class="${s.last.bal<0?'neg':''}">${fmt(s.last.bal)} 万円</b></span>${left?`<span>入力<b style="font-size:13px;margin-top:3px">あと${left}項目</b></span>`:''}<span>判定<b style="font-size:13px;margin-top:3px"><span class="chip ${s.st.c}">${s.st.t}</span></b></span></div><button class="btn primary" data-act="toresult">結果を見る</button>`;
 }
 let rT=0;
 function changed(){LP.example=false;saveLP();updateDock();clearTimeout(rT);rT=setTimeout(()=>{renderResult();const d=document.getElementById('diffbox');if(d)d.innerHTML=diffHTML()},250)}
@@ -107,8 +131,10 @@ function penHTML(S){
   const c=U.pc=U.pc||{who:'self',work:'emp',nen:40,yrs:38,inc:500};
   const sel=(k,o)=>`<select id="pc_${k}" data-pc="${k}">${o.map(x=>`<option value="${x[0]}"${c[k]===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select>`;
   const num=(k,l,u,h)=>`<label class="fld"${k!=='nen'?' data-pcemp':''}${k!=='nen'&&c.work!=='emp'?' hidden':''}><span class="lab">${l}</span><span class="inp"><input id="pc_${k}" data-pc="${k}" type="number" inputmode="decimal" value="${esc(c[k])}"><span class="u">${u}</span></span>${h?`<span class="hint">${h}</span>`:''}</label>`;
-  return `<details class="sub pcalc" style="margin-top:14px"><summary><b>年金の目安を計算する</b> <span class="unit">ねんきん定期便が手元にないとき</span></summary>
-   <div class="fields" style="margin-top:10px">
+  return `${teikiHTML()}<details class="sub pcalc" style="margin-top:10px"><summary><b>年金の目安を計算する</b> <span class="unit">ねんきん定期便が手元にないとき</span></summary>
+   <div class="macts" style="margin-top:10px"><button class="btn small" data-act="pcfill" data-w="self">ご本人の年収から目安を出す</button>${S.spouse==='yes'?'<button class="btn small" data-act="pcfill" data-w="sp">配偶者の年収から目安を出す</button>':''}</div>
+   <p class="unit" style="margin:4px 0 0">上で入れた手取り年収と働く年齢から、下の欄を自動で埋めます。違うところは直してください。</p>
+   <div class="fields" id="pcf" style="margin-top:10px">
     <label class="fld"><span class="lab">だれの年金</span>${sel('who',[['self','ご本人'],['sp','配偶者']])}</label>
     <label class="fld"><span class="lab">おもな働き方</span>${sel('work',[['emp','会社員・公務員'],['self','自営業・フリーランス'],['dep','専業主婦（夫）・扶養の範囲で働く']])}</label>
     ${num('nen','国民年金に入る年数','年','20〜60歳のうち保険料を納める（免除を除く）年数。満額は40年')}
@@ -118,4 +144,23 @@ function penHTML(S){
    <div id="pcout">${penOut()}</div>
    <div class="macts"><button class="btn small primary" data-act="pcset">この金額を入れる</button></div>
    <p class="unit" style="margin:6px 0 0">令和8年度の制度の金額をもとにした、ざっくりした目安です。正確な見込み額は「ねんきん定期便」や「ねんきんネット」で確認できます。</p></details>`;
+}
+
+function teikiHTML(){
+  return `<details class="sub teiki" style="margin-top:14px"><summary><b>「ねんきん定期便」の見方</b> <span class="unit">毎年、誕生月に届くハガキ</span></summary>
+   <ol class="steps">
+    <li><b>50歳以上の方</b>：「老齢年金の種類と見込額（年額）」の<b>合計</b>を見ます。今の働き方を60歳まで続けた場合の見込みです。<br><span class="unit">年額なので12で割り、税金などを引いた手取りは約9割で考えます（例：年額200万円 → 月約15万円）。</span></li>
+    <li><b>50歳未満の方</b>：載っているのは「これまでの加入実績に応じた年金額」で、<b>今までに払った分だけ</b>の金額です。これから働く分が足されるので、実際はもっと増えます。<br><span class="unit">そのまま入れると少なすぎるので、下の「年金の目安を計算する」を使うか、「ねんきんネット」の将来の見込額の試算で確認してください。</span></li>
+    <li><b>手元にない場合</b>：マイナポータルからつながる「ねんきんネット」で、いつでも見られます。</li>
+    <li><b>受け取り開始</b>は原則65歳です。60〜75歳の間で早めたり遅らせたりでき、遅らせるほど金額が増えます（上の「受け取り開始」に反映してください）。</li>
+   </ol></details>`;
+}
+function penFill(w){
+  const S=LP.plans[U.plan];const sp=w==='sp';
+  const net=n(sp?S.sinc:S.inc),age=n(sp?S.sage:S.age),end=Math.min(65,n(sp?S.sworkEnd:S.workEnd)||65);
+  const c=U.pc=U.pc||{};c.who=sp?'sp':'self';
+  if(net>0){c.work='emp';c.inc=Math.round(net/0.78*0.9);c.yrs=Math.max(0,Math.min(43,Math.round(end-22)))}else{c.work=sp?'dep':'self';c.inc=0;c.yrs=0}
+  c.nen=40;
+  const box=document.querySelector('.pcalc');if(box){const p=box.parentNode,o=box.open,nw=document.createElement('div');nw.innerHTML=penHTML(S);const nb=nw.querySelector('.pcalc');nb.open=true;p.replaceChild(nb,box)}
+  toast('年収から目安を出しました。内容を確かめて「この金額を入れる」を押してください');
 }

@@ -54,6 +54,11 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    click(w,'[data-t="scen"]');await wait(100);
    check('シナリオと確率が出る',/%/.test(T(d,'.kpi')[0]||''));
    click(w,'[data-act="pdf"]');check('PDF用のレポートが作られる',w.__printed&&d.querySelectorAll('#printArea table').length>3);
+   check('入力例では「すべて入力済み」',/すべて入力済み/.test(T(d,'#prog')[0]||''),T(d,'#prog')[0]);
+   set(w,'f_live','');await wait(400);
+   check('空欄にすると「あと1項目」と出る',/あと1項目/.test(T(d,'#prog')[0]||'')&&/生活費/.test(T(d,'#prog')[0]||''),T(d,'#prog')[0]);
+   click(w,'[data-act="nextempty"]');check('「次の未入力へ」で空欄に移動',d.activeElement&&d.activeElement.id==='f_live');
+   set(w,'f_live','20');await wait(400);
    const before=T(d,'.panel .kv b')[0];
    click(w,'[data-act="pre"][data-for="f_infl"][data-v="3"]');await wait(500);
    check('言葉のボタンで物価上昇率が3%になる',d.getElementById('f_infl').value==='3'&&d.querySelector('[data-act="pre"][data-for="f_infl"][data-v="3"]').getAttribute('aria-pressed')==='true');
@@ -69,6 +74,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    const ty=d.getElementById('o0_type');check('「その他の資産」を追加できる',!!ty);
    if(ty){ty.value='crypto';ty.dispatchEvent(new w.Event('input',{bubbles:true}));await wait(300);
      check('暗号資産を選ぶと利回り0%・値動き60%になる',d.getElementById('o0_rate').value==='0'&&d.getElementById('o0_vol').value==='60')}
+   check('ねんきん定期便の見方が出る',/50歳未満/.test(d.querySelector('.teiki')?.textContent||''));
+   click(w,'[data-act="pcfill"][data-w="self"]');await wait(200);
+   check('年収から年金の目安を出せる',+d.getElementById('pc_inc').value>0&&/約\d/.test(T(d,'#pcout b')[0]||''),d.getElementById('pc_inc')?.value);
    set(w,'pc_work','emp');set(w,'pc_nen','40');set(w,'pc_yrs','40');set(w,'pc_inc','600');await wait(100);
    const pc=T(d,'#pcout b')[0]||'';
    check('年金の目安（会社員40年・年収600万円）が月約16.2万円',/約16\.2/.test(pc),pc);
