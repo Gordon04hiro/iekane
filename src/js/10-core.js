@@ -1,5 +1,5 @@
 /* ===== サイのまど サイト本体 ===== */
-const SITE={name:'サイのまど',sub:'家とお金の相談室',contactUrl:SITE_CFG.contactForm||''}; /* contactUrl：GoogleフォームのURLを入れると、お問い合わせボタンが有効になります */
+const SITE={name:'サイのまど',sub:'住まいとお金の無料シミュレーション',contactUrl:SITE_CFG.contactForm||''}; /* contactUrl：GoogleフォームのURLを入れると、お問い合わせボタンが有効になります */
 const LKEY='iekane-lifeplan-v1';
 const PK=['A','B','C'];
 const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
@@ -38,7 +38,7 @@ function go(){
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
   toolInfoTail(r);legalTail(r);adTail(r);setTimeout(fillAds,0);
-  if(!['article','hub','notfound'].includes(r))document.title=r==='home'?'サイのまど 家とお金の相談室':TITLES[r]+'｜サイのまど';
+  if(!['article','hub','notfound'].includes(r))document.title=r==='home'?'サイのまど｜住まいとお金の無料シミュレーション':TITLES[r]+'｜サイのまど';
 }
 if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
 
@@ -62,7 +62,7 @@ const TOOLS=[
 function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
-   <div><div class="k">家とお金の相談室</div>
+   <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>家のことを決める前に、<br><em>お金の未来</em>を見てみよう。</h1>
     <p>家を買う、売る、相続する。大きな決断の前に、95歳までのお金の流れを数字で確かめられる無料ツールをそろえています。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
