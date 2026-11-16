@@ -26,14 +26,14 @@ const keys=()=>PK.filter(k=>LP.plans[k]);
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
 
 /* ---------- routing ---------- */
-const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','koujo','souzokubun','glossary','articles','news','data','about','privacy'];
+const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','koujo','souzokubun','chuko','links','glossary','articles','news','data','about','privacy'];
 function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':h.startsWith('g-')?'hub':'home')}
-const TITLES={koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',glossary:'用語集',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
+const TITLES={chuko:'中古住宅チェックシート',links:'一次情報リンク集',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',glossary:'用語集',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
 function go(){
   const r=route();
   document.querySelectorAll('.gnav a').forEach(a=>{if(a.dataset.r===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   const v=document.getElementById('view');
-  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
+  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
   document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei','koujo','souzokubun'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
@@ -56,6 +56,7 @@ const TOOLS=[
  {ic:'down',href:'#prepay',t:'繰上げ返済シミュレーター',d:'期間短縮型と返済額軽減型で、減る利息と毎月の返済を比べます。'},
  {ic:'scale',href:'#souzokuzei',t:'相続税がかかるかチェック',d:'財産の合計が基礎控除を超えそうかを確かめます。税額は計算しません。'},
  {ic:'down',href:'#koujo',t:'住宅ローン控除の目安',d:'借入額と家の種類から、住宅ローン控除で毎年いくら戻りそうかを計算します。'},
+ {ic:'vs',href:'#chuko',t:'中古住宅チェックシート',d:'内見・購入前に確かめたい19のポイント。再建築・耐震・浄化槽・私道など、安さの理由を見落とさない。'},
  {ic:'inherit',href:'#souzokubun',t:'法定相続分の計算',d:'家族構成から、相続の割合（法定相続分）と遺留分、金額の目安がわかります。'}
 ];
 function vHome(v){

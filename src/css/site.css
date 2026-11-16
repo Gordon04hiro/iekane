@@ -145,6 +145,8 @@ details.grp .body{padding:0 16px 16px}
 .toolcta b{font-size:15px}.toolcta span{font-size:14px;line-height:1.7}.toolcta .btn{justify-self:start;margin-top:4px}
 .refs{margin-top:26px}.refs h2{font-size:16px;margin:0 0 6px}.refs ul{margin:0;padding-left:1.2em;display:grid;gap:4px}.refs li{font-size:13.5px}
 .ftguides{margin-bottom:6px}
+.links{list-style:none;padding:0;margin:0 0 8px;display:grid;gap:8px}.links li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:2px}.links a{font-weight:700;color:var(--brand)}.links span{font-size:13px;color:var(--muted)}
+.tool[href*="chuko"] .ic{background:var(--sky);color:#2f5d73}
 table.cf.fit{width:100%}table.cf.fit th,table.cf.fit td{white-space:normal}
 .terms dt{color:var(--ink)}
 .terms{margin:0;display:grid;gap:10px}

@@ -1,0 +1,64 @@
+# ==============================================================
+#  信頼できる一次情報リンク集（links.html に表示）
+#  分野 ／ 名前 ／ URL（https:// で始まる公式サイト） ／ 説明
+# ==============================================================
+- 分野: 家を買う・借りる
+  名前: 国土交通省「住宅ローン減税」
+  URL: https://www.mlit.go.jp/jutakukentiku/house/zeisei_index2.html
+  説明: 住宅ローン控除の対象・借入の上限・控除期間
+- 分野: 家を買う・借りる
+  名前: 国土交通省「みらいエコ住宅2026事業」
+  URL: https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk4_000310.html
+  説明: 省エネ住宅の新築・リフォームの補助金
+- 分野: 家を買う・借りる
+  名前: 国土交通省「人の死の告知に関するガイドライン」
+  URL: https://www.mlit.go.jp/report/press/tochi_fudousan_kensetsugyo16_hh_000001_00029.html
+  説明: 過去に人が亡くなった物件の告知の考え方
+- 分野: 税金
+  名前: 国税庁 タックスアンサー（土地・建物の譲渡）
+  URL: https://www.nta.go.jp/taxes/shiraberu/taxanswer/code/bunya-tochi-tatemono.htm
+  説明: 家や土地を売ったときの税金・特例
+- 分野: 税金
+  名前: 国税庁 タックスアンサー（相続税・贈与税）
+  URL: https://www.nta.go.jp/taxes/shiraberu/taxanswer/code/bunya-souzoku-zoyo.htm
+  説明: 相続税・贈与税のしくみ
+- 分野: 税金
+  名前: 総務省「固定資産税の概要」
+  URL: https://www.soumu.go.jp/main_sosiki/jichi_zeisei/czaisei/czaisei_seido/149767_08.html
+  説明: 固定資産税の税率・住宅用地の特例など
+- 分野: 相続・登記
+  名前: 法務省「相続土地国庫帰属制度」（広報誌）
+  URL: https://www.moj.go.jp/KANBOU/KOHOSHI/no82/6.html
+  説明: 相続した土地を国に引き取ってもらう制度
+- 分野: お金・年金
+  名前: 日本年金機構「令和8年4月分からの年金額等について」
+  URL: https://www.nenkin.go.jp/oshirase/taisetu/kojin/2026/202604/0401.html
+  説明: 今年度の年金額
+- 分野: お金・年金
+  名前: 金融庁 NISA特設ウェブサイト
+  URL: https://www.fsa.go.jp/policy/nisa2/
+  説明: NISAのしくみ
+- 分野: お金・年金
+  名前: 厚生労働省「iDeCo（個人型確定拠出年金）」
+  URL: https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/nenkin/kyoshutsu/ideco.html
+  説明: iDeCoのしくみ
+- 分野: 災害・まちの情報
+  名前: 国土交通省 ハザードマップポータルサイト
+  URL: https://disaportal.gsi.go.jp/
+  説明: 全国の洪水・土砂災害・津波などのリスクを地図で確認
+- 分野: 浜松・静岡
+  名前: 浜松市 防災マップ・ハザードマップ
+  URL: https://www.city.hamamatsu.shizuoka.jp/bosai/bosai/map/
+  説明: 浜松市の浸水・土砂災害などの想定
+- 分野: 浜松・静岡
+  名前: 浜松市 都市計画図
+  URL: https://www.city.hamamatsu.shizuoka.jp/toshikei/city/tosike/map/index.html
+  説明: 用途地域・市街化区域などの確認
+- 分野: 浜松・静岡
+  名前: 浜松市 木造住宅の耐震化
+  URL: https://www.city.hamamatsu.shizuoka.jp/kensido/home_tochi/home/kensido/taisin/
+  説明: 無料の耐震診断・補強工事の助成
+- 分野: 浜松・静岡
+  名前: 静岡県 浄化槽管理者の報告書の提出について
+  URL: https://www.pref.shizuoka.jp/kurashikankyo/kankyo/taikisuishitsu/1002650/1079075
+  説明: 浄化槽つきの家を買ったときの届出

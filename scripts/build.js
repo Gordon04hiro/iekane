@@ -28,8 +28,8 @@ if(!RULES.koujo||!RULES.koujo.types) fail('rules.yml に koujo（住宅ローン
 for(const k of ['checked','next','stampUntil','kaikaeUntil','akiyaUntil','toukiTransition']) if(!/^\d{4}-\d\d-\d\d$/.test(RULES[k]||'')) fail(`rules.yml の ${k} の日付が正しくありません（例：2027-03-31）`);
 
 // ---- 記事（content/articles/*.md）
-const TOOLNAME={koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート',souzoku2:'相続の手続きチェックシート',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断'};
-const TOOLMAP={koujo:'#koujo',souzokubun:'#souzokubun',rent2buy:'#rent2buy',prepay:'#prepay',souzokuzei:'#souzokuzei',lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
+const TOOLNAME={chuko:'中古住宅チェックシート',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート',souzoku2:'相続の手続きチェックシート',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断'};
+const TOOLMAP={chuko:'#chuko',koujo:'#koujo',souzokubun:'#souzokubun',rent2buy:'#rent2buy',prepay:'#prepay',souzokuzei:'#souzokuzei',lifeplan:'#lifeplan',sell:'#sell',loan:'#loan',souzoku:'#souzoku',souzoku2:'#souzoku2',akiya:'#akiya',vs:'#vs'};
 const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f.startsWith('_')).map(f=>{
   const src=read('content/articles/'+f);const m=src.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if(!m) fail(`記事 ${f} の先頭の「---」で囲んだ部分が見つかりません`);
@@ -60,6 +60,10 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
   const refs=(fm['参考']||[]).map(x=>Array.isArray(x)?{t:x[0],u:x[1]}:{t:x['名前'],u:x['URL']}).filter(x=>x.t&&/^https:\/\//.test(x.u||''));
   return {slug,title:fm['タイトル'],cat:fm['カテゴリ'],date:fm['公開日'],updated:fm['更新日']||fm['公開日'],draft:fm['下書き']!==false,pr,tool,lead:fm['リード'],stitle:fm['検索タイトル']||'',refs,il:fm['イラスト']||'',...(()=>{let k=0;const toc=[];const html=marked.parse(body).replace(/<h2>([\s\S]*?)<\/h2>/g,(_,t)=>{k++;toc.push(t.replace(/<[^>]+>/g,''));return `<h2 id="s${k}"><span class="hn">${k}</span><span>${t}</span></h2>`});return {body:html,toc,mins:Math.max(1,Math.round(body.replace(/<[^>]+>|[\s#*>|:-]/g,'').length/500))}})()};
 }).sort((a,b)=>b.date.localeCompare(a.date));
+// ---- 一次情報リンク集（content/links.yml）
+const LINKS=(fs.existsSync(R('content/links.yml'))?(Y('content/links.yml')||[]):[]).map((l,i)=>{
+  if(!l['名前']||!/^https:\/\//.test(l['URL']||'')) fail(`links.yml の${i+1}番目の「名前」か「URL」（https:// で始まる）を確認してください`);
+  return{c:l['分野']||'その他',t:l['名前'],u:l['URL'],d:l['説明']||''}});
 // ---- 用語集（content/glossary.yml）
 const GLOSSARY=(fs.existsSync(R('content/glossary.yml'))?(Y('content/glossary.yml')||[]):[]).map((g,i)=>{
   if(!g['語']||!g['説明']) fail(`glossary.yml の${i+1}番目に「語」か「説明」がありません`);
@@ -86,7 +90,8 @@ const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x[
 const NEWS=${JSON.stringify(NEWS.map(x=>({d:x['日付'],t:x['内容']})))};
 const ARTICLES=${JSON.stringify(ARTS.map(({body,...a})=>a))};
 const HUBS=${JSON.stringify(HUBS)};
-const GLOSSARY=${JSON.stringify(GLOSSARY)}; // 本文は各記事のページにだけ入れる（全ページのプログラムを軽くするため）
+const GLOSSARY=${JSON.stringify(GLOSSARY)};
+const LINKS=${JSON.stringify(LINKS)}; // 本文は各記事のページにだけ入れる（全ページのプログラムを軽くするため）
 `;
 const files=fs.readdirSync(R('src/js')).filter(f=>f.endsWith('.js')).sort();
 const pre=files.filter(f=>f<'10'), main=files.filter(f=>f>='10');
@@ -129,7 +134,7 @@ async function prerender(pg,base){
     // 検索エンジン向けの情報（記事・ツール・パンくず）
     const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'イエカネ運営者',jobTitle:[].concat(P['資格']||[])[0]||undefined,hasCredential:[].concat(P['資格']||[]).map(q=>({'@type':'EducationalOccupationalCredential',name:q})),url:SITE_URL+'/about.html#profile'};
     const crumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map(([n,u],k)=>({'@type':'ListItem',position:k+1,name:n,item:u}))});
-    const TOOLR=['koujo','souzokubun','lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
+    const TOOLR=['chuko','koujo','souzokubun','lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
     const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'イエカネ',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},
         {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
       :pg.hub?[{'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],[pg.hub.title,canon(pg.f)]])}]

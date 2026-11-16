@@ -16,8 +16,8 @@ buy:
       記事: [loan-budget, loan-400man, loan-500man, loan-600man, loan-700man, rent-same-buy]
     - 見出し: 住宅ローンを選ぶ
       説明: 金利のタイプや、住宅ローン控除のしくみを知っておくと、借り方の判断がしやすくなります。
-      ツール: [vs, koujo]
-      記事: [hendo-kotei, loan-koujo]
+      ツール: [vs, koujo, chuko]
+      記事: [hendo-kotei, loan-koujo, pair-loan, chuko-yasui-riyu]
     - 見出し: 買ったあとのお金を知る
       説明: 固定資産税や修繕費は、家を持っているかぎりかかり続けます。繰上げ返済や借り換えの考え方も確認しておきましょう。
       ツール: [prepay]
@@ -25,7 +25,7 @@ buy:
     - 見出し: 家計全体で確かめる
       説明: 教育費や老後まで続けて見ると、本当に無理がないかがわかります。
       ツール: [lifeplan]
-      記事: [kyouikuhi]
+      記事: [kyouikuhi, hamamatsu-hojokin-2026]
 sell:
   タイトル: 家を売る・住み替えるときのガイド
   検索タイトル: 家を売る・住み替えるときのガイド｜手取り・進め方・必要書類
@@ -63,7 +63,7 @@ souzoku:
     - 見出し: 相続した実家をどうするか
       説明: 持ち続ける・貸す・売るで、かかるお金は大きく変わります。売るなら3,000万円の特例の期限にも気をつけましょう。
       ツール: [akiya]
-      記事: [jikka-souzoku, akiya-3000]
+      記事: [jikka-souzoku, akiya-3000, oya-tochi]
 money:
   タイトル: これからのお金のガイド
   検索タイトル: これからのお金のガイド｜家計の見通し・教育費・老後資金
