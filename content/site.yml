@@ -2,7 +2,7 @@
 url: https://iekane.jp        # ← 取得したドメインに書き換える（最後に / は付けない）
 name: イエカネ 家とお金の相談室
 contactForm: "https://docs.google.com/forms/d/e/1FAIpQLSfJuvud4JCL3M9MJ5PTbYuTm9Rg05zVdsF_b8DD7D5koEXONQ/viewform"               # GoogleフォームのURLを入れると、お問い合わせボタンが有効になります
-analytics: ""                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
+analytics: "G-78NZTT9650"                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
 adsense: ""                   # AdSenseの審査が通ったら、パブリッシャーID（ca-pub-XXXX）を入れます
 
 # AdSenseの「広告ユニット」の番号（data-ad-slot の数字）。空欄の枠には何も出ません。

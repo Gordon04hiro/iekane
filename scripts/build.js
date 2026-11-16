@@ -76,7 +76,7 @@ const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
 const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:a.title+'｜イエカネ',d:a.lead,art:a}))];
-const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}');</script>`:'';
+const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}',{page_location:location.origin+location.pathname});</script>`:'';
 const ads=SITE.adsense?`<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
 async function prerender(pg,base){
   const boot=`<script>window.PAGE=${JSON.stringify(pg.p)};window.BASE=${JSON.stringify(base)};${pg.slug?'window.SLUG='+JSON.stringify(pg.slug)+';':''}</script>`;
