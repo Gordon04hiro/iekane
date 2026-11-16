@@ -121,7 +121,7 @@ function sField(f){
 function sVis(){SALL.forEach(f=>{if(f.show){const el=document.querySelector(`[data-sf="${f.id}"]`);if(el)el.hidden=!f.show(SV)}})}
 const TAXNOTE='<div class="taxnote">税金はすべて一般的な計算方法による<b>計算例</b>です。特例が使えるかどうかの判断や実際の税額は、税理士または税務署にご確認ください。当サイトでは個別の税務相談にはお答えしていません。</div>';
 function vSell(v){
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 売却・住み替えシミュレーター</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイかね</a> › 売却・住み替えシミュレーター</div>
   <div class="thead"><h1>売却・住み替えシミュレーター</h1><p>今の家を売ったら、手元にいくら残るか。ローンを返し切れるか。次の家を買うなら、いくら借りることになるか。売る前に確かめておきたい数字の目安をまとめて出します。</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
    ${SV.example?`<p class="unit" style="margin-top:8px">いまは入力例（築12年の木造戸建て・ローン残り1,800万円）が入っています。ご自分の数字に書き換えてください。</p>`:''}</div>

@@ -20,7 +20,7 @@ const CHECKS=[
 ];
 let CK={};try{const s=localStorage.getItem(CKEY);if(s)CK=JSON.parse(s)||{}}catch(e){}
 function vSouzoku(v){
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 相続の準備チェックシート（遺す方へ）</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイかね</a> › 相続の準備チェックシート（遺す方へ）</div>
   <div class="thead"><h1>相続の準備チェックシート<br><small style="font-size:.6em;color:var(--muted)">遺す方へ</small></h1><p>家や財産を遺す立場の方のためのチェックシートです。相続の準備がどこまでできているかを、12の質問で確かめます。当てはまるものにチェックを入れてください。チェックが付かなかった項目が、これからやることのリストになります。</p>
    <div class="safe">✓ 回答はこの端末の中だけに保存され、どこにも送信されません</div>${souzokuTabs('souzoku')}</div>
   <div id="cscore"></div>
@@ -84,7 +84,7 @@ let C2={};try{const s=localStorage.getItem(C2KEY);if(s)C2=JSON.parse(s)||{}}catc
 function addTo(d,o){const x=new Date(d.getTime());if(o.d)x.setDate(x.getDate()+o.d);if(o.m)x.setMonth(x.getMonth()+o.m);if(o.y)x.setFullYear(x.getFullYear()+o.y);if(o.ye!=null){x.setFullYear(x.getFullYear()+o.ye,11,31)}if(o.cap){const c=new Date(o.cap+'T00:00:00');if(x>c)return c}return x}
 const jdate=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
 function vSouzoku2(v){
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 相続の手続きチェックシート（受け継ぐ方へ）</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイかね</a> › 相続の手続きチェックシート（受け継ぐ方へ）</div>
   <div class="thead"><h1>相続の手続きチェックシート<br><small style="font-size:.6em;color:var(--muted)">受け継ぐ方へ</small></h1>
    <p>親などから相続する立場の方のためのチェックシートです。親が元気なうちに確かめておくことと、相続が起きたあとの期限つきの手続きを、順番に確認できます。</p>
    <div class="safe">✓ 回答はこの端末の中だけに保存され、どこにも送信されません</div>${souzokuTabs('souzoku2')}</div>

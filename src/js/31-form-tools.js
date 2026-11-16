@@ -16,7 +16,7 @@ function gtField(def,f,V){
 function gtVis(def){const V=gtState(def);def.groups.flatMap(g=>g.f).forEach(f=>{if(f.show){const el=document.querySelector(`[data-gf="${def.id}_${f.id}"]`);if(el)el.hidden=!f.show(V)}})}
 function vGen(def,v){
   const V=gtState(def);
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › ${esc(def.title)}</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイかね</a> › ${esc(def.title)}</div>
   <div class="thead"><h1>${esc(def.title)}</h1><p>${def.lead}</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
    ${V.example?`<p class="unit" style="margin-top:8px">いまは入力例（${def.example}）が入っています。ご自分の数字に書き換えてください。</p>`:''}</div>

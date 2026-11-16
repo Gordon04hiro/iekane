@@ -16,7 +16,7 @@ function easyDefaults(S){normPlan(S);const A=S.assets;const sp=S.spouse==='yes';
 function vLife(v){
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › ライフプラン診断</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイかね</a> › ライフプラン診断</div>
   <div class="thead"><h1>ライフプラン診断</h1><p>家族・収入・住まいを入れると、95歳までの毎年の収支と貯蓄の推移がわかります。わかる範囲の入力で大丈夫です。</p>
    <p class="lpnote"><span>✓ 入力は端末の中だけに保存（送信なし）</span>${LP.example?`<span>いまは入力例が入っています <button class="btn small" data-act="clear">空にして始める</button></span>`:''}</p></div>
   ${ks.length>1||U.plan!=='A'?planBox(ks):''}

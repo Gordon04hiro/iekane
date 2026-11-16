@@ -53,7 +53,7 @@ document.addEventListener('click',async e=>{
   if(a==='share') openShare();
   else if(a==='closemodal'){const m=document.getElementById('modal');if(m)m.hidden=true}
   else if(a==='copyshare'){const t=document.getElementById('shareurl');try{await navigator.clipboard.writeText(t.value);toast('リンクをコピーしました')}catch(err){t.select();toast('選択しました。長押しまたはCtrl+Cでコピーしてください')}}
-  else if(a==='nshare'){const t=document.getElementById('shareurl');try{await navigator.share({title:document.title,text:'イエカネで計算した結果です',url:t.value})}catch(err){}}
+  else if(a==='nshare'){const t=document.getElementById('shareurl');try{await navigator.share({title:document.title,text:'サイかねで計算した結果です',url:t.value})}catch(err){}}
   else if(a==='keepshared'){window.__shared=false;try{saveLP();saveSV();Object.keys(GDEF).forEach(k=>GT[k]&&gtSave(GDEF[k]))}catch(err){}history.replaceState(null,'',location.href.split('#')[0]);toast('自分のデータとして保存しました');go()}
   else if(a==='leaveshared'){location.href=location.href.split('#')[0]}
 });

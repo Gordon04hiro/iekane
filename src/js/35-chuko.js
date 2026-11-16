@@ -29,7 +29,7 @@ const CHUKO=[
 let CHK={};try{const s=localStorage.getItem(CHUKOKEY);if(s)CHK=JSON.parse(s)||{}}catch(e){}
 function vChuko(v){
   const all=CHUKO.flatMap(g=>g.items);
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 中古住宅チェックシート</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイかね</a> › 中古住宅チェックシート</div>
   <div class="thead"><h1>中古住宅チェックシート</h1><p>中古住宅を内見するとき・買う前に確かめたい${all.length}のポイントです。確かめたものにチェックを付けると、まだ確かめていないことが一覧になります。スマホを持って内見に行くときにも使えます。</p>
    <div class="safe">✓ チェックはこの端末の中だけに保存され、どこにも送信されません</div>
    <p style="margin:10px 0 0"><button class="btn small ghost" data-act="chukoreset">チェックをすべて外す（次の物件へ）</button></p></div>
@@ -55,7 +55,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('[data-act="chukorese
 /* ---------- 信頼できる一次情報リンク集（content/links.yml） ---------- */
 function vLinks(v){
   const cats=[...new Set(LINKS.map(l=>l.c))];
-  v.innerHTML=`<div class="wrap doc"><div class="crumb"><a href="#home">イエカネ</a> › 一次情報リンク集</div><h1>信頼できる一次情報リンク集</h1>
+  v.innerHTML=`<div class="wrap doc"><div class="crumb"><a href="#home">サイかね</a> › 一次情報リンク集</div><h1>信頼できる一次情報リンク集</h1>
    <p class="lead">国や自治体など、制度や数字の「もと」になっている公式の情報へのリンクです。記事やツールで目安をつかんだら、最後はここで確かめてください。</p>
    ${cats.map(c=>`<section><h2>${esc(c)}</h2><ul class="links">${LINKS.filter(l=>l.c===c).map(l=>`<li><a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.t)}</a>${l.d?`<span>${esc(l.d)}</span>`:''}</li>`).join('')}</ul></section>`).join('')}
    <p class="unit" style="margin-top:18px">リンク先は各機関のサイトです。内容やアドレスが変わることがあります。</p></div>`;
