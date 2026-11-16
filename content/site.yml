@@ -5,6 +5,14 @@ contactForm: "https://docs.google.com/forms/d/e/1FAIpQLSfJuvud4JCL3M9MJ5PTbYuTm9
 analytics: "G-78NZTT9650"                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります
 adsense: ""                   # AdSenseの審査が通ったら、パブリッシャーID（ca-pub-XXXX）を入れます
 
+# 運営者のプロフィール（「サイトについて」と各記事の執筆者欄に出ます。本名・会社名は出しません）
+運営者:
+  名前: イエカネ運営者
+  資格: 宅地建物取引士
+  実務年数: ""        # 例：10年以上（空欄なら表示しません）
+  地域: 静岡県西部
+  相続の相談: true    # true なら「相続の相談にも対応」と表示
+
 # AdSenseの「広告ユニット」の番号（data-ad-slot の数字）。空欄の枠には何も出ません。
 # AdSenseの管理画面 → 広告 → 広告ユニットごと → ディスプレイ広告 で作り、数字だけを貼ります。
 # どの枠もスマホ・PCの両方で、画面の幅に合わせた大きさで表示されます。

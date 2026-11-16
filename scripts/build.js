@@ -53,7 +53,7 @@ const ARTS=fs.readdirSync(R('content/articles')).filter(f=>f.endsWith('.md')&&!f
 
 // ---- ブラウザで動くプログラムをまとめる
 const content=`/* このファイルは自動で作られます。直接書き換えないでください */
-const SITE_CFG=${JSON.stringify({contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{}})};
+const SITE_CFG=${JSON.stringify({prof:SITE['運営者']||{},contactForm:SITE.contactForm||'',adsense:SITE.adsense||'',adslots:SITE.adslots||{}})};
 const AFF_ADS=${JSON.stringify(Object.fromEntries(Object.entries(AFF).filter(([k,v])=>String((v||{})['コード']||'').trim()).map(([k,v])=>[k,{h:v['見出し']||'',d:v['説明']||'',code:String(v['コード']).trim()}])))};
 const CFG=${JSON.stringify(RULES).replace(/"Infinity"/g,'Infinity')};
 const DATA_ITEMS=${JSON.stringify(SOURCES.map(x=>({cat:x['カテゴリ'],name:x['項目'],val:x['値'],src:x['出典'],url:x['リンク']||'',until:x['期限']||'',tool:x['使うツール']||''})))};
@@ -98,8 +98,16 @@ async function prerender(pg,base){
   for(const pg of list){
     const depth=pg.f.split('/').length-1, base=depth?'../'.repeat(depth):'';
     const {body,boot}=await prerender(pg,base);
-    const ld=pg.art?{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),publisher:{'@type':'Organization',name:'イエカネ'}}
-      :pg.p==='home'?{'@context':'https://schema.org','@type':'WebSite',name:SITE.name,url:SITE_URL+'/'}:null;
+    // 検索エンジン向けの情報（記事・ツール・パンくず）
+    const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'イエカネ運営者',jobTitle:P['資格']||undefined,url:SITE_URL+'/about.html#profile'};
+    const crumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map(([n,u],k)=>({'@type':'ListItem',position:k+1,name:n,item:u}))});
+    const TOOLR=['lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
+    const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'イエカネ',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},
+        {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
+      :pg.p==='home'?[{'@context':'https://schema.org','@type':'WebSite',name:SITE.name,url:SITE_URL+'/'}]
+      :TOOLR.includes(pg.p)?[{'@context':'https://schema.org','@type':'WebApplication',name:pg.t.split('｜')[0],description:pg.d,url:canon(pg.f),applicationCategory:'FinanceApplication',operatingSystem:'Any',inLanguage:'ja',isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'JPY'},author},
+        {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],[pg.t.split('｜')[0],canon(pg.f)]])}]:[];
+    const ld=ldList.length?ldList:null;
     const html=`<!doctype html>
 <html lang="ja">
 <head>
@@ -123,7 +131,7 @@ async function prerender(pg,base){
 <link rel="icon" href="${base}assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="${base}assets/apple-touch-icon.png">
 ${headLinks}<link rel="stylesheet" href="${base}assets/site.css">
-${ld?`<script type="application/ld+json">${JSON.stringify(ld)}</script>\n`:''}${ga}${ads}
+${ld?ld.map(x=>`<script type="application/ld+json">${JSON.stringify(x)}</script>\n`).join(''):''}${ga}${ads}
 </head>
 <body>
 ${body}

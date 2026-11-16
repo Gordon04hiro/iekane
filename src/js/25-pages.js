@@ -19,7 +19,7 @@ function vArticle(v,slug){
   ${a.draft?'<div class="draft">下書きです。内容を確認してから公開してください（articles の draft を false にすると、この表示は消えます）。</div>':''}
   ${illust(a)}
   <span class="chip muted">${esc(a.cat)}</span><h1 style="margin-top:8px">${esc(a.title)}</h1>
-  <p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}${a.mins?'　・　約'+a.mins+'分で読めます':''}</p>
+  ${bylineHTML()}<p class="unit">公開 ${jd(a.date)}${a.updated&&a.updated!==a.date?'　更新 '+jd(a.updated):''}${a.mins?'　・　約'+a.mins+'分で読めます':''}</p>
   ${a.pr?'<p class="pr-note">当サイトはアフィリエイト広告を利用しています。記事内の「PR」と表示したリンクから申し込みがあると、当サイトが報酬を受け取ることがあります。</p>':''}
   <p class="lead">${esc(a.lead)}</p>
   ${adUnit('記事の上')}
