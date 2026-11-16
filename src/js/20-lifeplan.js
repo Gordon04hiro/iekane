@@ -27,7 +27,7 @@ function vLife(v){
    <p class="mp-q">入力のしかたを選べます</p>
    <div class="mp-opts">
     <button class="mp" data-act="mode2" data-m="easy" aria-pressed="${LP.mode!=='detail'}"><span class="mp-r"></span><span><b>かんたん入力</b><small>主な項目だけ・約3分。年金や利回りは標準の値で計算します</small></span></button>
-    <button class="mp" data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}"><span class="mp-r"></span><span><b>くわしく入力</b><small>年金・iDeCo・車・金や暗号資産・不動産投資まで入れて、より正確に</small></span></button>
+    <button class="mp" data-act="mode2" data-m="detail" aria-pressed="${LP.mode==='detail'}"><span class="mp-r"></span><span><b>くわしく入力</b><small>年金・退職金・教育費・車・住まいの費用まで入れて、より正確に</small></span></button>
    </div></div>
   ${LP.mode!=='detail'?`<p class="unit defaults">かんたん入力では、次の値を自動で使います：${esc(easyDefaults(S))}。<button class="linkbtn" data-act="mode2" data-m="detail">くわしく入力で変える →</button></p>`:''}
   <div class="prog" id="prog" aria-live="polite"></div>
