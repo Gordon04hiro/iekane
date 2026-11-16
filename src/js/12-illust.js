@@ -26,7 +26,7 @@ const ILLUST={
  rain:()=>`${ilHouse(60,52,1)}<g transform="translate(200 30)"><ellipse cx="40" cy="26" rx="44" ry="22" fill="#fff" stroke="${ILC.ink}" stroke-width="3"/><ellipse cx="14" cy="34" rx="22" ry="16" fill="#fff" stroke="${ILC.ink}" stroke-width="3"/>${[0,1,2,3].map(i=>`<path d="M${8+i*22} 64 l-6 14" stroke="#4f8fab" stroke-width="4" stroke-linecap="round"/>`).join('')}</g><path d="M20 160 q30 -14 60 0 t60 0 t60 0 t60 0 t60 0" fill="none" stroke="#4f8fab" stroke-width="6" stroke-linecap="round"/>`,
  senior:()=>`${ilPerson(110,74,2.2,ILC.teal)}${ilPerson(172,82,2,ILC.coin)}<path d="M40 150 h240" stroke="${ILC.grass}" stroke-width="8" stroke-linecap="round"/><circle cx="262" cy="46" r="18" fill="${ILC.coinL}"/>${ilStack(244,146,3)}`
 };
-const CAT_IL={'浜松・静岡':'buy','家を買う':'buy','家を売る':'sell','相続':'souzoku','ライフプラン':'money'};
+const CAT_IL={'家を買う':'buy','家を売る':'sell','相続':'souzoku','ライフプラン':'money'};
 function illust(a,small){
   const k=ILLUST[a.il]?a.il:(CAT_IL[a.cat]||'money');
   const bg={buy:ILC.sky,sell:ILC.sand,souzoku:ILC.sand,money:ILC.sky,loan:ILC.sky,akiya:'#eef0e6',bank:ILC.sky,nisa:'#e8f2ee',school:ILC.sand,senior:'#eef0e6',rain:ILC.sky}[k]||ILC.sky;
