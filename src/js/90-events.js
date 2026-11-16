@@ -22,6 +22,11 @@ document.addEventListener('click',e=>{
   else if(a==='addprop'){S.props.push(newProp(S));changed();vLife(document.getElementById('view'))}
   else if(a==='delprop'){S.props.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
   else if(a==='addev'){S.events.push({name:'',age:Math.round(n(S.age))+5,amt:100,kind:'out'});changed();vLife(document.getElementById('view'))}
+  else if(a==='addoth'){S.assets.others.push(newOther('gold'));changed();vLife(document.getElementById('view'))}
+  else if(a==='deloth'){S.assets.others.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
+  else if(a==='pcset'){const v=penEst();const k=U.pc.who==='sp'?'spen':'pen';const el=document.getElementById('f_'+k);if(el){el.value=v.take;el.dispatchEvent(new Event('input',{bubbles:true}))}toast((U.pc.who==='sp'?'配偶者':'ご本人')+'の年金に月'+v.take+'万円を入れました')}
+  else if(a==='pcfill'){penFill(b.dataset.w)}
+  else if(a==='nextempty'){nextEmpty()}
   else if(a==='delev'){S.events.splice(+b.dataset.i,1);changed();vLife(document.getElementById('view'))}
 });
 document.addEventListener('input',e=>{
@@ -29,6 +34,7 @@ document.addEventListener('input',e=>{
   if(t.dataset.goal){LP.goal=LP.goal||{type:'fin95',target:1000};LP.goal[t.dataset.goal]=t.dataset.goal==='type'?t.value:parseFloat(t.value);saveLP();clearTimeout(rT);rT=setTimeout(()=>{const f=document.activeElement&&document.activeElement.id;renderResult();if(f){const x=document.getElementById(f);if(x)x.focus()}},400);return}
   if(t.dataset.yjy){U.yjy=+t.value;renderResult();return}
   if(t.dataset.yj){LP.actuals=LP.actuals||{};const y=U.yjy;LP.actuals[y]=LP.actuals[y]||{};LP.actuals[y][t.dataset.yj]=t.value===''?'':parseFloat(t.value);saveLP();clearTimeout(rT);rT=setTimeout(()=>{const f=document.activeElement&&document.activeElement.id;renderResult();if(f){const x=document.getElementById(f);if(x){x.focus();try{x.setSelectionRange(x.value.length,x.value.length)}catch(err){}}}},600);return}
+  if(t.dataset.pc){U.pc[t.dataset.pc]=t.tagName==='SELECT'?t.value:t.value;if(t.dataset.pc==='work'){document.querySelectorAll('[data-pcemp]').forEach(x=>x.hidden=t.value!=='emp');if(t.value==='dep'&&n(U.pc.nen)<1){U.pc.nen=40}}const o=document.getElementById('pcout');if(o)o.innerHTML=penOut();return}
   if(S&&applyAssetInput(S,t)){changed();return}
   if(t.dataset.k){const f=ALLF.find(x=>x.id===t.dataset.k);S[t.dataset.k]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));syncVis(S);changed()}
   else if(t.dataset.kid!=null){const k=S.kids[+t.dataset.kid],kk=t.dataset.kk;k[kk]=kk==='away'?t.checked:(kk==='by'?parseFloat(t.value):t.value);changed()}
@@ -36,5 +42,8 @@ document.addEventListener('input',e=>{
   else if(t.dataset.pname){LP.names[U.plan]=t.value;saveLP();document.querySelectorAll('.seg [data-act="plan"]').forEach(btn=>{if(btn.dataset.p===U.plan)btn.lastChild.textContent=U.plan+'：'+t.value});clearTimeout(rT);rT=setTimeout(renderResult,300)}
 });
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset.kid!=null&&t.dataset.kk==='away'){LP.plans[U.plan].kids[+t.dataset.kid].away=t.checked;changed()}});
+/* 言葉で選ぶボタン（押すと入力欄に数字が入る） */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="pre"]');if(!b)return;e.preventDefault();const el=document.getElementById(b.dataset.for);if(!el)return;el.value=b.dataset.v;el.dispatchEvent(new Event('input',{bubbles:true}))});
+document.addEventListener('input',e=>{const t=e.target;if(!t.id)return;document.querySelectorAll(`[data-act="pre"][data-for="${t.id}"]`).forEach(b=>b.setAttribute('aria-pressed',String(t.value!==''&&+t.value===+b.dataset.v)))});
 go();loadShared().then(ok=>{if(ok){go();toast('共有された結果を表示しています')}});
 
