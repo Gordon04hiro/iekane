@@ -1,6 +1,6 @@
-/* ===== イエカネ サイト本体 ===== */
-const SITE={name:'イエカネ',sub:'家とお金の相談室',contactUrl:SITE_CFG.contactForm||''}; /* contactUrl：GoogleフォームのURLを入れると、お問い合わせボタンが有効になります */
-const LKEY='iekane-lifeplan-v1';
+/* ===== サイのまど サイト本体 ===== */
+const SITE={name:'サイのまど',sub:'住まいとお金の無料シミュレーション',contactUrl:SITE_CFG.contactForm||''}; /* contactUrl：GoogleフォームのURLを入れると、お問い合わせボタンが有効になります */
+const LKEY='sainomado-lifeplan-v1';
 const PK=['A','B','C'];
 const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
 const PDASH={A:'',B:'6 4',C:'2 3'};
@@ -38,7 +38,7 @@ function go(){
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
   toolInfoTail(r);legalTail(r);adTail(r);setTimeout(fillAds,0);
-  if(!['article','hub','notfound'].includes(r))document.title=r==='home'?'イエカネ 家とお金の相談室':TITLES[r]+'｜イエカネ';
+  if(!['article','hub','notfound'].includes(r))document.title=r==='home'?'サイのまど｜住まいとお金の無料シミュレーション':TITLES[r]+'｜サイのまど';
 }
 if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#s='))return;go();if(h!=='#tools')scrollTo(0,0)});
 
@@ -62,7 +62,7 @@ const TOOLS=[
 function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
-   <div><div class="k">家とお金の相談室</div>
+   <div><div class="k">住まいとお金の無料シミュレーション</div>
     <h1>家のことを決める前に、<br><em>お金の未来</em>を見てみよう。</h1>
     <p>家を買う、売る、相続する。大きな決断の前に、95歳までのお金の流れを数字で確かめられる無料ツールをそろえています。</p>
     <div class="acts"><a class="btn primary big" href="#lifeplan">ライフプラン診断をはじめる</a><a class="btn big ghost" href="#tools">ツール一覧</a></div>
@@ -81,7 +81,7 @@ function vHome(v){
     <div class="t" style="margin-top:6px"><span>95歳時点の金融資産</span></div><div class="v">${fmt(s.last.bal)}<span class="unit"> 万円</span></div>
     ${chartSVG([{rows:r,color:'var(--accent)'}],null,'peekc')}</div></div>
   </section></div>
-  <section class="wrap trust" aria-label="イエカネの約束">
+  <section class="wrap trust" aria-label="サイのまどの約束">
    <div><span class="ti">${IC.plan}</span><span><b>登録不要・無料</b>名前もメールも要りません</span></div>
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><span><b>入力は送信されません</b>計算はお使いの端末の中だけ</span></div>
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/></svg></span><span><b>宅地建物取引士が作成</b>売買・相続の現場の目線で</span></div>
@@ -93,7 +93,7 @@ function vHome(v){
     ${TOOLS.filter(t=>!t.hide).map(toolCard).join('')}
    </div></section>
   ${adUnit('一覧の中')?`<section class="wrap sect">${adUnit('一覧の中')}</section>`:''}
-  <section class="wrap sect"><h2>安心してお使いいただくために</h2><p class="lead">イエカネは、一般的な情報と計算の目安をお届けするサイトです。専門家の仕事にあたることは行っていません。</p>
+  <section class="wrap sect"><h2>安心してお使いいただくために</h2><p class="lead">サイのまどは、一般的な情報と計算の目安をお届けするサイトです。専門家の仕事にあたることは行っていません。</p>
    <div class="stance">
     <div><b>税金</b><span>表示する税金は一般的な計算式による計算例です。個別の税額計算・申告・税務相談は行いません（税理士法）。</span></div>
     <div><b>法律・相続の手続き</b><span>個別の法律相談や交渉・代理、登記や遺言書などの書類作成は行いません（弁護士法・司法書士法・行政書士法）。</span></div>
@@ -103,7 +103,7 @@ function vHome(v){
     <div><b>情報の新しさ</b><span>制度・数値は${jd(CFG.checked)}時点の内容で、毎年見直しています。期限が過ぎた制度は、ツールの画面でお知らせします。</span></div>
    </div>
    <p class="unit" style="margin-top:10px">ご自身の状況にもとづく判断は、税理士・弁護士・司法書士などの専門家にご相談ください。くわしくは<a href="#privacy">プライバシーポリシー・免責事項</a>をご覧ください。</p></section>
-  <section class="wrap sect"><h2>イエカネの考え方</h2><p class="lead">住まいの決断は、金額も大きく、やり直しがききません。</p>
+  <section class="wrap sect"><h2>サイのまどの考え方</h2><p class="lead">住まいの決断は、金額も大きく、やり直しがききません。</p>
    <div class="why"><div><b>家だけでなく、家計全体で見る</b>ローンが払えるかだけでなく、教育費や老後まで続けて見ないと、本当に大丈夫かはわかりません。</div>
    <div><b>個人情報を預からない</b>計算はブラウザの中だけ。名前やメールアドレスの登録もありません。</div>
    <div><b>不動産の実務家が作成</b>住まいの売買や相続の相談を受けている宅地建物取引士が、現場の目線で作っています。</div></div></section>

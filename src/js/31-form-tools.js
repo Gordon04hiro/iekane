@@ -2,11 +2,11 @@
 const GT={};
 function gtState(def){
   if(GT[def.id]) return GT[def.id];
-  let v=null;try{const s=localStorage.getItem('iekane-'+def.id+'-v1');if(s)v=JSON.parse(s)}catch(e){}
+  let v=null;try{const s=localStorage.getItem('sainomado-'+def.id+'-v1');if(s)v=JSON.parse(s)}catch(e){}
   if(!v) v=Object.assign(def.base(),{example:true});
   GT[def.id]=v;return v;
 }
-function gtSave(def){if(window.__shared)return;try{localStorage.setItem('iekane-'+def.id+'-v1',JSON.stringify(GT[def.id]))}catch(e){}}
+function gtSave(def){if(window.__shared)return;try{localStorage.setItem('sainomado-'+def.id+'-v1',JSON.stringify(GT[def.id]))}catch(e){}}
 function gtField(def,f,V){
   const v=V[f.id], hint=f.h?`<span class="hint">${esc(f.h)}</span>`:'';
   const at=`id="g_${def.id}_${f.id}" data-gt="${def.id}" data-gk="${f.id}"`;
@@ -16,7 +16,7 @@ function gtField(def,f,V){
 function gtVis(def){const V=gtState(def);def.groups.flatMap(g=>g.f).forEach(f=>{if(f.show){const el=document.querySelector(`[data-gf="${def.id}_${f.id}"]`);if(el)el.hidden=!f.show(V)}})}
 function vGen(def,v){
   const V=gtState(def);
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › ${esc(def.title)}</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › ${esc(def.title)}</div>
   <div class="thead"><h1>${esc(def.title)}</h1><p>${def.lead}</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
    ${V.example?`<p class="unit" style="margin-top:8px">いまは入力例（${def.example}）が入っています。ご自分の数字に書き換えてください。</p>`:''}</div>

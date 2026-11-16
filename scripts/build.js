@@ -1,4 +1,4 @@
-// イエカネ サイトを作る（npm run build）
+// サイのまど サイトを作る（npm run build）
 // content/ と src/ から dist/ に公開用ファイルを書き出します。
 const fs=require('fs'),path=require('path');
 const yaml=require('js-yaml');
@@ -111,7 +111,7 @@ fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico')); // Google
 const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
-const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...HUBS.map(h=>({p:'hub',slug:h.slug,f:'guide/'+h.slug+'.html',t:h.stitle+'｜イエカネ',d:h.lead,hub:h})),{p:'notfound',f:'404.html',t:'ページが見つかりません｜イエカネ',d:'お探しのページは見つかりませんでした。',nf:true},...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:(a.stitle||a.title)+'｜イエカネ',d:a.lead,art:a}))];
+const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...HUBS.map(h=>({p:'hub',slug:h.slug,f:'guide/'+h.slug+'.html',t:h.stitle+'｜サイのまど',d:h.lead,hub:h})),{p:'notfound',f:'404.html',t:'ページが見つかりません｜サイのまど',d:'お探しのページは見つかりませんでした。',nf:true},...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:(a.stitle||a.title)+'｜サイのまど',d:a.lead,art:a}))];
 const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}',{page_location:location.origin+location.pathname});</script>`:'';
 const ads=SITE.adsense?`<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
 async function prerender(pg,base){
@@ -132,16 +132,16 @@ async function prerender(pg,base){
     const depth=pg.f.split('/').length-1, base=pg.nf?'/':(depth?'../'.repeat(depth):''); // 404ページはどの場所でも出るので、絶対パス
     const {body,boot}=await prerender(pg,base);
     // 検索エンジン向けの情報（記事・ツール・パンくず）
-    const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'イエカネ運営者',jobTitle:[].concat(P['資格']||[])[0]||undefined,hasCredential:[].concat(P['資格']||[]).map(q=>({'@type':'EducationalOccupationalCredential',name:q})),url:SITE_URL+'/about.html#profile'};
+    const P=SITE['運営者']||{};const author={'@type':'Person',name:P['名前']||'サイのまど運営者',jobTitle:[].concat(P['資格']||[])[0]||undefined,hasCredential:[].concat(P['資格']||[]).map(q=>({'@type':'EducationalOccupationalCredential',name:q})),url:SITE_URL+'/about.html#profile'};
     const crumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map(([n,u],k)=>({'@type':'ListItem',position:k+1,name:n,item:u}))});
     const TOOLR=['chuko','koujo','souzokubun','lifeplan','sell','loan','vs','akiya','souzoku','souzoku2','rent2buy','prepay','souzokuzei'];
-    const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'イエカネ',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},
-        {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
-      :pg.hub?[{'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],[pg.hub.title,canon(pg.f)]])}]
+    const ldList=pg.art?[{'@context':'https://schema.org','@type':'Article',headline:pg.art.title,description:pg.art.lead,datePublished:pg.art.date,dateModified:pg.art.updated,image:ogImg(pg),author,publisher:{'@type':'Organization',name:'サイのまど',logo:{'@type':'ImageObject',url:SITE_URL+'/assets/icon-192.png'}}},
+        {'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],['記事',SITE_URL+'/articles/'],[pg.art.title,canon(pg.f)]])}]
+      :pg.hub?[{'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],[pg.hub.title,canon(pg.f)]])}]
       :pg.p==='glossary'?[{'@context':'https://schema.org','@type':'DefinedTermSet',name:'住まいとお金の用語集',url:canon(pg.f),hasDefinedTerm:GLOSSARY.map((g,i)=>({'@type':'DefinedTerm',name:g.w,description:g.d,url:canon(pg.f)+'#t'+(i+1)}))}]
       :pg.p==='home'?[{'@context':'https://schema.org','@type':'WebSite',name:SITE.name,url:SITE_URL+'/'}]
       :TOOLR.includes(pg.p)?[{'@context':'https://schema.org','@type':'WebApplication',name:pg.t.split('｜')[0],description:pg.d,url:canon(pg.f),applicationCategory:'FinanceApplication',operatingSystem:'Any',inLanguage:'ja',isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'JPY'},author},
-        {'@context':'https://schema.org',...crumb([['イエカネ',SITE_URL+'/'],[pg.t.split('｜')[0],canon(pg.f)]])}]:[];
+        {'@context':'https://schema.org',...crumb([['サイのまど',SITE_URL+'/'],[pg.t.split('｜')[0],canon(pg.f)]])}]:[];
     const ld=ldList.length?ldList:null;
     const html=`<!doctype html>
 <html lang="ja">

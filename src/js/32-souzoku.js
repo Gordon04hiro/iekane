@@ -1,5 +1,5 @@
 /* ---------- 相続の準備チェックシート ---------- */
-const CKEY='iekane-souzoku-v1';
+const CKEY='sainomado-souzoku-v1';
 const CHECKS=[
  {g:'財産を把握する',items:[
   ['assets','財産の一覧をつくる','預貯金・証券・保険などの一覧がある','どこに何があるか分からないと、家族は通帳や郵便物から探すことになります。金融機関名だけでも一覧にしておきましょう。'],
@@ -20,7 +20,7 @@ const CHECKS=[
 ];
 let CK={};try{const s=localStorage.getItem(CKEY);if(s)CK=JSON.parse(s)||{}}catch(e){}
 function vSouzoku(v){
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 相続の準備チェックシート（遺す方へ）</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › 相続の準備チェックシート（遺す方へ）</div>
   <div class="thead"><h1>相続の準備チェックシート<br><small style="font-size:.6em;color:var(--muted)">遺す方へ</small></h1><p>家や財産を遺す立場の方のためのチェックシートです。相続の準備がどこまでできているかを、12の質問で確かめます。当てはまるものにチェックを入れてください。チェックが付かなかった項目が、これからやることのリストになります。</p>
    <div class="safe">✓ 回答はこの端末の中だけに保存され、どこにも送信されません</div>${souzokuTabs('souzoku')}</div>
   <div id="cscore"></div>
@@ -47,7 +47,7 @@ function souzokuTabs(cur){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="sz"]');if(b){if(window.PAGE)location.href=pageURL(b.dataset.r);else location.hash=b.dataset.r}});
 
 /* ---------- 相続の手続きチェックシート（受け継ぐ方へ） ---------- */
-const C2KEY='iekane-souzoku2-v1';
+const C2KEY='sainomado-souzoku2-v1';
 const PRE=[
  ['p_assets','親の財産の大まかな中身（預貯金・家・保険など）を聞けている','どの金融機関に口座があるかだけでも分かると、手続きの手間が大きく減ります。'],
  ['p_home','実家を将来どうするか、親や兄弟姉妹と話したことがある','誰も住まない実家は空き家になりがちです。売る・貸す・誰かが住むを、元気なうちに話しておくと安心です。'],
@@ -84,7 +84,7 @@ let C2={};try{const s=localStorage.getItem(C2KEY);if(s)C2=JSON.parse(s)||{}}catc
 function addTo(d,o){const x=new Date(d.getTime());if(o.d)x.setDate(x.getDate()+o.d);if(o.m)x.setMonth(x.getMonth()+o.m);if(o.y)x.setFullYear(x.getFullYear()+o.y);if(o.ye!=null){x.setFullYear(x.getFullYear()+o.ye,11,31)}if(o.cap){const c=new Date(o.cap+'T00:00:00');if(x>c)return c}return x}
 const jdate=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
 function vSouzoku2(v){
-  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">イエカネ</a> › 相続の手続きチェックシート（受け継ぐ方へ）</div>
+  v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › 相続の手続きチェックシート（受け継ぐ方へ）</div>
   <div class="thead"><h1>相続の手続きチェックシート<br><small style="font-size:.6em;color:var(--muted)">受け継ぐ方へ</small></h1>
    <p>親などから相続する立場の方のためのチェックシートです。親が元気なうちに確かめておくことと、相続が起きたあとの期限つきの手続きを、順番に確認できます。</p>
    <div class="safe">✓ 回答はこの端末の中だけに保存され、どこにも送信されません</div>${souzokuTabs('souzoku2')}</div>
