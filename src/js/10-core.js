@@ -1,6 +1,6 @@
 /* ===== サイのまど サイト本体 ===== */
 const SITE={name:'サイのまど',sub:'住まいとお金の無料シミュレーション',contactUrl:SITE_CFG.contactForm||''}; /* contactUrl：GoogleフォームのURLを入れると、お問い合わせボタンが有効になります */
-const LKEY='iekane-lifeplan-v1';
+const LKEY='sainomado-lifeplan-v1';
 const PK=['A','B','C'];
 const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
 const PDASH={A:'',B:'6 4',C:'2 3'};

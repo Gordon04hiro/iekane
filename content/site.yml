@@ -1,5 +1,5 @@
 # サイト全体の設定
-url: https://sainomado.jp     # サイトのアドレス（最後に / は付けない）。旧アドレス iekane.jp は転送用
+url: https://sainomado.jp     # サイトのアドレス（最後に / は付けない）
 name: サイのまど｜住まいとお金の無料シミュレーション
 contactForm: "https://docs.google.com/forms/d/e/1FAIpQLSfJuvud4JCL3M9MJ5PTbYuTm9Rg05zVdsF_b8DD7D5koEXONQ/viewform"               # GoogleフォームのURLを入れると、お問い合わせボタンが有効になります
 analytics: "G-78NZTT9650"                 # GoogleアナリティクスのID（G-XXXXXXX）を入れると計測が始まります

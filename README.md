@@ -87,7 +87,7 @@
 ---
 
 ## 最初の公開手順
-1. GitHubで新しいリポジトリ（例：iekane）を作り、このフォルダの中身をすべてアップロード
+1. GitHubで新しいリポジトリ（例：sainomado）を作り、このフォルダの中身をすべてアップロード
 2. Settings → Pages → 「Build and deployment」の Source を **GitHub Actions** にする
 3. `content/site.yml` の `url` を取得したドメインに書き換えて保存（自動で公開が始まります）
 4. Settings → Pages → Custom domain にドメインを入れ、ドメイン会社のDNSに案内どおりのレコードを追加。「Enforce HTTPS」にチェック

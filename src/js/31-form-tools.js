@@ -2,11 +2,11 @@
 const GT={};
 function gtState(def){
   if(GT[def.id]) return GT[def.id];
-  let v=null;try{const s=localStorage.getItem('iekane-'+def.id+'-v1');if(s)v=JSON.parse(s)}catch(e){}
+  let v=null;try{const s=localStorage.getItem('sainomado-'+def.id+'-v1');if(s)v=JSON.parse(s)}catch(e){}
   if(!v) v=Object.assign(def.base(),{example:true});
   GT[def.id]=v;return v;
 }
-function gtSave(def){if(window.__shared)return;try{localStorage.setItem('iekane-'+def.id+'-v1',JSON.stringify(GT[def.id]))}catch(e){}}
+function gtSave(def){if(window.__shared)return;try{localStorage.setItem('sainomado-'+def.id+'-v1',JSON.stringify(GT[def.id]))}catch(e){}}
 function gtField(def,f,V){
   const v=V[f.id], hint=f.h?`<span class="hint">${esc(f.h)}</span>`:'';
   const at=`id="g_${def.id}_${f.id}" data-gt="${def.id}" data-gk="${f.id}"`;

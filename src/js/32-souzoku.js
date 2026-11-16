@@ -1,5 +1,5 @@
 /* ---------- 相続の準備チェックシート ---------- */
-const CKEY='iekane-souzoku-v1';
+const CKEY='sainomado-souzoku-v1';
 const CHECKS=[
  {g:'財産を把握する',items:[
   ['assets','財産の一覧をつくる','預貯金・証券・保険などの一覧がある','どこに何があるか分からないと、家族は通帳や郵便物から探すことになります。金融機関名だけでも一覧にしておきましょう。'],
@@ -47,7 +47,7 @@ function souzokuTabs(cur){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act="sz"]');if(b){if(window.PAGE)location.href=pageURL(b.dataset.r);else location.hash=b.dataset.r}});
 
 /* ---------- 相続の手続きチェックシート（受け継ぐ方へ） ---------- */
-const C2KEY='iekane-souzoku2-v1';
+const C2KEY='sainomado-souzoku2-v1';
 const PRE=[
  ['p_assets','親の財産の大まかな中身（預貯金・家・保険など）を聞けている','どの金融機関に口座があるかだけでも分かると、手続きの手間が大きく減ります。'],
  ['p_home','実家を将来どうするか、親や兄弟姉妹と話したことがある','誰も住まない実家は空き家になりがちです。売る・貸す・誰かが住むを、元気なうちに話しておくと安心です。'],
