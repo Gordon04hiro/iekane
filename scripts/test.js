@@ -131,6 +131,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
 
   {const w=await open('index.html'),d=w.document;check('トップに「目的から選ぶ」入口が4つある',d.querySelectorAll('.purpose [data-jump]').length===4&&d.querySelectorAll('.pgroup').length===4);
    check('同じアイコンのツールがない（賃貸vs持ち家と中古住宅チェック）',d.querySelector('#p-buy a[href$="chuko.html"] .ic')?.innerHTML!==d.querySelector('#p-buy a[href$="vs.html"] .ic')?.innerHTML);w.close();}
+  {const w=await open('lifeplan.html'),d=w.document;
+   check('ライフプラン：運用しなかった場合の点線と「運用で増える分」が出る',!!d.querySelector('.nibox')&&/運用で増える分の目安/.test(d.querySelector('.nibox').textContent)&&d.querySelectorAll('#ch1 polyline').length>=2);
+   check('運用しなかった場合の95歳時点のほうが少ない',(()=>{const b=[...d.querySelectorAll('.nibox .kv b')].map(x=>parseFloat(x.textContent.replace(/[^0-9.-]/g,'')));return b[0]>0&&b[1]<6174})());w.close();}
   console.log('\n■ 入力の使いやすさ');
   {const w=await open('loan.html'),d=w.document;
    set(w,'g_loan_income','6000000');await wait(50);
