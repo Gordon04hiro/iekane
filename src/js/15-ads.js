@@ -16,7 +16,7 @@ function houseAd(where){
   const h=SITE_CFG.houseAd;if(!h||!h['出す']||!h['リンク'])return '';
   const B=window.BASE||'',suf=h['保険']?'-hoken':'',L=String(h['リンク']);
   const url=L+(L.includes('?')?'&':'?')+'utm_source=sainomado&utm_medium=banner&utm_campaign=kj_banner&utm_content='+encodeURIComponent(where);
-  return `<aside class="house-ad"><span class="pr-label">広告</span><a href="${esc(url)}" target="_blank" rel="noopener sponsored" data-house="${esc(where)}"><picture><source media="(max-width:600px)" srcset="${B}assets/ads/kj-rect${suf}.webp" width="600" height="500"><img src="${B}assets/ads/kj-wide${suf}.webp" width="1200" height="400" alt="${esc(h['名前']||'')}　住まいと資産のご相談（ホームページへ）" loading="lazy"></picture></a></aside>`;
+  return `<aside class="house-ad"><span class="pr-label">広告</span><a href="${esc(url)}" target="_blank" rel="noopener sponsored" data-house="${esc(where)}"><picture><source media="(max-width:600px)" srcset="${B}assets/ads/kj-rect${suf}.webp" width="600" height="500"><img src="${B}assets/ads/kj-wide${suf}.webp" width="1200" height="400" alt="${esc(h['名前']||'')}　不動産・相続・ライフプランのご相談（ホームページへ）" loading="lazy"></picture></a></aside>`;
 }
 const houseOn=(k,v)=>{const h=SITE_CFG.houseAd;return !!(h&&h['出す']&&[].concat(h[k]||[]).includes(v))};
 document.addEventListener('click',e=>{const a=e.target.closest('[data-house]');if(a)track('kj_banner_click',{place:a.dataset.house})});
