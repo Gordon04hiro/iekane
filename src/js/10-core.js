@@ -5,6 +5,9 @@ const PK=['A','B','C'];
 const PCOL={A:'var(--accent)',B:'var(--planB)',C:'var(--planC)'};
 const PDASH={A:'',B:'6 4',C:'2 3'};
 const IC={
+ check:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M8.5 12.5l2.2 2.2 4.8-4.8"/></svg>',
+ yen:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8l3 3.5L15 8M12 11.5V16M9.5 12.5h5M9.5 14.5h5"/></svg>',
+ pie:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12l6 6"/><path d="M12 12H3.5"/></svg>',
  key:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/></svg>',
  down:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10h11M4 15h7"/><path d="M18 12v8m0 0l-3-3m3 3l3-3"/></svg>',
  scale:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M5 7h14"/><path d="M5 7l-3 6a3 3 0 006 0zM19 7l-3 6a3 3 0 006 0z"/></svg>',
@@ -55,10 +58,23 @@ const TOOLS=[
  {ic:'key',href:'#rent2buy',t:'家賃と同じ返済で買える家',d:'今の家賃と同じ月々の負担で、いくらの家が買えるかがすぐわかります。'},
  {ic:'down',href:'#prepay',t:'繰上げ返済シミュレーター',d:'期間短縮型と返済額軽減型で、減る利息と毎月の返済を比べます。'},
  {ic:'scale',href:'#souzokuzei',t:'相続税がかかるかチェック',d:'財産の合計が基礎控除を超えそうかを確かめます。税額は計算しません。'},
- {ic:'down',href:'#koujo',t:'住宅ローン控除の目安',d:'借入額と家の種類から、住宅ローン控除で毎年いくら戻りそうかを計算します。'},
- {ic:'vs',href:'#chuko',t:'中古住宅チェックシート',d:'内見・購入前に確かめたい19のポイント。再建築・耐震・浄化槽・私道など、安さの理由を見落とさない。'},
- {ic:'inherit',href:'#souzokubun',t:'法定相続分の計算',d:'家族構成から、相続の割合（法定相続分）と遺留分、金額の目安がわかります。'}
+ {ic:'yen',href:'#koujo',t:'住宅ローン控除の目安',d:'借入額と家の種類から、住宅ローン控除で毎年いくら戻りそうかを計算します。'},
+ {ic:'check',href:'#chuko',t:'中古住宅チェックシート',d:'内見・購入前に確かめたい19のポイント。再建築・耐震・浄化槽・私道など、安さの理由を見落とさない。'},
+ {ic:'pie',href:'#souzokubun',t:'法定相続分の計算',d:'家族構成から、相続の割合（法定相続分）と遺留分、金額の目安がわかります。'}
 ];
+/* トップページ：目的から選ぶ入口 */
+const PURPOSE=[
+ {id:'p-buy',t:'家を買いたい',d:'予算・住宅ローン・賃貸との比較',hub:'buy',tools:['loan','rent2buy','vs','koujo','chuko','prepay']},
+ {id:'p-sell',t:'売りたい・住み替えたい',d:'手元に残るお金と、住み替えの資金計画',hub:'sell',tools:['sell','akiya','loan']},
+ {id:'p-inherit',t:'相続・実家のこと',d:'準備・手続きの期限・相続税・空き家',hub:'souzoku',tools:['souzoku','souzoku2','souzokuzei','souzokubun','akiya']},
+ {id:'p-life',t:'家計・老後のお金',d:'教育費や老後まで、95歳までの収支',hub:'money',tools:['lifeplan','prepay','koujo']}
+];
+function purposeHTML(){
+  const card=id=>{const t=TOOLS.find(x=>x.href==='#'+id);return t?toolCard(t):''};
+  return `<nav class="purpose" aria-label="目的から選ぶ">${PURPOSE.map(p=>`<button type="button" data-jump="${p.id}"><b>${p.t}</b><small>${p.d}</small></button>`).join('')}</nav>
+  ${PURPOSE.map(p=>`<div class="pgroup" id="${p.id}"><div class="pghead"><h3>${p.t}</h3>${HUBS.find(h=>h.slug===p.hub)?`<a href="#g-${p.hub}">順番にまとめたガイド →</a>`:''}</div><div class="tools">${p.tools.map(card).join('')}</div></div>`).join('')}`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;const el=document.getElementById(b.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
 function vHome(v){
   const S=LP.plans.A,r=sim(S),s=summarize(r,S);
   v.innerHTML=`<div class="heroband"><section class="wrap hero">
@@ -87,11 +103,12 @@ function vHome(v){
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/></svg></span><span><b>宅地建物取引士が作成</b>売買・相続の現場の目線で</span></div>
    <div><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg></span><span><b>データの出典を公開</b><a href="#data">使っているデータ</a>で確認できます</span></div>
   </section>
-  <section class="wrap sect" id="tools"><h2>ツール</h2><p class="lead">どれも無料・登録不要。計算はお使いの端末の中だけで行います。</p>
+  <section class="wrap sect" id="tools"><h2>ツール</h2><p class="lead">どれも無料・登録不要。計算はお使いの端末の中だけで行います。まず家計全体を見るなら、ライフプラン診断から。</p>
    <div class="tools">
     <a class="tool feat" href="#lifeplan"><span class="ic">${IC.plan}</span><span><h3>ライフプラン診断</h3><p>家族・収入・住まいを入れると、毎年の収支と貯蓄の推移がわかります。住宅購入あり・なしなど、3パターンまで比べられます。</p></span><span class="go">はじめる →</span></a>
-    ${TOOLS.filter(t=>!t.hide).map(toolCard).join('')}
-   </div></section>
+   </div>
+   <h2 style="margin-top:28px">目的から選ぶ</h2><p class="lead">いまの状況に近いものを選んでください。</p>
+   ${purposeHTML()}</section>
   ${adUnit('一覧の中')?`<section class="wrap sect">${adUnit('一覧の中')}</section>`:''}
   <section class="wrap sect"><h2>安心してお使いいただくために</h2><p class="lead">サイのまどは、一般的な情報と計算の目安をお届けするサイトです。専門家の仕事にあたることは行っていません。</p>
    <div class="stance">
