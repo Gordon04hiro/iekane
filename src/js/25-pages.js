@@ -14,7 +14,7 @@ function vHub(v,slug){
    <ol class="hsteps">${h.steps.map((st,i)=>`<li><div class="hs-h"><span class="hn">${i+1}</span><h2>${esc(st.h)}</h2></div><p>${esc(st.d)}</p>
     ${st.tools.length?`<div class="hs-tools">${st.tools.map(t=>`<a class="btn small primary" href="#${t}">${esc(TITLES[t]||t)}で計算する</a>`).join('')}</div>`:''}
     ${st.arts.map(art).filter(Boolean).length?`<ul class="hs-arts">${st.arts.map(art).filter(Boolean).map(a=>`<li><a href="#a-${a.slug}">${esc(a.title)}</a></li>`).join('')}</ul>`:''}</li>`).join('')}</ol>
-   ${houseOn('ガイド',h.slug)?houseAd('guide_'+h.slug):''}
+   ${houseFor('ガイド',h.slug,'guide_'+h.slug)}
    ${legalHTML(LEGAL_MAP[h.cat]||['fin'])}</div>`;
 }
 /* ---------- 用語集 ---------- */
@@ -60,7 +60,7 @@ function vArticle(v,slug){
   ${a.tool?`<div class="consult" style="margin-top:22px"><div><h2>数字で確かめてみる</h2><p>${esc(toolName(a.tool))}で、ご自分の場合を計算できます。登録不要・入力内容は送信されません。</p></div><div class="ways"><a class="btn primary" href="${a.tool}">${esc(toolName(a.tool))}を使う</a></div></div>`:''}
   ${(a.refs||[]).length?`<section class="refs"><h2>参考にした資料</h2><ul>${a.refs.map(r=>`<li><a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.t)}</a></li>`).join('')}</ul></section>`:''}
   ${legalHTML(LEGAL_MAP[a.cat]||['fin'])}
-  ${houseOn('記事カテゴリ',a.cat)?houseAd('article_'+a.slug):''}
+  ${houseFor('記事カテゴリ',a.cat,'article_'+a.slug)}
   ${adUnit('記事の下')}
   ${rel.length?`<h2>ほかの記事</h2><div class="tools">${rel.map(artCard).join('')}</div>`:''}</div>`;
 }
