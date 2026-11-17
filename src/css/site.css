@@ -605,3 +605,7 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
  .pgroup .tool p{font-size:12.5px;margin:0;line-height:1.6}
  .pgroup .tool .go{display:none}
 }
+.legend .dash-sw{display:inline-block;width:18px;height:0;border-top:2.4px dashed var(--muted);vertical-align:middle;margin-right:4px}
+.nibox{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.nibox>b{font-size:14px}
+.nibox .kv{margin-top:6px}

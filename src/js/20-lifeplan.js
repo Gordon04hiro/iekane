@@ -62,13 +62,14 @@ function renderResult(){
    <span>いちばん少ない時（${s.min.a}歳）</span><b class="${s.min.bal<0?'neg':''}">${fmt(s.min.bal)}<small>万円</small></b>
    <span>95歳時点の純資産</span><b class="${s.last.bs.nw<0?'neg':''}">${fmt(s.last.bs.nw)}<small>万円</small></b>
    ${k!=='A'?`<span>Aとの差（95歳時点）</span><b>${s.last.bal-R.A.s.last.bal>=0?'+':''}${fmt(s.last.bal-R.A.s.last.bal)}<small>万円</small></b>`:''}</div></section>`};
-  const series=()=>ks.map(k=>({rows:R[k].r,color:PCOL[k],dash:PDASH[k]}));
+  const cur0=R[U.plan]||R.A, NI=noInvest(cur0.S,cur0.r);
+  const series=()=>ks.map(k=>({rows:R[k].r,color:PCOL[k],dash:PDASH[k]})).concat(NI?[{rows:NI.r,color:'var(--muted)',dash:'5 4'}]:[]);
   const cur=R[U.plan]||R.A;
   const key=U.plan in R?U.plan:'A'; cur.key=key;
   const tab=U.rtab||'overview';
   let body='';
-  if(tab==='overview') body=`<section class="chartcard"><div class="legend"><b style="color:var(--ink);font-size:14px">金融資産の推移</b>${ks.map(k=>`<span><span class="dot ${k.toLowerCase()}"></span>${k}：${esc(LP.names[k]||'')}</span>`).join('')}</div>
-   <div class="readout" id="ro"></div>${chartSVG(series(),U.hi,'ch1')}<div class="unit">グラフをタップ・なぞると、その年の数字が出ます。</div></section>
+  if(tab==='overview') body=`<section class="chartcard"><div class="legend"><b style="color:var(--ink);font-size:14px">金融資産の推移</b>${ks.map(k=>`<span><span class="dot ${k.toLowerCase()}"></span>${k}：${esc(LP.names[k]||'')}</span>`).join('')}${NI?`<span><span class="dash-sw"></span>運用しなかった場合（${U.plan in R?U.plan:'A'}）</span>`:''}</div>
+   <div class="readout" id="ro"></div>${chartSVG(series(),U.hi,'ch1')}<div class="unit">グラフをタップ・なぞると、その年の数字が出ます。</div>${NI?noInvestBox(NI,cur0):''}</section>
   <section class="chartcard"><div class="legend" style="margin-bottom:4px"><b style="color:var(--ink);font-size:14px">資産の内訳の推移（パターン${key}）</b></div>${stackSVG(cur.r,'st1')}<div class="unit">手元のお金が足りない年は、課税口座 → NISA の順に取り崩す計算です。iDeCoと共済は、受け取る年齢まで取り崩しに使いません。</div></section>
   <section class="advice"><h3>パターン${key}の見どころ</h3><ul>${advice(cur.S,cur.s,cur.r).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>${ctaHTML()}`;
   else if(tab==='bs') body=`<section class="chartcard" id="bsbox"></section>`;
@@ -89,11 +90,32 @@ function renderResult(){
   <div class="sect" style="padding-bottom:0"><h3 style="font-size:16px;margin-bottom:10px">あわせて使いたいツール</h3><div class="tools">${['sell','loan','vs'].map(id=>toolCard(TOOLS.find(t=>t.href==='#'+id))).join('')}</div></div>`;
   if(tab==='bs'){BSR={r:cur.r,S:cur.S,key}; renderBS();}
   if(tab==='overview'){
-  const ro=()=>{const a=r0[U.hi];document.getElementById('ro').innerHTML=`<span><b>${a.a}歳</b>（${a.y}年）</span>${ks.map(k=>{const x=R[k].r[U.hi];return`<span>${k} 残高 <b class="${x&&x.bal<0?'neg':''}">${x?fmt(x.bal):'–'}</b></span>`}).join('')}${a.ev.length?`<span>${esc(a.ev.join('・'))}</span>`:''}`};
+  const ro=()=>{const a=r0[U.hi];document.getElementById('ro').innerHTML=`<span><b>${a.a}歳</b>（${a.y}年）</span>${ks.map(k=>{const x=R[k].r[U.hi];return`<span>${k} 残高 <b class="${x&&x.bal<0?'neg':''}">${x?fmt(x.bal):'–'}</b></span>`}).join('')}${NI&&NI.r[U.hi]?`<span>運用なし <b class="${NI.r[U.hi].bal<0?'neg':''}">${fmt(NI.r[U.hi].bal)}</b></span>`:''}${a.ev.length?`<span>${esc(a.ev.join('・'))}</span>`:''}`};
   ro();
   const onIdx=i=>{if(i===U.hi)return;U.hi=i;document.getElementById('ch1').outerHTML=chartSVG(series(),U.hi,'ch1');ro();bindChart('ch1',r0.length,onIdx)};
   bindChart('ch1',r0.length,onIdx);
   }
+}
+/* ---------- 運用しなかった場合（NISA・iDeCo・課税口座などの利回りを0%にした計算） ----------
+   運用でどれくらい増える前提になっているかを見える化する。投資の残高・積立がなければ出さない */
+const INVKEYS=['nisa','tax','ideco','snisa','sideco'];
+function noInvest(S,r){
+  const T=clone(S);normPlan(T);
+  const has=INVKEYS.some(k=>T.assets[k]&&(n(T.assets[k].bal)>0||n(T.assets[k].mon)>0)&&n(T.assets[k].rate)>0)||(T.assets.others||[]).some(o=>n(o.rate)>0&&(n(o.bal)>0||n(o.mon)>0));
+  if(!has) return null;
+  INVKEYS.forEach(k=>{if(T.assets[k])T.assets[k].rate=0});(T.assets.others||[]).forEach(o=>o.rate=0);
+  const rr=sim(T),last=rr[rr.length-1],base=r[r.length-1],gain=base.bal-last.bal;
+  if(gain<1) return null;
+  const short=rr.find(x=>x.bal<0);
+  return{r:rr,last,gain,base,short};
+}
+function noInvestBox(NI,cur){
+  const pct=NI.base.bal>0?Math.round(NI.gain/NI.base.bal*100):null;
+  return `<div class="nibox"><b>運用で増える分（95歳時点）</b>
+   <div class="kv"><span>運用で増える分の目安</span><b>約${fmt(NI.gain)}<small>万円</small></b>
+   <span>運用しなかった場合の95歳時点</span><b class="${NI.last.bal<0?'neg':''}">${fmt(NI.last.bal)}<small>万円</small></b>
+   ${pct!=null&&pct>0?`<span>95歳時点の金融資産のうち</span><b>約${Math.min(pct,999)}<small>%</small></b>`:''}</div>
+   <p class="unit" style="margin:6px 0 0">${NI.short?`NISA・iDeCoなどの運用でまったく増えなかった場合、<b>${NI.short.a}歳</b>でお金が足りなくなる計算です。運用は増えることもあれば減ることもあるので、利回りを低めにしたり、支出や働き方で備えたりしておくと安心です。`:`NISA・iDeCoなどの運用でまったく増えなかった場合でも、95歳までお金が足りなくならない計算です。${pct>=50?'ただし、95歳時点の金融資産の半分以上は運用で増える前提なので、利回りを低めにした場合も確かめておくと安心です。':''}`}点線が、運用しなかった場合の金融資産の推移です（利回りを0%にした計算。預貯金の利息と共済はそのまま）。</p></div>`;
 }
 /* ---------- 入力の進み具合（あと何項目） ---------- */
 function progItems(S){
