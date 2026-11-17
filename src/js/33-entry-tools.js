@@ -4,7 +4,7 @@ const man1=v=>(Math.round(v*10)/10).toLocaleString('ja-JP');
 /* 家賃と同じ返済で買える家 */
 const RENT2BUYDEF={id:'rent2buy',title:'家賃と同じ返済で買える家',example:'家賃9万円・頭金300万円・35歳',
   lead:'今の家賃と同じ月々の負担で、いくらの家が買えるかを計算します。家を持つと、ローンのほかに管理費・修繕費・固定資産税もかかるので、その分を差し引いて考えます。',
-  base:()=>({rent:9,upkeep:2,down:300,costRate:7,rate:0.9,term:35,age:35,income:600}),
+  base:()=>({rent:9,upkeep:2,down:300,costRate:7,rate:CFG.loanRates.hendo,term:35,age:35,income:600}),
   groups:[
    {g:'今の家賃',f:[{id:'rent',l:'家賃（管理費込み）',u:'万円/月'},{id:'income',l:'世帯の年収（額面）',u:'万円',h:'返済負担率の確認に使います。わからなければ0'}]},
    {g:'買う場合',f:[
@@ -40,9 +40,9 @@ const RENT2BUYDEF={id:'rent2buy',title:'家賃と同じ返済で買える家',ex
 };
 
 /* 繰上げ返済シミュレーター */
-const PREPAYDEF={id:'prepay',title:'繰上げ返済シミュレーター',example:'残り2,500万円・金利0.9%・残り28年に200万円',
+const PREPAYDEF={id:'prepay',title:'繰上げ返済シミュレーター',example:`残り2,500万円・金利${CFG.loanRates.hendo}%・残り28年に200万円`,
   lead:'住宅ローンを繰上げ返済すると、利息がいくら減るかを計算します。返済期間を短くする「期間短縮型」と、毎月の返済を減らす「返済額軽減型」を並べて比べます。',
-  base:()=>({bal:2500,rate:0.9,years:28,amount:200}),
+  base:()=>({bal:2500,rate:CFG.loanRates.hendo,years:28,amount:200}),
   groups:[{g:'今のローン',f:[{id:'bal',l:'ローンの残り',u:'万円',h:'返済予定表で確認できます'},{id:'rate',l:'金利',u:'%',st:.01},{id:'years',l:'残りの返済期間',u:'年'}]},
    {g:'繰上げ返済',f:[{id:'amount',l:'繰上げ返済する額',u:'万円'}]}],
   calc(V){

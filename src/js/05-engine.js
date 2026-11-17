@@ -6,7 +6,7 @@ function basePlan(){return{
   inc:450,raise:1.0,ret:60,sev:1500,reinc:250,workEnd:65,
   sinc:120,sraise:0.5,sret:60,ssev:0,sreinc:0,sworkEnd:60,
   pen:16,penAge:65,spen:8,spenAge:65,penRev:0.5,
-  house:'buy',rent:7,loanPay:9,loanEnd:70,orate:1.0,hval:2500,hdep:-1.5,buyAge:37,price:3000,down:300,rate:1.0,term:35,hcost:12,
+  house:'buy',rent:7,loanPay:9,loanEnd:70,orate:1.0,hval:2500,hdep:-1.5,buyAge:37,price:3000,down:300,rate:CFG.loanRates.hendo,term:35,hcost:12,
   live:20,retRatio:80,ins:2,insEnd:60,
   car:250,carEvery:8,carNext:3,carLast:75,
   infl:1.5,

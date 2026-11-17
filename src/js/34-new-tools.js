@@ -9,9 +9,9 @@ function salaryTax(gross){
 }
 /* 住宅ローン控除の目安（数値は content/rules.yml の koujo） */
 const KJ=CFG.koujo;
-const KOUJODEF={id:'koujo',title:'住宅ローン控除の目安',example:'新築ZEH水準・借入3,500万円・金利0.9%・35年・年収600万円',
+const KOUJODEF={id:'koujo',title:'住宅ローン控除の目安',example:`新築ZEH水準・借入3,500万円・金利${CFG.loanRates.hendo}%・35年・年収600万円`,
   lead:'借入額と家の種類から、住宅ローン控除で毎年いくら戻りそうかの目安を出します。所得税と住民税の額で戻る金額に上限があるので、その分も考えます。2026〜2030年に入居する場合の制度で計算します。',
-  base:()=>({type:'new_zeh',kids:'no',year:2026,loan:3500,rate:0.9,term:35,how:'gross',gross:600,itax:15,taxable:350}),
+  base:()=>({type:'new_zeh',kids:'no',year:2026,loan:3500,rate:CFG.loanRates.hendo,term:35,how:'gross',gross:600,itax:15,taxable:350}),
   fix:V=>{if(!V.how){V.how='manual';V.gross=600}},
   groups:[
    {g:'家とローン',f:[

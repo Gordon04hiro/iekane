@@ -160,7 +160,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    w.close();}
 
   console.log('\n■ 入口ツールの計算');
-  {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,637万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,637'),T(w.document,'.panel .kv b')[0]);w.close();}
+  {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,417万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,417'),T(w.document,'.panel .kv b')[0]);w.close();}
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));
    check('繰上げ返済：期間短縮のほうが利息が多く減る',s>l&&l>0,b.join(' / '));w.close();}
   {const w=await open('souzokuzei.html');const d=w.document;check('相続税チェック：入力例は基礎控除の範囲内',T(d,'.panel .chip')[0]==='基礎控除の範囲内の見込み');
@@ -178,7 +178,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   console.log('\n■ 住宅ローン控除・法定相続分');
   {const w=await open('koujo.html');const d=w.document;
    check('住宅ローン控除：13年分の表が出る',d.querySelectorAll('#gresult table.cf tr').length===15,String(d.querySelectorAll('#gresult table.cf tr').length));
-   check('住宅ローン控除：1年目は約23.9万円',/^23\.[89]/.test(T(d,'.panel .kv b')[1]||''),T(d,'.panel .kv b')[1]);
+   check('住宅ローン控除：1年目は約24万円',/^24/.test(T(d,'.panel .kv b')[1]||''),T(d,'.panel .kv b')[1]);
    set(w,'g_koujo_type','new_eco');set(w,'g_koujo_year','2028');await wait(400);
    check('省エネ基準の新築は2028年入居だと対象外と出る',/2027年までに住み始める/.test(T(d,'.advice')[0]||''));
    w.close();}
