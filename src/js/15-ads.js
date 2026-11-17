@@ -13,7 +13,7 @@ function affBox(key){
 }
 /* ツールごとに出すアフィリエイト（affiliates.yml の名前） */
 const TOOL_AFF={
- chuko:['住宅ローン比較'], koujo:['住宅ローン比較'], souzokubun:['一括査定'],
+ chuko:['住宅ローン比較'], koujo:['住宅ローン比較','ふるさと納税'], furusato:['ふるさと納税'], souzokubun:['一括査定'],
  lifeplan:['証券口座','住宅ローン比較'], loan:['住宅ローン比較'], vs:['住宅ローン比較'], rent2buy:['住宅ローン比較'], prepay:['住宅ローン比較'],
  sell:['一括査定'], akiya:['空き家買取','一括査定'], souzoku:['一括査定'], souzoku2:['空き家買取','一括査定'], souzokuzei:['一括査定']
 };

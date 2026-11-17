@@ -1,5 +1,5 @@
 /* ---------- 複数ページ対応のリンク ---------- */
-const FILES={forfp:'forfp.html',chuko:'chuko.html',links:'links.html',koujo:'koujo.html',souzokubun:'souzokubun.html',glossary:'glossary.html',rent2buy:'rent2buy.html',prepay:'prepay.html',souzokuzei:'souzokuzei.html',home:'index.html',lifeplan:'lifeplan.html',sell:'sell.html',loan:'loan.html',souzoku:'souzoku.html',souzoku2:'souzoku2.html',akiya:'akiya.html',vs:'vs.html',articles:'articles/index.html',news:'news.html',data:'data.html',about:'about.html',privacy:'privacy.html',tools:'index.html#tools',contact:'about.html#contact'};
+const FILES={forfp:'forfp.html',furusato:'furusato.html',chuko:'chuko.html',links:'links.html',koujo:'koujo.html',souzokubun:'souzokubun.html',glossary:'glossary.html',rent2buy:'rent2buy.html',prepay:'prepay.html',souzokuzei:'souzokuzei.html',home:'index.html',lifeplan:'lifeplan.html',sell:'sell.html',loan:'loan.html',souzoku:'souzoku.html',souzoku2:'souzoku2.html',akiya:'akiya.html',vs:'vs.html',articles:'articles/index.html',news:'news.html',data:'data.html',about:'about.html',privacy:'privacy.html',tools:'index.html#tools',contact:'about.html#contact'};
 function pageURL(h){const B=window.BASE||'';if(h.startsWith('a-'))return B+'articles/'+h.slice(2)+'.html';if(h.startsWith('g-'))return B+'guide/'+h.slice(2)+'.html';return FILES[h]?B+FILES[h]:null}
 function linkFix(root){if(!window.PAGE)return;const D=root||(typeof document!=='undefined'?document:null);if(!D||!D.querySelectorAll)return;D.querySelectorAll('a[href^="#"]').forEach(a=>{const u=pageURL(a.getAttribute('href').slice(1));if(u)a.setAttribute('href',u)})}
 if(window.PAGE&&window.MutationObserver){new MutationObserver(()=>linkFix(document)).observe(document.body,{childList:true,subtree:true})}
@@ -13,6 +13,7 @@ const SHARE={
  vs:{get:()=>gtState(VSDEF),set:d=>{GT.vs=d}},
  rent2buy:{get:()=>gtState(RENT2BUYDEF),set:d=>{GT.rent2buy=d}},
  koujo:{get:()=>gtState(KOUJODEF),set:d=>{GT.koujo=d}},
+ furusato:{get:()=>gtState(FURUDEF),set:d=>{GT.furusato=d}},
  souzokubun:{get:()=>gtState(BUNDEF),set:d=>{GT.souzokubun=d}},
  prepay:{get:()=>gtState(PREPAYDEF),set:d=>{GT.prepay=d}},
  souzokuzei:{get:()=>gtState(ZEIDEF),set:d=>{GT.souzokuzei=d}}

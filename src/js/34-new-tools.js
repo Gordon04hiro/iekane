@@ -108,4 +108,51 @@ const BUNDEF={id:'souzokubun',title:'法定相続分の計算',example:'配偶�
   dock:(V,R)=>['相続人',R.none?'なし':R.heirs.reduce((s,h)=>s+h.n,0)+' 人'],
   related:['souzoku','souzokuzei','souzoku2']
 };
-Object.assign(GDEF,{koujo:KOUJODEF,souzokubun:BUNDEF});
+
+/* ふるさと納税の上限の目安（数値は content/rules.yml の furusato・salary） */
+function furusatoCalc(V){
+  const F=CFG.furusato,C=CFG.salary,g=Math.max(0,n(V.gross)),r=C.ded.find(x=>g<=x[0])||C.ded[C.ded.length-1];
+  const kyuyo=Math.max(0,g-Math.max(C.min,g*r[1]/100+r[2]));
+  const soc=V.socMode==='input'?Math.max(0,n(V.soc)):g*C.social/100, ideco=Math.max(0,n(V.ideco))*12;
+  const sp=V.sp==='yes'?1:0, dep=Math.max(0,Math.round(n(V.dep))), tok=Math.max(0,Math.round(n(V.tok)));
+  const itTaxable=Math.max(0,Math.floor(kyuyo-soc-ideco-C.basic-sp*F.spouse[0]-dep*F.dep[0]-tok*F.tok[0]));
+  const rsTaxable=Math.max(0,Math.floor(kyuyo-soc-ideco-F.resBasic-sp*F.spouse[1]-dep*F.dep[1]-tok*F.tok[1]));
+  const b=CFG.retire.brackets.find(x=>itTaxable<=x[0])||CFG.retire.brackets[CFG.retire.brackets.length-1];
+  const shotokuwari=Math.max(0,rsTaxable*F.resRate/100-F.adj);
+  const limit=shotokuwari>0?shotokuwari*F.special/100/(0.9-b[1]/100*1.021)+0.2:0;
+  return{kyuyo,soc,itTaxable,rsTaxable,rate:b[1],shotokuwari,limit:Math.max(0,Math.floor(limit*10)/10)};
+}
+const FURUDEF={id:'furusato',title:'ふるさと納税の上限の目安',example:'年収600万円・独身（扶養なし）',
+  lead:'年収と家族構成から、ふるさと納税で自己負担2,000円で済む寄附額の上限の目安を出します。会社員（給与収入のみ）の方向けの、ざっくりした計算です。',
+  base:()=>({gross:600,sp:'no',dep:0,tok:0,socMode:'auto',soc:90,ideco:0,loanKoujo:'no'}),
+  groups:[
+   {g:'収入',f:[
+    {id:'gross',l:'年収（額面）',u:'万円',h:'源泉徴収票の「支払金額」。ボーナス込み。今年の見込みで'},
+    {id:'socMode',l:'社会保険料',type:'sel',o:[['auto','年収の約15%で計算する'],['input','金額を入れる']],h:'源泉徴収票の「社会保険料等の金額」がわかれば、金額を入れるとより正確です'},
+    {id:'soc',l:'社会保険料の金額（年）',u:'万円',show:V=>V.socMode==='input'},
+    {id:'ideco',l:'iDeCoの掛金（月）',u:'万円',st:.1,h:'していなければ0'}]},
+   {g:'家族',s:'あなたが扶養している家族',f:[
+    {id:'sp',l:'配偶者控除・配偶者特別控除',type:'sel',o:[['no','受けていない（共働き・独身など）'],['yes','受けている（配偶者の年収が少ない）']],h:'配偶者の給与収入がおおむね123万円以下なら「受けている」が目安。配偶者特別控除の場合は、少し上限が下がることがあります'},
+    {id:'dep',l:'扶養している16〜18歳・23歳以上の家族',u:'人',h:'高校生など。15歳以下の子どもは数えません'},
+    {id:'tok',l:'扶養している19〜22歳の家族',u:'人',h:'大学生など（特定扶養親族）'}]},
+   {g:'住宅ローン控除',f:[
+    {id:'loanKoujo',l:'今年、住宅ローン控除を受けますか',type:'sel',o:[['no','受けない'],['first','受ける（1年目・確定申告）'],['yes','受ける（2年目以降・年末調整）']]}]}
+  ],
+  calc:V=>furusatoCalc(V),
+  result(V,R){
+    const yen=v=>Math.floor(v*10)*1000;
+    return `<h2>計算結果</h2><p class="unit">入力するたびに自動で更新されます。</p>
+    <div class="panels"><section class="panel"><div class="ph"><span class="nm">自己負担2,000円で済む寄附額の目安</span></div>
+     <div class="kv">${kvRow('上限の目安','約'+yen(R.limit).toLocaleString('ja-JP')+'<small>円</small>')}${kvRow('住民税の所得割額（目安）','約'+(Math.round(R.shotokuwari*10)/10).toLocaleString('ja-JP')+'<small>万円</small>')}${kvRow('所得税の税率（目安）',R.rate+'<small>%</small>')}</div></section></div>
+    <section class="advice"><h3>入力した条件で計算すると</h3><ul>
+     <li>年間の寄附額が<b>約${yen(R.limit).toLocaleString('ja-JP')}円まで</b>なら、自己負担2,000円を除いた額が、所得税と住民税から差し引かれる計算です。</li>
+     <li>上限ぎりぎりではなく、<b>1〜2割ほど少なめ</b>にしておくと安心です。年収や控除が見込みとずれると、上限も変わります。</li>
+     ${V.loanKoujo==='first'?'<li><b>住宅ローン控除の1年目は確定申告が必要なので、ワンストップ特例は使えません。</b>ふるさと納税の寄附も、確定申告で一緒に申告します。</li>':''}
+     ${V.loanKoujo!=='no'?'<li>住宅ローン控除で所得税が少なくなっている場合、確定申告でふるさと納税を申告すると、控除しきれない分が出て上限が下がることがあります。ワンストップ特例を使える年（2年目以降で、寄附先が5自治体以内など）は、影響が出にくくなります。</li>':''}
+     <li>医療費控除や生命保険料控除、副業・年金などの収入があると、上限は変わります。このツールでは考えていません。</li></ul></section>${ctaHTML()}
+    <div class="taxnote">総務省が示している計算方法にもとづく、一般的な<b>目安</b>です（給与収入のみ・社会保険料は入力または年収の約15%・調整控除はおおまかな額で計算）。実際の上限は、源泉徴収票や住民税の決定通知書の数字、各ふるさと納税サイトの詳しいシミュレーションでご確認ください。申告の方法や税額は、お住まいの市町村・税務署にご確認ください。</div>`;
+  },
+  dock:(V,R)=>['ふるさと納税の上限の目安','約'+(Math.floor(R.limit*10)*1000).toLocaleString('ja-JP')+' 円'],
+  related:['koujo','lifeplan','loan']
+};
+Object.assign(GDEF,{koujo:KOUJODEF,souzokubun:BUNDEF,furusato:FURUDEF});
