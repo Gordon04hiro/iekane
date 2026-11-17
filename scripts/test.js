@@ -155,6 +155,11 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   {const w=await open('koujo.html');const d=w.document;check('住宅ローン控除：年収から目安で計算（源泉徴収票の欄は隠れる）',!d.querySelector('[data-gf="koujo_gross"]').hidden&&d.querySelector('[data-gf="koujo_itax"]').hidden);
    check('年収600万円なら所得税は約19万円の目安',/所得税は年約19\.1万円/.test(d.getElementById('gresult').textContent));w.close();}
 
+  {const w=await open('furusato.html');const d=w.document;
+   check('ふるさと納税：年収600万円・独身なら上限の目安は約77,000円（総務省の表と同じ）',/約77,000/.test(T(d,'.panel .kv b')[0]||''),T(d,'.panel .kv b')[0]);
+   set(w,'g_furusato_sp','yes');set(w,'g_furusato_dep','1');await wait(400);
+   check('配偶者控除と高校生1人で約60,000円（総務省の表と同じ）',/約60,000/.test(T(d,'.panel .kv b')[0]||''),T(d,'.panel .kv b')[0]);
+   set(w,'g_furusato_loanKoujo','first');await wait(400);check('住宅ローン控除1年目はワンストップ特例が使えないと出る',/ワンストップ特例は使えません/.test(d.getElementById('gresult').textContent));w.close();}
   console.log('\n■ 住宅ローン控除・法定相続分');
   {const w=await open('koujo.html');const d=w.document;
    check('住宅ローン控除：13年分の表が出る',d.querySelectorAll('#gresult table.cf tr').length===15,String(d.querySelectorAll('#gresult table.cf tr').length));
