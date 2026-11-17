@@ -609,3 +609,10 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .nibox{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
 .nibox>b{font-size:14px}
 .nibox .kv{margin-top:6px}
+/* 自社の広告（バナー） */
+.house-ad{margin:18px 0;position:relative}
+.house-ad .pr-label{display:inline-block;margin-bottom:6px;background:var(--surface)}
+.house-ad a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:0 4px 14px rgba(13,44,84,.06);transition:box-shadow .15s,transform .15s}
+.house-ad a:hover{box-shadow:0 8px 22px rgba(13,44,84,.12);transform:translateY(-1px)}
+.house-ad img{display:block;width:100%;height:auto}
+.house-ad{max-width:880px}

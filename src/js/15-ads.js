@@ -11,6 +11,17 @@ function affBox(key){
   const a=AFF_ADS[key]; if(!a) return '';
   return `<aside class="pr-box" data-aff="${esc(key)}"><span class="pr-label">PR</span><b>${esc(a.h)}</b>${a.d?`<p>${esc(a.d)}</p>`:''}<div class="pr-code">${a.code}</div></aside>`;
 }
+/* 自社の広告（site.yml の 自社広告）。ページの内容（テーマ）に合わせて出し分ける。where はどのページから来たか（utm_content） */
+function houseTheme(kind,v){const h=SITE_CFG.houseAd;if(!h||!h['出す']||!h['テーマ'])return null;
+  return Object.keys(h['テーマ']).find(t=>[].concat(h['テーマ'][t][kind]||[]).includes(v))||null}
+function houseAd(theme,where){
+  const h=SITE_CFG.houseAd;if(!theme||!h||!h['リンク'])return '';
+  const T=h['テーマ'][theme]||{},B=window.BASE||'',L=String(h['リンク']);
+  const url=L+(L.includes('?')?'&':'?')+'utm_source=sainomado&utm_medium=banner&utm_campaign=kj_'+theme+'&utm_content='+encodeURIComponent(where);
+  return `<aside class="house-ad"><span class="pr-label">広告</span><a href="${esc(url)}" target="_blank" rel="noopener sponsored" data-house="${esc(theme+':'+where)}"><picture><source media="(max-width:600px)" srcset="${B}assets/ads/kj-${theme}-rect.webp" width="600" height="500"><img src="${B}assets/ads/kj-${theme}-wide.webp" width="1200" height="400" alt="${esc(h['名前']||'')}　${esc(T['説明']||'')}（ホームページへ）" loading="lazy"></picture></a></aside>`;
+}
+const houseFor=(kind,v,where)=>houseAd(houseTheme(kind,v),where);
+document.addEventListener('click',e=>{const a=e.target.closest('[data-house]');if(a){const [t,p]=a.dataset.house.split(':');track('kj_banner_click',{theme:t,place:p})}});
 /* ツールごとに出すアフィリエイト（affiliates.yml の名前） */
 const TOOL_AFF={
  chuko:['住宅ローン比較'], koujo:['住宅ローン比較','ふるさと納税'], furusato:['ふるさと納税'], souzokubun:['一括査定'],
@@ -22,7 +33,7 @@ function adTail(r){
   const box=document.getElementById('adtail'); if(!box) return;
   const affs=(TOOL_AFF[r]||[]).map(affBox).filter(Boolean);
   const unit=TOOL_AFF[r]?adUnit('ツールの下'):'';
-  box.innerHTML=(affs.length?`<p class="pr-note">当サイトはアフィリエイト広告を利用しています。「PR」と表示したリンクから申し込みがあると、当サイトが報酬を受け取ることがあります。</p>${affs.join('')}`:'')+unit;
+  box.innerHTML=houseFor('ツール',r,'tool_'+r)+(affs.length?`<p class="pr-note">当サイトはアフィリエイト広告を利用しています。「PR」と表示したリンクから申し込みがあると、当サイトが報酬を受け取ることがあります。</p>${affs.join('')}`:'')+unit;
   box.hidden=!box.innerHTML;
 }
 /* 記事の本文に、見出し2つごとに広告を入れる */
