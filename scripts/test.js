@@ -144,7 +144,11 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));
    check('繰上げ返済：期間短縮のほうが利息が多く減る',s>l&&l>0,b.join(' / '));w.close();}
   {const w=await open('souzokuzei.html');const d=w.document;check('相続税チェック：入力例は基礎控除の範囲内',T(d,'.panel .chip')[0]==='基礎控除の範囲内の見込み');
-   set(w,'g_souzokuzei_cash','4000');await wait(400);check('預貯金を増やすと「超える可能性」になる',T(d,'.panel .chip')[0]==='基礎控除を超える可能性');w.close();}
+   set(w,'g_souzokuzei_cash','4000');await wait(400);check('預貯金を増やすと「超える可能性」になる',T(d,'.panel .chip')[0]==='基礎控除を超える可能性');
+   set(w,'g_souzokuzei_kids','3');await wait(400);check('子どもの人数から法定相続人を数える（配偶者＋子3人＝4人）',/600万円×4人/.test(d.getElementById('gresult').textContent));
+   set(w,'g_souzokuzei_kids','0');await wait(100);check('子どもがいないときは親の人数を聞く',!d.querySelector('[data-gf="souzokuzei_parents"]').hidden);w.close();}
+  {const w=await open('koujo.html');const d=w.document;check('住宅ローン控除：年収から目安で計算（源泉徴収票の欄は隠れる）',!d.querySelector('[data-gf="koujo_gross"]').hidden&&d.querySelector('[data-gf="koujo_itax"]').hidden);
+   check('年収600万円なら所得税は約19万円の目安',/所得税は年約19\.1万円/.test(d.getElementById('gresult').textContent));w.close();}
 
   console.log('\n■ 住宅ローン控除・法定相続分');
   {const w=await open('koujo.html');const d=w.document;

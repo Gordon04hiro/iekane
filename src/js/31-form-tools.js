@@ -4,6 +4,7 @@ function gtState(def){
   if(GT[def.id]) return GT[def.id];
   let v=null;try{const s=localStorage.getItem('sainomado-'+def.id+'-v1');if(s)v=JSON.parse(s)}catch(e){}
   if(!v) v=Object.assign(def.base(),{example:true});
+  if(def.fix) def.fix(v);
   GT[def.id]=v;return v;
 }
 function gtSave(def){if(window.__shared)return;try{localStorage.setItem('sainomado-'+def.id+'-v1',JSON.stringify(GT[def.id]))}catch(e){}}
@@ -215,7 +216,7 @@ const VSDEF={id:'vs',title:'賃貸vs持ち家 比べる診断',example:'35歳・
      <li>賃貸は住み替えやすく、修繕の負担がありません。購入はローン完済後の住居費が下がり、家が資産として残ります。老後に借りにくくなることも、賃貸を選ぶときに考えておきたい点です。</li></ul></section>${ctaHTML()}
     <p class="unit">頭金を運用した場合の利益、住宅ローン控除、家財・火災保険、賃貸の引越し費用は含めていません。家賃は毎年同じ割合で上がる前提です。</p>`;
   },
-  dock:(V,R)=>{const d=R.cr-R.net;return[d>=0?'購入のほうが少ない':'賃貸のほうが少ない',fmt(Math.abs(d))+' 万円']},
+  dock:(V,R)=>{const d=R.cr-R.net;return[`住居費の合計は、${d>=0?'購入':'賃貸'}のほうが`,fmt(Math.abs(d))+' 万円少ない']},
   related:['loan','lifeplan']
 };
 const GDEF={loan:LOANDEF,akiya:AKIYADEF,vs:VSDEF};

@@ -91,7 +91,7 @@ const SF=[
   {id:'loan',l:'住宅ローンの残り',u:'万円',h:'返済予定表で確認できます。なければ0'},
   {id:'feeMode',l:'仲介手数料の計算',type:'sel',o:[['std','通常の上限で計算'],['low','800万円以下の特例で計算（上限33万円）']],h:'800万円以下の家は、事前に説明・合意があれば上限が33万円（税込）になる特例があります',show:V=>n(V.price)<=CFG.fee.lowMax},
  ]},
- {g:'買ったときのこと',s:'税金の計算例に使います',f:[
+ {g:'買ったときのこと',closed:1,s:'税金の計算例に使います。わかる範囲で（開いて入力）',f:[
   {id:'buyYear',l:'買った年',u:'年'},
   {id:'buyPrice',l:'買った価格（土地＋建物）',u:'万円',h:'分からない場合は0。売却価格の5%で計算します'},
   {id:'bldPrice',l:'うち建物の価格',u:'万円',h:'契約書に内訳がなければ、戸建てなら半分程度が目安'},
@@ -125,7 +125,7 @@ function vSell(v){
   <div class="thead"><h1>売却・住み替えシミュレーター</h1><p>今の家を売ったら、手元にいくら残るか。ローンを返し切れるか。次の家を買うなら、いくら借りることになるか。売る前に確かめておきたい数字の目安をまとめて出します。</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
    <p class="unit exnote" style="margin-top:8px"${SV.example?'':' hidden'}>いまは入力例（築12年の木造戸建て・ローン残り1,800万円）が入っています。ご自分の数字に書き換えてください。</p><p class="resetrow" style="margin:8px 0 0"${SV.example?' hidden':''}><button class="btn small ghost" data-act="svreset">入力例に戻す</button></p></div>
-  <div class="formgrid">${SF.map(g=>`<details class="grp" open><summary>${g.g}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body"><div class="fields">${g.f.map(sField).join('')}</div></div></details>`).join('')}</div>
+  <div class="formgrid">${SF.map(g=>`<details class="grp"${g.closed?'':' open'}><summary>${g.g}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body"><div class="fields">${g.f.map(sField).join('')}</div></div></details>`).join('')}</div>
   <section class="result" id="sresult"></section></div>`;
   sVis(); sRender(); sDock();
 }
