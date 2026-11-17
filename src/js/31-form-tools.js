@@ -33,7 +33,7 @@ function gtRender(def){
 }
 let gT=0;
 document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.gt)return;const def=GDEF[t.dataset.gt];const V=gtState(def);const f=def.groups.flatMap(g=>g.f).find(x=>x.id===t.dataset.gk);
-  V[t.dataset.gk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));V.example=false;exShown(false);gtVis(def);gtSave(def);clearTimeout(gT);gT=setTimeout(()=>gtRender(def),250)});
+  V[t.dataset.gk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));V.example=false;if(def.onChange)def.onChange(V,t.dataset.gk);if(def.id==='loan'&&t.dataset.gk==='rate'&&V.rtype!=='custom'){V.rtype='custom';const sl=document.getElementById('g_loan_rtype');if(sl)sl.value='custom'}exShown(false);gtVis(def);gtSave(def);clearTimeout(gT);gT=setTimeout(()=>gtRender(def),250)});
 /* 入力例に戻す（直前の入力は「元に戻す」で戻せる） */
 let gtPrev=null;
 function exShown(ex){const a=document.querySelector('.exnote'),b=document.querySelector('.resetrow');if(a)a.hidden=!ex;if(b)b.hidden=ex}
@@ -55,7 +55,9 @@ function bars(items,unit){
 /* ---------- 住宅ローン・購入予算診断 ---------- */
 const LOANDEF={id:'loan',title:'住宅ローン・購入予算診断',example:'世帯年収600万円・頭金300万円・35歳',
   lead:'年収と毎月の返済から、無理なく返せる借入額と、金融機関の審査で借りられる上限の目安、そこから考えた物件価格の目安を出します。金利が上がった場合の返済額も確かめられます。',
-  base:()=>({income:600,other:0,age:35,down:300,costRate:7,rate:0.9,term:35,target:25,screen:CFG.screenRate}),
+  base:()=>({income:600,other:0,age:35,down:300,costRate:7,rtype:'hendo',rate:CFG.loanRates.hendo,term:35,target:25,screen:CFG.screenRate}),
+  fix:V=>{if(!V.rtype)V.rtype='custom'},
+  onChange(V,k){if(k==='rtype'&&V.rtype!=='custom'){V.rate=CFG.loanRates[V.rtype];const el=document.getElementById('g_loan_rate');if(el)el.value=V.rate}},
   groups:[
    {g:'収入と今の借入',f:[
     {id:'income',l:'世帯の年収（額面）',u:'万円',h:'ペアローン・収入合算をする場合は合計'},
@@ -64,7 +66,8 @@ const LOANDEF={id:'loan',title:'住宅ローン・購入予算診断',example:'�
    {g:'買い方',f:[
     {id:'down',l:'頭金（預貯金から出す額）',u:'万円'},
     {id:'costRate',l:'諸費用',u:'%',st:.5,h:'物件価格に対する割合。新築マンション3〜5%、中古・戸建て6〜9%が目安'},
-    {id:'rate',l:'借入金利',u:'%',st:.01},
+    {id:'rtype',l:'金利のタイプ',type:'sel',o:[['hendo','変動金利'],['kotei10','10年固定'],['flat','全期間固定（フラット35など）'],['custom','自分で入れる']],h:`選ぶと、${CFG.loanRates.asOf}ごろの水準の目安（変動${CFG.loanRates.hendo}%・10年固定${CFG.loanRates.kotei10}%・全期間固定${CFG.loanRates.flat}%）が入ります。実際の金利は金融機関や審査で変わります`},
+    {id:'rate',l:'借入金利',u:'%',st:.01,h:'ここを直すと「自分で入れる」になります'},
     {id:'term',l:'返済期間',u:'年'}]},
    {g:'判断の基準',s:'一般的な目安を初期値にしています',f:[
     {id:'target',l:'無理のない返済負担率',u:'%',h:'手取りで暮らしを考えるなら20〜25%がよく使われる目安'},
@@ -89,6 +92,7 @@ const LOANDEF={id:'loan',title:'住宅ローン・購入予算診断',example:'�
       <div class="kv">${kvRow('借入額',man(R.max))}${kvRow('物件価格の目安',man(R.priceMax))}${kvRow('審査金利',n(V.screen)+'<small>%</small>')}</div></section>
     </div>
     <section class="advice"><h3>入力した条件で計算すると</h3><ul>
+     ${V.rtype==='hendo'?'<li><b>変動金利</b>は、借りたあとに金利が上がると返済額が増えます。下の「金利が上がった場合」の返済額も確かめておきましょう。</li>':V.rtype==='kotei10'?'<li><b>10年固定</b>は、11年目以降の金利がそのときの水準で決め直されます。ここでは完済まで同じ金利で計算しています。</li>':V.rtype==='flat'?'<li><b>全期間固定</b>は、完済まで金利が変わらないので、返済額が増える心配はありません。そのぶん、変動金利より金利が高めです。</li>':''}
      <li>無理なく返せる借入額は約${fmt(R.ok)}万円、頭金と諸費用を考えた物件価格の目安は約${fmt(R.priceOk)}万円です。</li>
      <li>審査では約${fmt(R.max)}万円まで借りられる可能性がありますが、「借りられる額」と「返せる額」は違います。差は${fmt(R.max-R.ok)}万円です。</li>
      ${R.term<n(V.term)?`<li>完済時80歳までとすると、返済期間は${R.term}年になります。</li>`:''}

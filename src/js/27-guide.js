@@ -38,7 +38,7 @@ const WZ=[
  {id:'inv',t:'NISA・iDeCoなどで、投資や積立をしていますか？',h:'証券会社のアプリやサイトで、今の残高と毎月の積立額を確認できます。していなければ0のままで大丈夫です。',
   body:S=>{const col=(p,l)=>`<div><p class="wzq" style="margin-top:0">${l}</p><div class="fields">${wzAcc(p+'nisa','bal','万円','NISAの残高')}${wzAcc(p+'nisa','mon','万円/月','NISAの積立（月）','',.1)}${wzAcc(p+'ideco','bal','万円','iDeCoの残高')}${wzAcc(p+'ideco','mon','万円/月','iDeCoの掛金（月）','',.1)}</div></div>`;
    return `<div class="wzcols">${col('','あなた')}${wzSp(S)?col('s','配偶者'):''}</div><p class="unit" style="margin:8px 0 0">株や投資信託（NISA以外）、小規模企業共済などは「くわしく入力」で入れられます。</p>`}},
- {id:'pen',t:'年金の見込みを入れましょう',h:'「ねんきん定期便」（毎年、誕生月に届くハガキ）や「ねんきんネット」で確認できます。手元になければ、ここまでの答えから出した目安を使ってください。',
+ {id:'pen',t:'年金の見込みを入れましょう',h:'「ねんきん定期便」（毎年、誕生月に届くハガキ）や「ねんきんネット」で確認できます。ねんきん定期便のQRコードを、厚生労働省の「公的年金シミュレーター」で読み込むと、これからの働き方も入れて試算できます。手元になければ、ここまでの答えから出した目安を使ってください。',
   body:S=>{const e=wzPenEst(S);return `<div class="pcres" style="margin-bottom:12px"><span>ここまでの答えから出した目安（手取り）</span><b>あなた 月約${e.self}<small>万円</small>${wzSp(S)?`　配偶者 月約${e.sp}<small>万円</small>`:''}</b><span class="unit">今の働き方を続けた場合の、ざっくりした目安です。</span><div class="macts" style="margin-top:8px"><button class="btn small primary" data-act="wzpen">この目安を入れる</button></div></div>
    <div class="fields">${wzNum('pen','万円/月','あなたの年金（手取り・月）','ねんきん定期便の年額 ÷12 × 0.9 が目安')}${wzSp(S)?wzNum('spen','万円/月','配偶者の年金（手取り・月）'):''}</div>`}},
  {id:'done',t:'おつかれさまでした！',h:'答えた内容で、95歳までのお金の流れを計算しました。下の結果を見てみましょう。数字はあとからいつでも直せます。',

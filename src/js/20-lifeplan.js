@@ -177,7 +177,7 @@ function penHTML(S){
    </div>
    <div id="pcout">${penOut()}</div>
    <div class="macts"><button class="btn small primary" data-act="pcset">この金額を入れる</button></div>
-   <p class="unit" style="margin:6px 0 0">令和8年度の制度の金額をもとにした、ざっくりした目安です。正確な見込み額は「ねんきん定期便」や「ねんきんネット」で確認できます。</p></details>`;
+   <p class="unit" style="margin:6px 0 0">令和8年度の制度の金額をもとにした、ざっくりした目安です。正確な見込み額は「ねんきん定期便」「ねんきんネット」や、厚生労働省の<a href="https://nenkin-shisan.mhlw.go.jp/main.html" target="_blank" rel="noopener">公的年金シミュレーター</a>（ねんきん定期便のQRコードで加入記録を読み込めます）で確認できます。</p></details>`;
 }
 
 /* 退職金の手取りの目安（額面と勤続年数から） */
@@ -201,7 +201,7 @@ function teikiHTML(){
   return `<details class="sub teiki" style="margin-top:14px"><summary><b>「ねんきん定期便」の見方</b> <span class="unit">毎年、誕生月に届くハガキ</span></summary>
    <ol class="steps">
     <li><b>50歳以上の方</b>：「老齢年金の種類と見込額（年額）」の<b>合計</b>を見ます。今の働き方を60歳まで続けた場合の見込みです。<br><span class="unit">年額なので12で割り、税金などを引いた手取りは約9割で考えます（例：年額200万円 → 月約15万円）。</span></li>
-    <li><b>50歳未満の方</b>：載っているのは「これまでの加入実績に応じた年金額」で、<b>今までに払った分だけ</b>の金額です。これから働く分が足されるので、実際はもっと増えます。<br><span class="unit">そのまま入れると少なすぎるので、下の「年金の目安を計算する」を使うか、「ねんきんネット」の将来の見込額の試算で確認してください。</span></li>
+    <li><b>50歳未満の方</b>：載っているのは「これまでの加入実績に応じた年金額」で、<b>今までに払った分だけ</b>の金額です。これから働く分が足されるので、実際はもっと増えます。<br><span class="unit">そのまま入れると少なすぎるので、ねんきん定期便のQRコードを読み込める厚生労働省の<a href="https://nenkin-shisan.mhlw.go.jp/main.html" target="_blank" rel="noopener">公的年金シミュレーター</a>（これからの働き方を入れて試算できます）や、「ねんきんネット」の将来の見込額の試算で確認してください。手早く目安を出すなら、下の「年金の目安を計算する」も使えます。</span></li>
     <li><b>手元にない場合</b>：マイナポータルからつながる「ねんきんネット」で、いつでも見られます。</li>
     <li><b>受け取り開始</b>は原則65歳です。60〜75歳の間で早めたり遅らせたりでき、遅らせるほど金額が増えます（上の「受け取り開始」に反映してください）。</li>
    </ol></details>`;
