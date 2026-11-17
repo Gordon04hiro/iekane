@@ -19,7 +19,7 @@ function vGen(def,v){
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › ${esc(def.title)}</div>
   <div class="thead"><h1>${esc(def.title)}</h1><p>${def.lead}</p>
    <div class="safe">✓ 入力内容はこの端末の中だけに保存され、どこにも送信されません</div>
-   ${V.example?`<p class="unit" style="margin-top:8px">いまは入力例（${def.example}）が入っています。ご自分の数字に書き換えてください。</p>`:''}</div>
+   <p class="unit exnote" style="margin-top:8px"${V.example?'':' hidden'}>いまは入力例（${def.example}）が入っています。ご自分の数字に書き換えてください。</p><p class="resetrow" style="margin:8px 0 0"${V.example?' hidden':''}><button class="btn small ghost" data-act="gtreset" data-id="${def.id}">入力例に戻す</button></p></div>
   <div class="formgrid">${def.groups.map(g=>`<details class="grp" open><summary>${g.g}${g.s?`<small>${g.s}</small>`:''}</summary><div class="body"><div class="fields">${g.f.map(f=>gtField(def,f,V)).join('')}</div></div></details>`).join('')}</div>
   <section class="result" id="gresult"></section></div>`;
   gtVis(def); gtRender(def);
@@ -32,7 +32,17 @@ function gtRender(def){
 }
 let gT=0;
 document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.gt)return;const def=GDEF[t.dataset.gt];const V=gtState(def);const f=def.groups.flatMap(g=>g.f).find(x=>x.id===t.dataset.gk);
-  V[t.dataset.gk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));V.example=false;gtVis(def);gtSave(def);clearTimeout(gT);gT=setTimeout(()=>gtRender(def),250)});
+  V[t.dataset.gk]=f&&f.type==='sel'?t.value:(t.value===''?'':parseFloat(t.value));V.example=false;exShown(false);gtVis(def);gtSave(def);clearTimeout(gT);gT=setTimeout(()=>gtRender(def),250)});
+/* 入力例に戻す（直前の入力は「元に戻す」で戻せる） */
+let gtPrev=null;
+function exShown(ex){const a=document.querySelector('.exnote'),b=document.querySelector('.resetrow');if(a)a.hidden=!ex;if(b)b.hidden=ex}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,v=document.getElementById('view');
+  if(a==='gtreset'){const def=GDEF[b.dataset.id];if(!def)return;gtPrev={id:def.id,V:clone(gtState(def))};GT[def.id]=Object.assign(def.base(),{example:true});gtSave(def);vGen(def,v);toastAct('入力例に戻しました','元に戻す','gtundo')}
+  else if(a==='gtundo'&&gtPrev){const def=GDEF[gtPrev.id];GT[def.id]=gtPrev.V;gtPrev=null;gtSave(def);document.getElementById('toast').hidden=true;vGen(def,v);toast('元の入力に戻しました')}
+  else if(a==='svreset'){svPrev=clone(SV);SV=sellBase();saveSV();vSell(v);toastAct('入力例に戻しました','元に戻す','svundo')}
+  else if(a==='svundo'&&svPrev){SV=svPrev;svPrev=null;saveSV();document.getElementById('toast').hidden=true;vSell(v);toast('元の入力に戻しました')}
+});
+let svPrev=null;
 document.addEventListener('click',e=>{if(e.target.closest('[data-act="togresult"]'))document.getElementById('gresult').scrollIntoView({behavior:'smooth'})});
 const man=v=>fmt(v)+'<small>万円</small>';
 const kvRow=(l,v,neg)=>`<span>${l}</span><b class="${neg?'neg':''}">${v}</b>`;

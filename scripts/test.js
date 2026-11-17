@@ -126,6 +126,19 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    check('質問の途中は結果を出さない',d.getElementById('result').hidden===true);
    w.close();}
 
+  console.log('\n■ 入力の使いやすさ');
+  {const w=await open('loan.html'),d=w.document;
+   set(w,'g_loan_income','6000000');await wait(50);
+   check('万円の欄に円のつもりの数字を入れると注意が出る',/単位は「万円」/.test(d.querySelector('.unitwarn')?.textContent||''));
+   set(w,'g_loan_income','650');await wait(350);
+   check('直すと注意が消える',!d.querySelector('.unitwarn'));
+   check('入力を変えると「入力例に戻す」が出る',d.querySelector('.resetrow')?.hidden===false);
+   click(w,'[data-act="gtreset"]');await wait(100);
+   check('「入力例に戻す」で例の数字に戻る',d.getElementById('g_loan_income').value==='600',d.getElementById('g_loan_income').value);
+   click(w,'#toast [data-act="gtundo"]');await wait(100);
+   check('「元に戻す」で直前の入力に戻る',d.getElementById('g_loan_income').value==='650',d.getElementById('g_loan_income').value);
+   w.close();}
+
   console.log('\n■ 入口ツールの計算');
   {const w=await open('rent2buy.html');check('家賃9万円で買える家が2,637万円',(T(w.document,'.panel .kv b')[0]||'').startsWith('2,637'),T(w.document,'.panel .kv b')[0]);w.close();}
   {const w=await open('prepay.html');const b=T(w.document,'.panel .kv b');const s=parseFloat(b[0].replace(/,/g,'')),l=parseFloat(b[3].replace(/,/g,''));
