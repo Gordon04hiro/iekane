@@ -1,14 +1,17 @@
 // サイのまど 自動チェック（npm test）
 // 公開前に、計算・表示・リンク・共有が壊れていないかを確かめます。1つでも失敗したら公開しません。
 const fs=require('fs'),path=require('path');
-const {JSDOM,VirtualConsole}=require('jsdom');
+const {JSDOM,VirtualConsole,ResourceLoader}=require('jsdom');
+// 外部のスクリプト（広告・アクセス解析・フォント）は読み込まない。サイトの中のファイルだけでチェックする
+class LocalOnly extends ResourceLoader{fetch(url,opts){return url.startsWith('file:')?super.fetch(url,opts):null}}
+const loader=new LocalOnly();
 const DIST=path.join(__dirname,'..','dist');
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let ok=0,ng=0;
 const check=(name,cond,info='')=>{if(cond){ok++;console.log('  ✔ '+name)}else{ng++;console.log('  ✖ '+name+(info?'（'+info+'）':''))}};
 async function open(file,hash=''){
   const errs=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/fonts\.googleapis|googletagmanager|googlesyndication/.test(e.message))errs.push(e.message)});
-  const dom=await JSDOM.fromFile(path.join(DIST,file),{runScripts:'dangerously',resources:'usable',url:'file://'+path.join(DIST,file)+hash,pretendToBeVisual:true,virtualConsole:vc,
+  const dom=await JSDOM.fromFile(path.join(DIST,file),{runScripts:'dangerously',resources:loader,url:'file://'+path.join(DIST,file)+hash,pretendToBeVisual:true,virtualConsole:vc,
     beforeParse(w){w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.print=()=>{w.__printed=true}}});
   await wait(600);const w=dom.window;w.__errs=errs;return w;
 }
