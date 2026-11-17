@@ -217,6 +217,7 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
     check(f+'.html に計算の考え方とよくある質問',/計算の考え方/.test(h)&&/よくある質問/.test(h));
   }
   {const h=fs.readFileSync(path.join(DIST,'sell.html'),'utf8');check('広告コードが空のあいだは、結果の下の案内も出ない',!/cta-aff/.test(h));}
+  {const h=fs.readFileSync(path.join(DIST,'index.html'),'utf8');check('トップに検索用のサイト名（サイのまど・さいのまど）が入っている',/"@type":"WebSite","name":"サイのまど","alternateName":\["さいのまど"/.test(h)&&/"@type":"Organization"/.test(h)&&/サイのまど（さいのまど）/.test(h));}
 
   console.log('\n■ 共有したときの画像');
   {const bad=pages.map(f=>{const m=fs.readFileSync(path.join(DIST,f),'utf8').match(/og:image" content="https?:\/\/[^/]+\/([^"]+)"/);return m&&!fs.existsSync(path.join(DIST,m[1]))?f:null}).filter(Boolean);
