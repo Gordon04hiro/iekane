@@ -134,6 +134,13 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   {const w=await open('lifeplan.html'),d=w.document;
    check('ライフプラン：運用しなかった場合の点線と「運用で増える分」が出る',!!d.querySelector('.nibox')&&/運用で増える分の目安/.test(d.querySelector('.nibox').textContent)&&d.querySelectorAll('#ch1 polyline').length>=2);
    check('運用しなかった場合の95歳時点のほうが少ない',(()=>{const b=[...d.querySelectorAll('.nibox .kv b')].map(x=>parseFloat(x.textContent.replace(/[^0-9.-]/g,'')));return b[0]>0&&b[1]<6174})());w.close();}
+  {const w=await open('loan.html'),d=w.document;
+   check('住宅ローン：最初は変動金利の目安（1.5%）',d.getElementById('g_loan_rtype').value==='hendo'&&d.getElementById('g_loan_rate').value==='1.5',d.getElementById('g_loan_rate').value);
+   set(w,'g_loan_rtype','flat');await wait(400);
+   check('全期間固定を選ぶと金利の目安（3.8%）が入り、説明が出る',d.getElementById('g_loan_rate').value==='3.8'&&/全期間固定/.test(d.getElementById('gresult').textContent),d.getElementById('g_loan_rate').value);
+   set(w,'g_loan_rate','2.1');await wait(100);
+   check('金利を直すと「自分で入れる」になる',d.getElementById('g_loan_rtype').value==='custom');w.close();}
+  {const w=await open('lifeplan.html'),d=w.document;check('年金の案内に公的年金シミュレーター（厚生労働省）のリンク',!!d.querySelector('a[href="https://nenkin-shisan.mhlw.go.jp/main.html"]'));w.close();}
   console.log('\n■ 入力の使いやすさ');
   {const w=await open('loan.html'),d=w.document;
    set(w,'g_loan_income','6000000');await wait(50);
