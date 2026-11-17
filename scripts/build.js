@@ -113,7 +113,7 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
 const list=[...Object.entries(PAGES).map(([p,v])=>({p,f:v.file,t:v.title,d:v.description})),...HUBS.map(h=>({p:'hub',slug:h.slug,f:'guide/'+h.slug+'.html',t:h.stitle+'｜サイのまど',d:h.lead,hub:h})),{p:'notfound',f:'404.html',t:'ページが見つかりません｜サイのまど',d:'お探しのページは見つかりませんでした。',nf:true},...ARTS.map(a=>({p:'article',slug:a.slug,f:'articles/'+a.slug+'.html',t:(a.stitle||a.title)+'｜サイのまど',d:a.lead,art:a}))];
 const ga=SITE.analytics?`<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.analytics)}"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.analytics)}',{page_location:location.origin+location.pathname});</script>`:'';
-const ads=SITE.adsense?`<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
+const ads=SITE.adsense?`<meta name="google-adsense-account" content="${esc(SITE.adsense)}">\n<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(SITE.adsense)}" crossorigin="anonymous"></script>`:'';
 async function prerender(pg,base){
   const boot=`<script>window.PAGE=${JSON.stringify(pg.p)};window.BASE=${JSON.stringify(base)};${pg.slug?'window.SLUG='+JSON.stringify(pg.slug)+';':''}${pg.art?'window.ARTB={'+JSON.stringify(pg.slug)+':'+JSON.stringify(pg.art.body).replace(/<\//g,'<\\/')+'};':''}</script>`;
   const errs=[];
@@ -181,6 +181,8 @@ ${boot}
   }
   fs.writeFileSync(path.join(out,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u=>`  <url><loc>${u.loc}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
   fs.writeFileSync(path.join(out,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+  // AdSense：パブリッシャーID（ca-pub-…）が入っていれば ads.txt を作る（審査・広告配信に必要）
+  if(SITE.adsense){const pub=String(SITE.adsense).replace(/^ca-/,'');if(!/^pub-\d{10,20}$/.test(pub))fail('site.yml の adsense は ca-pub-（数字）の形で入れてください');fs.writeFileSync(path.join(out,'ads.txt'),`google.com, ${pub}, DIRECT, f08c47fec0942fa0\n`)}
   fs.writeFileSync(path.join(out,'CNAME'),SITE_URL.replace(/^https?:\/\//,'')+'\n');
   fs.writeFileSync(path.join(out,'.nojekyll'),'');
   console.log(`✔ ${list.length}ページを作りました（記事 ${ARTS.length}本、うち下書き ${ARTS.filter(a=>a.draft).length}本）`);
