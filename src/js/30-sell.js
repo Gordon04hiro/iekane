@@ -2,7 +2,7 @@
 const SKEY='sainomado-sell-v2';
 function sellBase(){return{price:3200,loan:1800,buyYear:Y0-12,buyPrice:3800,bldPrice:1800,struct:'wood',tokurei:'3000',feeMode:'std',
   other:30,move:20,
-  plan:'buy',newPrice:4200,newCostRate:7,cash:300,rate:0.9,term:35,income:600,example:true}}
+  plan:'buy',newPrice:4200,newCostRate:7,cash:300,rate:CFG.loanRates.hendo,term:35,income:600,example:true}}
 let SV=null;
 try{const s=localStorage.getItem(SKEY);if(s)SV=JSON.parse(s)}catch(e){}
 if(!SV||SV.price==null) SV=sellBase();

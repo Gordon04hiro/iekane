@@ -165,7 +165,7 @@ const AKIYADEF={id:'akiya',title:'相続した家・空き家の診断',example:
 /* ---------- 賃貸vs持ち家 ---------- */
 const VSDEF={id:'vs',title:'賃貸vs持ち家 比べる診断',example:'35歳・家賃9万円と、3,500万円の戸建て',
   lead:'今の年齢から決めた年齢までに払う住居費の合計を、賃貸と購入で比べます。購入の場合は、最後に残る家の価値も差し引いて比べます。',
-  base:()=>({age:35,end:85,rent:9,renew:1,rentUp:0.3,price:3500,down:300,costRate:7,rate:0.9,term:35,type:'house',upkeep:2,ptax:12,remain:25}),
+  base:()=>({age:35,end:85,rent:9,renew:1,rentUp:0.3,price:3500,down:300,costRate:7,rate:CFG.loanRates.hendo,term:35,type:'house',upkeep:2,ptax:12,remain:25}),
   groups:[
    {g:'比べる期間',f:[{id:'age',l:'今の年齢',u:'歳'},{id:'end',l:'比べる年齢',u:'歳'}]},
    {g:'賃貸',f:[
