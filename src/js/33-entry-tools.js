@@ -72,10 +72,17 @@ const PREPAYDEF={id:'prepay',title:'繰上げ返済シミュレーター',exampl
 };
 
 /* 相続税がかかるかチェック */
-const ZEIDEF={id:'souzokuzei',title:'相続税がかかるかチェック',example:'相続人3人・預貯金2,000万円・自宅2,500万円',
+/* 法定相続人の数（配偶者＋第1〜3順位のいずれか） */
+function zeiHeirs(V){if(V.sp==null&&V.heirs!=null)return Math.round(n(V.heirs));const k=Math.max(0,Math.round(n(V.kids))),p=Math.max(0,Math.min(2,Math.round(n(V.parents)))),b=Math.max(0,Math.round(n(V.sibs)));return (V.sp==='yes'?1:0)+(k>0?k:p>0?p:b)}
+const ZEIDEF={id:'souzokuzei',title:'相続税がかかるかチェック',example:'配偶者と子ども2人・預貯金2,000万円・自宅2,500万円',
   lead:'財産の合計が、相続税の基礎控除（3,000万円＋600万円×法定相続人の数）を超えそうかを確かめます。税額は計算しません。超えそうな場合は、早めに税理士に相談するきっかけにしてください。',
-  base:()=>({heirs:3,cash:2000,home:2500,land:1500,small:'no',other:0,stock:300,ins:1000,debt:200}),
-  groups:[{g:'相続人',f:[{id:'heirs',l:'法定相続人の数',u:'人',h:'配偶者と子どもなど。わからなければ家族の人数で目安を'}]},
+  base:()=>({sp:'yes',kids:2,parents:0,sibs:0,cash:2000,home:2500,land:1500,small:'no',other:0,stock:300,ins:1000,debt:200}),
+  fix:V=>{if(V.sp==null&&V.heirs!=null){const h=Math.max(1,Math.round(n(V.heirs)));Object.assign(V,{sp:'yes',kids:Math.max(0,h-1),parents:0,sibs:0})}},
+  groups:[{g:'家族',s:'亡くなる方（財産を遺す方）から見た家族。法定相続人の数を自動で数えます',f:[
+    {id:'sp',l:'配偶者',type:'sel',o:[['yes','いる'],['no','いない']]},
+    {id:'kids',l:'子どもの人数',u:'人',h:'養子も含みます（実子がいる場合、数えられる養子は1人まで）。亡くなった子に子（孫）がいれば、その孫の人数で'},
+    {id:'parents',l:'健在の親の人数',u:'人',h:'子どもがいない場合に相続人になります',show:V=>!(n(V.kids)>0)},
+    {id:'sibs',l:'兄弟姉妹の人数',u:'人',h:'子どもも親もいない場合に相続人になります',show:V=>!(n(V.kids)>0)&&!(n(V.parents)>0)}]},
    {g:'財産',s:'金額は評価額の目安で入れます',f:[
     {id:'cash',l:'預貯金',u:'万円'},{id:'stock',l:'株・投資信託など',u:'万円'},
     {id:'home',l:'自宅（土地＋建物）',u:'万円',h:'土地は路線価、建物は固定資産税評価額が目安。売れる値段より低くなることが多い'},
@@ -84,7 +91,7 @@ const ZEIDEF={id:'souzokuzei',title:'相続税がかかるかチェック',examp
     {id:'other',l:'その他の不動産',u:'万円'},{id:'ins',l:'生命保険金（受け取る額）',u:'万円',h:'500万円×法定相続人の数までは非課税として計算します'},
     {id:'debt',l:'借入・葬式費用',u:'万円',h:'財産から差し引けます'}]}],
   calc(V){
-    const h=Math.max(1,Math.round(n(V.heirs)));
+    const h=Math.max(1,zeiHeirs(V));
     const insTax=Math.max(0,n(V.ins)-500*h);
     const smallCut=V.small==='yes'?Math.min(n(V.land),n(V.home))*0.8:0;
     const total=n(V.cash)+n(V.stock)+n(V.home)+n(V.other)+insTax-smallCut-n(V.debt);

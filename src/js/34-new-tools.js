@@ -1,21 +1,32 @@
 /* ---------- 住宅ローン控除の目安／法定相続分の計算 ---------- */
 
+/* 年収（額面）から、課税所得と所得税（復興税を除く）のざっくりした目安 */
+function salaryTax(gross){
+  const C=CFG.salary,g=Math.max(0,n(gross)),r=C.ded.find(x=>g<=x[0])||C.ded[C.ded.length-1];
+  const ded=Math.max(C.min,g*r[1]/100+r[2]),taxable=Math.max(0,Math.floor(g-ded-g*C.social/100-C.basic));
+  const b=CFG.retire.brackets.find(x=>taxable<=x[0])||CFG.retire.brackets[CFG.retire.brackets.length-1];
+  return{taxable,itax:Math.max(0,Math.round((taxable*b[1]/100-b[2])*10)/10)};
+}
 /* 住宅ローン控除の目安（数値は content/rules.yml の koujo） */
 const KJ=CFG.koujo;
-const KOUJODEF={id:'koujo',title:'住宅ローン控除の目安',example:'新築ZEH水準・借入3,500万円・金利0.9%・35年',
+const KOUJODEF={id:'koujo',title:'住宅ローン控除の目安',example:'新築ZEH水準・借入3,500万円・金利0.9%・35年・年収600万円',
   lead:'借入額と家の種類から、住宅ローン控除で毎年いくら戻りそうかの目安を出します。所得税と住民税の額で戻る金額に上限があるので、その分も考えます。2026〜2030年に入居する場合の制度で計算します。',
-  base:()=>({type:'new_zeh',kids:'no',year:2026,loan:3500,rate:0.9,term:35,itax:15,taxable:350}),
+  base:()=>({type:'new_zeh',kids:'no',year:2026,loan:3500,rate:0.9,term:35,how:'gross',gross:600,itax:15,taxable:350}),
+  fix:V=>{if(!V.how){V.how='manual';V.gross=600}},
   groups:[
    {g:'家とローン',f:[
     {id:'type',l:'家の種類',type:'sel',o:Object.entries(KJ.types).map(([k,v])=>[k,v.name]),h:'省エネ性能は、住宅会社や不動産会社にある証明書で確認できます'},
     {id:'kids',l:'子育て世帯・若者夫婦世帯',type:'sel',o:[['no','あてはまらない'],['yes','あてはまる']],h:'19歳未満の子がいる、または夫婦のどちらかが40歳未満'},
     {id:'year',l:'住み始める年',u:'年'},
     {id:'loan',l:'借入額',u:'万円'},{id:'rate',l:'借入金利',u:'%',st:.01},{id:'term',l:'返済期間',u:'年'}]},
-   {g:'税金の額',s:'源泉徴収票で確認できます',f:[
-    {id:'itax',l:'所得税の額（年）',u:'万円',st:.1,h:'源泉徴収票の「源泉徴収税額」。年収500万円で10万円前後、600万円で15万円前後が目安'},
-    {id:'taxable',l:'課税される所得の金額',u:'万円',h:'源泉徴収票の「給与所得控除後の金額」から「所得控除の額の合計額」を引いた額。わからなければ0（住民税の上限9.75万円で計算）'}]}
+   {g:'税金の額',s:'控除で戻るのは、払った税金の範囲までです',f:[
+    {id:'how',l:'税金の額の入れ方',type:'sel',o:[['gross','年収から目安で計算する'],['manual','源泉徴収票の数字を入れる']],h:'会社員の方向け。自営業の方は確定申告書の数字を「源泉徴収票の数字」で入れてください'},
+    {id:'gross',l:'年収（額面）',u:'万円',h:'源泉徴収票の「支払金額」。ボーナス込み。借入する人の分だけ（夫婦の合計ではありません）',show:V=>V.how==='gross'},
+    {id:'itax',show:V=>V.how!=='gross',l:'所得税の額（年）',u:'万円',st:.1,h:'源泉徴収票の「源泉徴収税額」。年収500万円で10万円前後、600万円で15万円前後が目安'},
+    {id:'taxable',show:V=>V.how!=='gross',l:'課税される所得の金額',u:'万円',h:'源泉徴収票の「給与所得控除後の金額」から「所得控除の額の合計額」を引いた額。わからなければ0（住民税の上限9.75万円で計算）'}]}
   ],
   calc(V){
+    let est=null;if(V.how==='gross'){est=salaryTax(V.gross);V={...V,itax:est.itax,taxable:est.taxable}}
     const T=KJ.types[V.type]||KJ.types.new_zeh, kid=V.kids==='yes'?1:0, yr=Math.round(n(V.year));
     const out=T.until&&yr>T.until;
     const limit=out?0:n(T.limit[kid]), years=T.years;
@@ -28,7 +39,7 @@ const KOUJODEF={id:'koujo',title:'住宅ローン控除の目安',example:'新�
       const bal=Math.max(0,balAt(k)), base=Math.min(bal,limit)*KJ.rate/100, cap=n(V.itax)+resCap, got=Math.min(base,cap);
       rows.push({y:yr+k-1,k,bal,base,got,short:base-got});tot+=got;totMax+=base;
     }
-    return{T,limit,years,rows,tot,totMax,resCap,out,M};
+    return{T,limit,years,rows,tot,totMax,resCap,out,M,est};
   },
   result(V,R){
     const first=R.rows[0]||{base:0,got:0};
@@ -39,6 +50,7 @@ const KOUJODEF={id:'koujo',title:'住宅ローン控除の目安',example:'新�
      ${R.out?`<li><b>この種類の新築住宅は、${R.T.until}年までに住み始める場合が対象です。</b>${Math.round(n(V.year))}年の入居では、原則として控除を受けられない計算です（建築確認の時期による例外があります）。</li>`:''}
      <li>年末のローン残高（上限${fmt(R.limit)}万円）の${KJ.rate}%が、${R.years}年間、所得税から差し引かれる計算です。</li>
      ${R.totMax-R.tot>0.5?`<li>所得税と住民税の額が少ないため、約${fmt(R.totMax-R.tot)}万円は控除しきれない計算です。控除で戻るのは、払った税金の範囲までです。</li>`:'<li>入力した税金の額なら、控除の上限まで使い切れる計算です。</li>'}
+     ${R.est?`<li>年収${fmt(n(V.gross))}万円から、所得税は年約${(R.est.itax).toLocaleString('ja-JP')}万円（課税所得 約${fmt(R.est.taxable)}万円）として計算しています。配偶者や子どもを扶養している場合などは税額が少なくなり、戻る額も少なくなることがあります。源泉徴収票があれば「源泉徴収票の数字を入れる」がより正確です。</li>`:''}
      <li>住民税からは、年${(Math.round(R.resCap*100)/100).toLocaleString('ja-JP')}万円まで差し引ける前提で計算しています。</li>
      <li>1年目は確定申告が必要です。2年目からは、会社員なら年末調整で受けられます。</li></ul></section>${ctaHTML()}
     <div class="cfhead"><h3>年ごとの目安</h3></div>
