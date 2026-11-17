@@ -134,6 +134,9 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
   {const w=await open('lifeplan.html'),d=w.document;
    check('ライフプラン：運用しなかった場合の点線と「運用で増える分」が出る',!!d.querySelector('.nibox')&&/運用で増える分の目安/.test(d.querySelector('.nibox').textContent)&&d.querySelectorAll('#ch1 polyline').length>=2);
    check('運用しなかった場合の95歳時点のほうが少ない',(()=>{const b=[...d.querySelectorAll('.nibox .kv b')].map(x=>parseFloat(x.textContent.replace(/[^0-9.-]/g,'')));return b[0]>0&&b[1]<6174})());w.close();}
+  {const w=await open('sell.html'),d=w.document;const a=d.querySelector('.house-ad a');
+   check('売却のページに自社の広告（「広告」表示・utm付き・新しいタブ）',!!a&&/広告/.test(d.querySelector('.house-ad').textContent)&&/utm_source=sainomado&utm_medium=banner&utm_campaign=kj_banner&utm_content=tool_sell/.test(a.href)&&a.target==='_blank'&&!/noreferrer/.test(a.rel));w.close();}
+  {const w=await open('loan.html');check('住宅ローンのページには自社の広告は出ない',!w.document.querySelector('.house-ad'));w.close();}
   console.log('\n■ 入力の使いやすさ');
   {const w=await open('loan.html'),d=w.document;
    set(w,'g_loan_income','6000000');await wait(50);
