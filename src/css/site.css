@@ -587,3 +587,4 @@ details.grp > summary{flex-wrap:wrap;row-gap:2px}
 .pairrow .pcols.one{grid-template-columns:1fr}
 .wznav{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
 .wznav .btn{min-width:120px}
+.unitwarn{display:block;font-size:12px;font-weight:700;color:var(--bad);background:var(--bad-bg,#fdecea);border-radius:8px;padding:6px 8px;margin-top:4px;line-height:1.5}
