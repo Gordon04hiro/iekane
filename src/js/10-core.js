@@ -29,14 +29,14 @@ const keys=()=>PK.filter(k=>LP.plans[k]);
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
 
 /* ---------- routing ---------- */
-const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','koujo','souzokubun','chuko','links','glossary','articles','news','data','about','privacy'];
+const ROUTES=['home','lifeplan','sell','loan','rent2buy','prepay','souzoku','souzoku2','souzokuzei','akiya','vs','koujo','souzokubun','chuko','links','glossary','articles','news','data','about','privacy','forfp'];
 function route(){if(window.PAGE)return window.PAGE;const h=(location.hash||'').replace('#','');return ROUTES.includes(h)?h:(h.startsWith('a-')?'article':h.startsWith('g-')?'hub':'home')}
-const TITLES={chuko:'中古住宅チェックシート',links:'一次情報リンク集',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',glossary:'用語集',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
+const TITLES={forfp:'FP・相談担当の方へ',chuko:'中古住宅チェックシート',links:'一次情報リンク集',koujo:'住宅ローン控除の目安',souzokubun:'法定相続分の計算',glossary:'用語集',rent2buy:'家賃と同じ返済で買える家',prepay:'繰上げ返済シミュレーター',souzokuzei:'相続税がかかるかチェック',lifeplan:'ライフプラン診断',sell:'売却・住み替えシミュレーター',loan:'住宅ローン・購入予算診断',souzoku:'相続の準備チェックシート（遺す方へ）',souzoku2:'相続の手続きチェックシート（受け継ぐ方へ）',akiya:'相続した家・空き家の診断',vs:'賃貸vs持ち家 比べる診断',articles:'記事',news:'お知らせ',data:'使っているデータ',about:'サイトについて',privacy:'プライバシーポリシー'};
 function go(){
   const r=route();
   document.querySelectorAll('.gnav a').forEach(a=>{if(a.dataset.r===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   const v=document.getElementById('view');
-  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
+  ({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,forfp:vForFP,privacy:vPrivacy})[r]?({home:vHome,lifeplan:vLife,sell:vSell,souzoku:vSouzoku,souzoku2:vSouzoku2,articles:vArticles,news:vNews,data:vData,article:v=>vArticle(v,window.SLUG||location.hash.slice(3)),hub:v=>vHub(v,window.SLUG||location.hash.slice(3)),notfound:v404,glossary:vGlossary,chuko:vChuko,links:vLinks,about:vAbout,forfp:vForFP,privacy:vPrivacy})[r](v):vGen(GDEF[r],v);
   document.getElementById('dock').hidden=!['lifeplan','sell','loan','akiya','vs','rent2buy','prepay','souzokuzei','koujo','souzokubun'].includes(r);
   if(window.__shared)v.insertAdjacentHTML('afterbegin',sharedBanner());
   if(location.hash==='#tools'){const el=document.getElementById('tools');if(el)setTimeout(()=>el.scrollIntoView(),0)}
@@ -48,7 +48,7 @@ if(!window.PAGE)window.addEventListener('hashchange',()=>{const h=location.hash;
 /* ---------- home ---------- */
 function toolCard(t){return t.href?`<a class="tool" href="${t.href}"><span class="ic">${IC[t.ic]}</span><h3>${t.t}</h3><p>${t.d}</p><span class="go">使ってみる →</span></a>`:`<div class="tool off"><span class="ic">${IC[t.ic]}</span><h3>${t.t} <span class="chip soon">準備中</span></h3><p>${t.d}</p></div>`}
 const TOOLS=[
- {ic:'plan',href:'#lifeplan',t:'ライフプラン診断',d:'家族・収入・住まいから、95歳までの毎年の収支と貯蓄の推移を出します。',hide:true},
+ {ic:'plan',href:'#lifeplan',t:'ライフプラン診断',d:'家族・収入・住まいから、95歳までのキャッシュフロー表（毎年の収支と貯蓄の推移）を作ります。',hide:true},
  {ic:'sell',href:'#sell',t:'売却・住み替えシミュレーター',d:'今の家がいくらで売れたら、住み替えられるか。手取り額とローン残高から逆算します。'},
  {ic:'loan',href:'#loan',t:'住宅ローン・購入予算診断',d:'年収と家族構成から、無理なく返せる借入額と物件価格の目安を出します。'},
  {ic:'inherit',href:'#souzoku',t:'相続の準備チェックシート（遺す方へ）',d:'財産・家・家族との話し合い。遺す立場で準備がどこまでできているか、12問で確認できます。'},

@@ -18,7 +18,7 @@ function vLife(v){
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › ライフプラン診断</div>
-  <div class="thead"><h1>ライフプラン診断</h1><p>家族・収入・住まいを入れると、95歳までの毎年の収支と貯蓄の推移がわかります。わかる範囲の入力で大丈夫です。</p>
+  <div class="thead"><h1>ライフプラン診断</h1><p>家族・収入・住まいを入れると、95歳までのキャッシュフロー表（毎年の収支と貯蓄の推移）を作ります。Excel・PDFで保存もできます。わかる範囲の入力で大丈夫です。</p>
    ${lpSaveBox()}</div>
   ${ks.length>1||U.plan!=='A'?planBox(ks):''}
   <div class="modepick" role="group" aria-label="入力のしかた">
