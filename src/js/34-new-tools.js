@@ -1,9 +1,11 @@
 /* ---------- 住宅ローン控除の目安／法定相続分の計算 ---------- */
 
 /* 年収（額面）から、課税所得と所得税（復興税を除く）のざっくりした目安 */
+/* 所得税の基礎控除（合計所得金額で変わる） */
+const basicDed=S=>(CFG.salary.basic.find(x=>S<=x[0])||[0,0])[1];
 function salaryTax(gross){
   const C=CFG.salary,g=Math.max(0,n(gross)),r=C.ded.find(x=>g<=x[0])||C.ded[C.ded.length-1];
-  const ded=Math.max(C.min,g*r[1]/100+r[2]),taxable=Math.max(0,Math.floor(g-ded-g*C.social/100-C.basic));
+  const ded=Math.max(C.min,g*r[1]/100+r[2]),taxable=Math.max(0,Math.floor(g-ded-g*C.social/100-basicDed(g-ded)));
   const b=CFG.retire.brackets.find(x=>taxable<=x[0])||CFG.retire.brackets[CFG.retire.brackets.length-1];
   return{taxable,itax:Math.max(0,Math.round((taxable*b[1]/100-b[2])*10)/10)};
 }
@@ -115,7 +117,7 @@ function furusatoCalc(V){
   const kyuyo=Math.max(0,g-Math.max(C.min,g*r[1]/100+r[2]));
   const soc=V.socMode==='input'?Math.max(0,n(V.soc)):g*C.social/100, ideco=Math.max(0,n(V.ideco))*12;
   const sp=V.sp==='yes'?1:0, dep=Math.max(0,Math.round(n(V.dep))), tok=Math.max(0,Math.round(n(V.tok)));
-  const itTaxable=Math.max(0,Math.floor(kyuyo-soc-ideco-C.basic-sp*F.spouse[0]-dep*F.dep[0]-tok*F.tok[0]));
+  const itTaxable=Math.max(0,Math.floor(kyuyo-soc-ideco-basicDed(kyuyo)-sp*F.spouse[0]-dep*F.dep[0]-tok*F.tok[0]));
   const rsTaxable=Math.max(0,Math.floor(kyuyo-soc-ideco-F.resBasic-sp*F.spouse[1]-dep*F.dep[1]-tok*F.tok[1]));
   const b=CFG.retire.brackets.find(x=>itTaxable<=x[0])||CFG.retire.brackets[CFG.retire.brackets.length-1];
   const shotokuwari=Math.max(0,rsTaxable*F.resRate/100-F.adj);
