@@ -169,14 +169,14 @@ const click=(w,s)=>w.document.querySelector(s).dispatchEvent(new w.MouseEvent('c
    set(w,'g_souzokuzei_kids','3');await wait(400);check('子どもの人数から法定相続人を数える（配偶者＋子3人＝4人）',/600万円×4人/.test(d.getElementById('gresult').textContent));
    set(w,'g_souzokuzei_kids','0');await wait(100);check('子どもがいないときは親の人数を聞く',!d.querySelector('[data-gf="souzokuzei_parents"]').hidden);w.close();}
   {const w=await open('koujo.html');const d=w.document;check('住宅ローン控除：年収から目安で計算（源泉徴収票の欄は隠れる）',!d.querySelector('[data-gf="koujo_gross"]').hidden&&d.querySelector('[data-gf="koujo_itax"]').hidden);
-   check('年収600万円なら所得税は約19万円の目安',/所得税は年約19\.1万円/.test(d.getElementById('gresult').textContent));w.close();}
+   check('年収600万円なら所得税は約14.5万円の目安（2026年の基礎控除104万円で計算）',/所得税は年約14\.5万円/.test(d.getElementById('gresult').textContent));w.close();}
 
   {const w=await open('chukai.html');const d=w.document;check('仲介手数料：3,000万円なら上限1,056,000円（3%＋6万円＋消費税）',/^1,056,000/.test(T(d,'.panel .kv b')[0]||''),T(d,'.panel .kv b')[0]);set(w,'g_chukai_price','600');await wait(400);check('600万円なら原則264,000円・特例33万円も表示',/^264,000/.test(T(d,'.panel .kv b')[0]||'')&&/330,000/.test(d.getElementById('gresult').textContent),T(d,'.panel .kv b')[0]);w.close();}
   {const w=await open('zoyo.html');const d=w.document;const b=T(d,'.panel .kv b');check('贈与税：親から1,000万円（省エネ等住宅）なら、特例なし177万円・非課税の特例で0円',/^177/.test(b[0]||'')&&/^0/.test(b[2]||''),b.join('/'));set(w,'g_zoyo_amount','1500');await wait(400);const b2=T(d,'.panel .kv b');check('1,500万円なら非課税の特例で48.5万円・相続時精算課税で0円',/^48.5/.test(b2[2]||'')&&/^0/.test(b2[4]||''),b2.join('/'));w.close();}
   {const w=await open('furusato.html');const d=w.document;
    check('ふるさと納税：年収600万円・独身なら上限の目安は約77,000円（総務省の表と同じ）',/約77,000/.test(T(d,'.panel .kv b')[0]||''),T(d,'.panel .kv b')[0]);
    set(w,'g_furusato_sp','yes');set(w,'g_furusato_dep','1');await wait(400);
-   check('配偶者控除と高校生1人で約60,000円（総務省の表と同じ）',/約60,000/.test(T(d,'.panel .kv b')[0]||''),T(d,'.panel .kv b')[0]);
+   check('配偶者控除と高校生1人で約57,000円（2026年の基礎控除の引上げで所得税率が5%になり、総務省の表の約60,000円より少し下がる）',/約57,000/.test(T(d,'.panel .kv b')[0]||''),T(d,'.panel .kv b')[0]);
    set(w,'g_furusato_loanKoujo','first');await wait(400);check('住宅ローン控除1年目はワンストップ特例が使えないと出る',/ワンストップ特例は使えません/.test(d.getElementById('gresult').textContent));w.close();}
   console.log('\n■ 住宅ローン控除・法定相続分');
   {const w=await open('koujo.html');const d=w.document;
