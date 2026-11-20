@@ -15,6 +15,7 @@ const OPEN=['ご家族','お仕事の収入','住まい','毎月の支出','今�
 function easyDefaults(S){normPlan(S);const A=S.assets;const sp=S.spouse==='yes';
   return [`年金（ご本人 月${n(S.pen)}万円${sp?'・配偶者 月'+n(S.spen)+'万円':''}、${n(S.penAge)}歳から）`,`定年${n(S.ret)}歳・退職金${fmt(n(S.sev))}万円・${n(S.workEnd)}歳まで働く`,`車（${fmt(n(S.car))}万円を${n(S.carEvery)}年ごと）`,`物価上昇 年${n(S.infl)}%`,`利回り（預貯金${n(A.cash.rate)}%・NISA${n(A.nisa.rate)}%）`,`保険料 月${Math.round(insNow(S)*10)/10}万円`,`お子さまの幼稚園〜高校（幼稚園は私立、小中高は公立）`].join('、')}
 function vLife(v){
+  try{const o=sessionStorage.getItem('sainomado-lp-open');if(o&&LP.plans[o]){U.plan=o;U.cf=o;sessionStorage.removeItem('sainomado-lp-open')}}catch(e){}
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › ライフプラン診断</div>
