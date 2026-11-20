@@ -197,6 +197,7 @@ select,.txt{border:1px solid var(--line);border-radius:9px;background:var(--bg);
 svg.chart{width:100%;height:auto;display:block;touch-action:pan-y}
 svg.chart text{font-family:var(--f-num);font-size:11px;fill:var(--muted)}
 .advice{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;margin-bottom:14px}
+.exnote{background:#fff7e6;border:1.5px solid #e0a23a;border-radius:14px;padding:14px 16px;margin:0 0 14px;display:grid;gap:6px}.exnote b{font-size:15px}.exnote p{margin:0;font-size:14px;line-height:1.7}.exnote .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 .advice h3{font-size:15px}
 .advice ul{margin:0;padding-left:1.2em;font-size:14px;display:grid;gap:4px}
 .cfhead{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin:20px 0 10px}

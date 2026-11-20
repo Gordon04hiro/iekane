@@ -82,6 +82,10 @@ function renderResult(){
   <div class="cfwrap">${cfTable(R[U.cf].r,R[U.cf].S,U.step)}</div>`;
   box.innerHTML=`<div class="rhead"><div><h2>診断結果</h2><p class="unit">入力するたびに自動で更新されます（単位：万円）。${ks.length>1?`決算書・逆算・シナリオ・予実は、編集中のパターン${key}について表示します。`:''}</p></div>
    <div class="exportbar">${shareBtn()}<button class="btn small" data-act="pdf">PDFで保存</button><button class="btn small" data-act="xlsx">Excelで保存</button></div></div>
+  ${LP.example?`<section class="exnote" role="note"><b>いま表示しているのは「入力例の家族」の結果です</b>
+   <p>35歳・配偶者と子ども2人・手取り年収450万円、37歳で3,000万円の家を買う、という例の家族で計算しています。あなたの数字に変えると、結果も変わります。</p>
+   <p class="unit">結果が大きく動くのは、①手取りの収入　②毎月の生活費　③住まいの予算　④子どもの進路（教育費）の4つです。まずはこの4つから変えてみてください。</p>
+   <div class="acts"><button class="btn small primary" data-act="mode2" data-m="guide">質問に答えて入力する</button><button class="btn small" data-act="clear">空にして自分で入力する</button></div></section>`:''}
   <div class="panels">${ks.map(panel).join('')}</div>
   <div class="rtabs-h"><b>結果をくわしく見る</b><span class="unit">6つの見方で、わが家のお金を確かめられます</span></div>
   <nav class="rtabs" aria-label="結果の表示">${RTABS.map(([k,l,d,p])=>`<button data-act="rtab" data-t="${k}" aria-pressed="${tab===k}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${p}"/></svg><span><b>${l}</b><small>${d}</small></span></button>`).join('')}</nav>
