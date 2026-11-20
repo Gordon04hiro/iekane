@@ -15,6 +15,7 @@ const OPEN=['ご家族','お仕事の収入','住まい','毎月の支出','今�
 function easyDefaults(S){normPlan(S);const A=S.assets;const sp=S.spouse==='yes';
   return [`年金（ご本人 月${n(S.pen)}万円${sp?'・配偶者 月'+n(S.spen)+'万円':''}、${n(S.penAge)}歳から）`,`定年${n(S.ret)}歳・退職金${fmt(n(S.sev))}万円・${n(S.workEnd)}歳まで働く`,`車（${fmt(n(S.car))}万円を${n(S.carEvery)}年ごと）`,`物価上昇 年${n(S.infl)}%`,`利回り（預貯金${n(A.cash.rate)}%・NISA${n(A.nisa.rate)}%）`,`保険料 月${Math.round(insNow(S)*10)/10}万円`,`お子さまの幼稚園〜高校（幼稚園は私立、小中高は公立）`].join('、')}
 function vLife(v){
+  try{const o=sessionStorage.getItem('sainomado-lp-open');if(o&&LP.plans[o]){U.plan=o;U.cf=o;sessionStorage.removeItem('sainomado-lp-open')}}catch(e){}
   if(!LP.plans[U.plan]) U.plan='A';
   const S=LP.plans[U.plan], ks=keys();
   v.innerHTML=`<div class="wrap"><div class="crumb"><a href="#home">サイのまど</a> › ライフプラン診断</div>
@@ -82,6 +83,10 @@ function renderResult(){
   <div class="cfwrap">${cfTable(R[U.cf].r,R[U.cf].S,U.step)}</div>`;
   box.innerHTML=`<div class="rhead"><div><h2>診断結果</h2><p class="unit">入力するたびに自動で更新されます（単位：万円）。${ks.length>1?`決算書・逆算・シナリオ・予実は、編集中のパターン${key}について表示します。`:''}</p></div>
    <div class="exportbar">${shareBtn()}<button class="btn small" data-act="pdf">PDFで保存</button><button class="btn small" data-act="xlsx">Excelで保存</button></div></div>
+  ${LP.example?`<section class="exnote" role="note"><b>いま表示しているのは「入力例の家族」の結果です</b>
+   <p>35歳・配偶者と子ども2人・手取り年収450万円、37歳で3,000万円の家を買う、という例の家族で計算しています。あなたの数字に変えると、結果も変わります。</p>
+   <p class="unit">結果が大きく動くのは、①手取りの収入　②毎月の生活費　③住まいの予算　④子どもの進路（教育費）の4つです。まずはこの4つから変えてみてください。</p>
+   <div class="acts"><button class="btn small primary" data-act="mode2" data-m="guide">質問に答えて入力する</button><button class="btn small" data-act="clear">空にして自分で入力する</button></div></section>`:''}
   <div class="panels">${ks.map(panel).join('')}</div>
   <div class="rtabs-h"><b>結果をくわしく見る</b><span class="unit">6つの見方で、わが家のお金を確かめられます</span></div>
   <nav class="rtabs" aria-label="結果の表示">${RTABS.map(([k,l,d,p])=>`<button data-act="rtab" data-t="${k}" aria-pressed="${tab===k}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${p}"/></svg><span><b>${l}</b><small>${d}</small></span></button>`).join('')}</nav>
