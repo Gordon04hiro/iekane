@@ -179,7 +179,8 @@ ${boot}
     const latest=ARTS.filter(x=>!x.draft).map(x=>x.updated).sort().pop()||RULES.checked;
     if(!(pg.art&&pg.art.draft)&&!pg.nf) urls.push({loc:canon(pg.f),lastmod:pg.art?pg.art.updated:pg.hub?pg.hub.updated:['home','articles','news'].includes(pg.p)?[latest,RULES.checked].sort().pop():RULES.checked});
   }
-  fs.writeFileSync(path.join(out,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u=>`  <url><loc>${u.loc}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
+  const TODAY=new Date(Date.now()+9*3600e3).toISOString().slice(0,10); // 日本時間の今日。未来の日付はサイトマップに出さない
+  fs.writeFileSync(path.join(out,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u=>`  <url><loc>${u.loc}</loc><lastmod>${u.lastmod>TODAY?TODAY:u.lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
   fs.writeFileSync(path.join(out,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
   // AdSense：パブリッシャーID（ca-pub-…）が入っていれば ads.txt を作る（審査・広告配信に必要）
   if(SITE.adsense){const pub=String(SITE.adsense).replace(/^ca-/,'');if(!/^pub-\d{10,20}$/.test(pub))fail('site.yml の adsense は ca-pub-（数字）の形で入れてください');fs.writeFileSync(path.join(out,'ads.txt'),`google.com, ${pub}, DIRECT, f08c47fec0942fa0\n`)}
