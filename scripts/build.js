@@ -107,7 +107,14 @@ fs.writeFileSync(path.join(out,'assets','app.js'),esb.transformSync(bundle,{mini
 fs.writeFileSync(path.join(out,'assets','site.css'),esb.transformSync(read('src/css/site.css'),{loader:'css',minify:true,charset:'utf8'}).code);
 fs.cpSync(R('static'),path.join(out,'assets'),{recursive:true});
 const ogImg=pg=>pg.art&&fs.existsSync(R('static/ogp/'+pg.art.slug+'.png'))?SITE_URL+'/assets/ogp/'+pg.art.slug+'.png':SITE_URL+'/assets/ogp.png'; // 記事ごとの共有画像（なければ共通の画像）
-fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico')); // Googleの検索結果・サーチコンソールのアイコン用
+fs.copyFileSync(R('static/favicon.ico'),path.join(out,'favicon.ico'));
+// SNSのプロフィール用の短いリンク（sainomado.jp/ig など）。開くと計測用の印つきのトップへ転送する。検索結果には出さない
+const SHORT={ig:'instagram',x:'x'};
+for(const [k,src] of Object.entries(SHORT)){
+  const to=`/?utm_source=${src}&utm_medium=social&utm_campaign=profile`;
+  fs.mkdirSync(path.join(out,k),{recursive:true});
+  fs.writeFileSync(path.join(out,k,'index.html'),`<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${to.replace(/&/g,'&amp;')}"><title>サイのまど</title><script>location.replace(${JSON.stringify(to)})</script></head><body><a href="${to.replace(/&/g,'&amp;')}">サイのまどへ移動します</a></body></html>\n`);
+} // Googleの検索結果・サーチコンソールのアイコン用
 const shell=read('src/shell.html'), headLinks=read('src/head-links.html');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const canon=f=>SITE_URL+'/'+f.replace(/index\.html$/,'');
