@@ -68,4 +68,4 @@ function lpAddPattern(name,mut){
   try{localStorage.setItem(LKEY,JSON.stringify(LP));sessionStorage.setItem('sainomado-lp-open',k)}catch(e){}
   location.href=pageURL('lifeplan');
 }
-function bridgeHTML(title,text,act){return `<section class="lpbridge"><b>${title}</b><p>${text}</p><button class="btn small primary" data-act="${act}">ライフプラン診断で比べる</button><span class="unit">今のライフプランの入力（パターンA）に、この結果を足したパターンを作ります。</span></section>`}
+function bridgeHTML(title,text,act){return `<section class="lpbridge"><b>${title}</b><p>${text}</p><button class="btn small primary" data-act="${act}">ライフプラン診断で比べる</button><span class="unit">今のライフプランの入力（パターンA）に、この結果を足した「比べるパターン」を作ります。パターンがすでに3つあるときは、Cを置き換えます。</span></section>`}
