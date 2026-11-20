@@ -55,12 +55,10 @@ function toolInfoHTML(r){
 function toolInfoTail(r){const box=document.getElementById('tinfo');if(!box)return;const h=toolInfoHTML(r);box.innerHTML=h;box.hidden=!h}
 
 /* ---------- 結果のすぐ下の案内（アフィリエイトのコードが入っているときだけ） ---------- */
-const TOOL_CTA={
- sell:['一括査定','実際にいくらで売れそうか、査定額で確かめる'], lifeplan:['証券口座','NISAで積立を始めるなら、証券口座を比べる'],
+const TOOL_CTA={ lifeplan:['証券口座','NISAで積立を始めるなら、証券口座を比べる'],
  loan:['住宅ローン比較','実際の金利で、住宅ローンを比べてみる'], vs:['住宅ローン比較','実際の金利で、住宅ローンを比べてみる'], rent2buy:['住宅ローン比較','実際の金利で、住宅ローンを比べてみる'],
- prepay:['住宅ローン比較','借り換えも選択肢に。今の金利と比べてみる'], akiya:['空き家買取','そのまま買い取ってもらえるか、価格を調べる'],
- chuko:['住宅ローン比較','中古住宅＋リフォームの住宅ローンを比べてみる'], furusato:['ふるさと納税','寄附先と返礼品を探してみる'], koujo:['住宅ローン比較','借り換えや金利の比較で、返済をもっと軽くできるか確かめる'], souzokubun:['一括査定','相続する家の価格を、査定で確かめる'],
- souzoku:['一括査定','家の今の価格を、査定で確かめる'], souzoku2:['一括査定','相続した家の価格を、査定で確かめる'], souzokuzei:['一括査定','相続する家の価格を、査定で確かめる']
+ prepay:['住宅ローン比較','借り換えも選択肢に。今の金利と比べてみる'],
+ chuko:['住宅ローン比較','中古住宅＋リフォームの住宅ローンを比べてみる'], furusato:['ふるさと納税','寄附先と返礼品を探してみる'], koujo:['住宅ローン比較','借り換えや金利の比較で、返済をもっと軽くできるか確かめる'],
 };
 function ctaHTML(){
   const r=window.PAGE||route(),c=TOOL_CTA[r]; if(!c||!AFF_ADS[c[0]]) return '';
